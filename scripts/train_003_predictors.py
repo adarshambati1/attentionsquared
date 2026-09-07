@@ -18,8 +18,12 @@ class JumpMLP(nn.Module):
         return h0 + delta if self.residual else delta
 
 def load_split(directory: Path):
-    arrays = [np.load(p) for p in sorted(directory.glob("*.npz"))]
-    return tuple(np.concatenate([a[k].astype(np.float32) for a in arrays], axis=0) for k in ("h0", "x", "h16"))
+    by_key = {k: [] for k in ("h0", "x", "h16")}
+    for path in sorted(directory.glob("*.npz")):
+        with np.load(path) as archive:
+            for key in by_key:
+                by_key[key].append(archive[key].astype(np.float32))
+    return tuple(np.concatenate(by_key[key], axis=0) for key in ("h0", "x", "h16"))
 
 def metrics(model, arrays, device):
     h0, x, target = [torch.from_numpy(a) for a in arrays]
