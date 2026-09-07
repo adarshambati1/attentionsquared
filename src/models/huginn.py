@@ -57,6 +57,9 @@ class HuginnAdapter:
                 do_sample=False,
                 use_cache=True,
                 return_dict_in_generate=True,
+                # Huginn's custom DynamicCache is sparse by design; do not force
+                # Transformers 4.44.2 to convert it back to a legacy tuple.
+                return_legacy_cache=False,
                 eos_token_id=self.tokenizer.eos_token_id,
                 pad_token_id=self.tokenizer.pad_token_id or self.tokenizer.eos_token_id,
             ),
