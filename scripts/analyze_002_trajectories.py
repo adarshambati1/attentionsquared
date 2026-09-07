@@ -67,8 +67,9 @@ def analyze(path: Path, output_dir: Path) -> None:
         (to_final.mean(axis=0), "cos(h_d, h_64)", "cosine_to_final.png"),
         (direction.mean(axis=0), "cos(Δ_d, Δ_{d+1})", "update_direction_cosine.png"),
     ]:
+        plot_x = x[: len(values)]
         plt.figure()
-        plt.plot(x, values)
+        plt.plot(plot_x, values)
         plt.xlabel("Recurrent depth d")
         plt.ylabel(ylabel)
         plt.grid(alpha=0.3)
