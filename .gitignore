@@ -20,3 +20,5 @@ wandb/
 results/runs/
 results/001_depth_scaling/raw.jsonl
 results/001_depth_scaling/*.jsonl
+
+results/001_depth_scaling/**/*.jsonl
