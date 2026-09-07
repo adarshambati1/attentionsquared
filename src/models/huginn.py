@@ -65,6 +65,7 @@ class HuginnAdapter:
                     **encoded,
                     generation_config=GenerationConfig(
                         max_new_tokens=max_new_tokens,
+                        stop_strings=["<|end_text|>", "<|end_turn|>"],
                         do_sample=False,
                         use_cache=True,
                         return_dict_in_generate=True,
