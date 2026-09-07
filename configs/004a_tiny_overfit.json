@@ -15,8 +15,9 @@
   "refinement_rounds": 4,
   "num_heads": 16,
   "mlp_ratio": 1,
+  "fallback_mlp_ratio": 2,
   "train_steps": 1000,
   "learning_rate": 0.0001,
   "endpoint_loss_weight": 2.0,
-  "notes": "4A only: tiny overfit correctness gate; no benchmark or architecture sweep."
+  "notes": "4A only: tiny overfit correctness gate; no benchmark or architecture sweep. K=4 reuses one shared operator exactly four times. MLP ratio 1 is a tractability choice; if plumbing passes but memorization fails, retry ratio 2 before declaring 4A failure. Record single-round and four-round latency separately."
 }

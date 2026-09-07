@@ -34,7 +34,20 @@ def main(config_path, data_path, output_dir):
  with torch.inference_mode(): zz,_,att=model(h0,x,return_attention=True); co,rl=cosine_metrics(zz,target,mask); epco,eprl=cosine_metrics(zz[:,-1:],target[:,-1:],mask); pair=[]
  for i in range(d):
   for j in range(i+1,d): pair.append(torch.nn.functional.cosine_similarity(zz[:,i][mask],zz[:,j][mask],dim=-1).mean().item())
- result={'train_loss_final':float(losses[-1]),'trajectory_cosine':co,'trajectory_relative_l2':rl,'endpoint_cosine':epco,'endpoint_relative_l2':eprl,'slot_pairwise_cosine_mean':float(np.mean(pair)),'slot_pairwise_cosine_max':float(np.max(pair)),'parameters':sum(p.numel() for p in model.parameters()),'trainable_parameters':sum(p.numel() for p in model.parameters()),'shape':[n,d,t,h],'refinement_rounds':c['refinement_rounds'],'causal_future_to_past_error':causal_error,'depth_communication_effect':depth_comm}
+ # Measure one shared operator round separately from the configured K-round path.
+ with torch.inference_mode():
+  z0=model.initialize(h0[:1],x[:1])
+  for _ in range(3): model.operator(z0)
+  if device.type=='cuda': torch.cuda.synchronize()
+  t0=time.perf_counter()
+  for _ in range(10): model.operator(z0)
+  if device.type=='cuda': torch.cuda.synchronize()
+  one_round_ms=1000*(time.perf_counter()-t0)/10
+  if device.type=='cuda': torch.cuda.synchronize()
+  t0=time.perf_counter(); model(h0[:1],x[:1])
+  if device.type=='cuda': torch.cuda.synchronize()
+  full_ms=1000*(time.perf_counter()-t0)
+ result={'train_loss_final':float(losses[-1]),'trajectory_cosine':co,'trajectory_relative_l2':rl,'endpoint_cosine':epco,'endpoint_relative_l2':eprl,'slot_pairwise_cosine_mean':float(np.mean(pair)),'slot_pairwise_cosine_max':float(np.max(pair)),'parameters':sum(p.numel() for p in model.parameters()),'trainable_parameters':sum(p.numel() for p in model.parameters()),'shape':[n,d,t,h],'refinement_rounds':c['refinement_rounds'],'single_round_latency_ms':one_round_ms,'four_round_latency_ms':full_ms,'causal_future_to_past_error':causal_error,'depth_communication_effect':depth_comm}
  torch.save({'state_dict':model.state_dict(),'config':c,'result':result},output_dir/'attention2_lite.pt'); (output_dir/'result.json').write_text(json.dumps(result,indent=2)); print(json.dumps(result,indent=2),flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser(); p.add_argument('--config',type=Path,default=Path('configs/004a_tiny_overfit.json')); p.add_argument('--data',type=Path,default=Path('results/004a_tiny_overfit/trajectories.npz')); p.add_argument('--output-dir',type=Path,default=Path('results/004a_tiny_overfit')); a=p.parse_args(); main(a.config,a.data,a.output_dir)
