@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import re
-import time
 from pathlib import Path
 from typing import Any
 
@@ -41,16 +40,12 @@ def evaluate(config: dict[str, Any], output_path: Path) -> None:
     with output_path.open("w", encoding="utf-8") as stream:
         for depth in config["depths"]:
             for example_id, example in zip(config["example_ids"], examples):
-                adapter._synchronize()
-                start = time.perf_counter()
                 result = adapter.generate(
                     example["question"],
                     depth=depth,
                     system_instruction=config["system_instruction"],
                     max_new_tokens=config["max_new_tokens"],
                 )
-                adapter._synchronize()
-                latency = time.perf_counter() - start
                 gold = extract_answer(example["answer"])
                 predicted = extract_answer(result.text)
                 record = {
@@ -60,9 +55,16 @@ def evaluate(config: dict[str, Any], output_path: Path) -> None:
                     "gold_answer": gold,
                     "predicted_answer": predicted,
                     "correct": predicted is not None and predicted == gold,
-                    "generation_latency_seconds": latency,
+                    "generation_latency_seconds": result.generation_latency_seconds,
+                    "time_to_first_token_seconds": result.time_to_first_token_seconds,
+                    "single_forward_latency_seconds": result.single_forward_latency_seconds,
                     "generated_tokens": result.generated_tokens,
                     "prompt_tokens": result.prompt_tokens,
+                    "tokens_per_second": result.generated_tokens / result.generation_latency_seconds if result.generation_latency_seconds else None,
+                    "seconds_per_generated_token": result.generation_latency_seconds / result.generated_tokens if result.generated_tokens else None,
+                    "mean_decode_step_latency_seconds": result.generation_latency_seconds / result.generated_tokens if result.generated_tokens else None,
+                    "ended_naturally": result.ended_naturally,
+                    "hit_max_new_tokens": result.hit_max_new_tokens,
                 }
                 stream.write(json.dumps(record, ensure_ascii=False) + "\n")
                 stream.flush()

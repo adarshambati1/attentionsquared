@@ -9,6 +9,16 @@ from collections import defaultdict
 from pathlib import Path
 
 
+def wilson_interval(successes: int, total: int, z: float = 1.96) -> tuple[float, float]:
+    if total == 0:
+        return 0.0, 0.0
+    p = successes / total
+    denominator = 1 + z * z / total
+    center = (p + z * z / (2 * total)) / denominator
+    margin = z * ((p * (1 - p) / total + z * z / (4 * total * total)) ** 0.5) / denominator
+    return max(0.0, center - margin), min(1.0, center + margin)
+
+
 def main(raw: Path, out_dir: Path) -> None:
     records = [json.loads(line) for line in raw.read_text().splitlines() if line.strip()]
     grouped = defaultdict(list)
@@ -16,11 +26,21 @@ def main(raw: Path, out_dir: Path) -> None:
         grouped[record["depth"]].append(record)
     rows = []
     for depth, items in sorted(grouped.items()):
+        successes = sum(item["correct"] for item in items)
+        ci_low, ci_high = wilson_interval(successes, len(items))
         rows.append({
             "depth": depth,
-            "accuracy": sum(item["correct"] for item in items) / len(items),
+            "accuracy": successes / len(items),
+            "accuracy_ci95_low": ci_low,
+            "accuracy_ci95_high": ci_high,
             "mean_latency_seconds": statistics.mean(item["generation_latency_seconds"] for item in items),
+            "mean_time_to_first_token_seconds": statistics.mean(item["time_to_first_token_seconds"] for item in items if item["time_to_first_token_seconds"] is not None),
+            "mean_single_forward_latency_seconds": statistics.mean(item["single_forward_latency_seconds"] for item in items),
+            "mean_tokens_per_second": statistics.mean(item["tokens_per_second"] for item in items),
+            "mean_seconds_per_generated_token": statistics.mean(item["seconds_per_generated_token"] for item in items),
             "mean_generated_tokens": statistics.mean(item["generated_tokens"] for item in items),
+            "cap_hits": sum(item["hit_max_new_tokens"] for item in items),
+            "natural_ends": sum(item["ended_naturally"] for item in items),
             "examples": len(items),
         })
     out_dir.mkdir(parents=True, exist_ok=True)

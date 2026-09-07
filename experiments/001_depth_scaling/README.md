@@ -41,6 +41,12 @@ the authors. Huginn's custom remote code is `raven_modeling_minimal.py`; the
 upstream repository contains the corresponding implementation and lm-eval
 commands. `num_steps` must not be put into `GenerationConfig`.
 
+The upstream GSM8K task configurations use greedy generation and stop strings
+including `<|end_text|>` and `<|end_turn|>`. The upstream lm-eval commands do
+not specify a task-specific cap; the harness default and the Huginn quick-chat
+path use a 256-token generation budget. We retain `max_new_tokens=256` for
+reproduction and explicitly record whether each output hits that cap.
+
 ## Go criterion
 
 Increasing recurrent depth produces a measurable capability improvement.
@@ -50,9 +56,22 @@ Increasing recurrent depth produces a measurable capability improvement.
 D = 64 performs essentially the same as D = 4 on the chosen benchmark after
 checking formatting, API correctness, model revision, and depth range.
 
-## Status
+## Instrumentation
 
-Implementation and pins are prepared. No GPU run has been performed yet.
+Each raw record includes end-to-end generation latency, time to first token,
+fixed single-forward latency, generated tokens, tokens/sec, seconds/generated
+token, cap-hit status, natural-termination status, prompt tokens, parsed answer,
+and correctness. Summary CSVs include 95% Wilson accuracy intervals.
+
+## Runs
+
+- `results/001_depth_scaling/a100_smoke/`: two-example A100 smoke run.
+- `results/001_depth_scaling/h100_smoke/`: same two-example H100 smoke run;
+  hardware latency is not directly comparable to A100.
+- `configs/001_depth_scaling_n20.json`: next fixed 20-example validation run.
+
+The 20-example run must pass instrumentation and output-inspection checks
+before expanding to 100 examples.
 
 ## Notes
 
