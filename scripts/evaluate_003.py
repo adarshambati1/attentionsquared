@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Evaluate Exp3 latent fidelity, frozen-coda KL, and greedy GSM8K generation."""
 from __future__ import annotations
-import argparse, json, re, time
+import argparse, json, re, time, sys
 from pathlib import Path
 from types import MethodType
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 from datasets import load_dataset
-from scripts.train_003_predictors import JumpMLP
+from train_003_predictors import JumpMLP
 
 NUM_RE=re.compile(r"####\s*([-+]?\$?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)")
 def answer(text):
