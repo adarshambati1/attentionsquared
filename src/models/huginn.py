@@ -46,6 +46,8 @@ class HuginnAdapter:
 
         prompt = self.format_prompt(question, system_instruction)
         encoded = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False)
+        # Huginn is decoder-only and rejects tokenizer-generated segment IDs.
+        encoded.pop("token_type_ids", None)
         encoded = {key: value.to(self.device) for key, value in encoded.items()}
         self._synchronize()
         outputs = self.model.generate(
