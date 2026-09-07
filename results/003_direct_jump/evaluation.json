@@ -1,0 +1,20 @@
+[
+  {
+    "model": "direct",
+    "latent_cosine": 0.7505686357021332,
+    "latent_relative_l2": 0.5333641040325164,
+    "teacher_logit_kl": 354.44189932250976,
+    "gsm8k_accuracy": 0.0,
+    "mean_generation_latency_seconds": 2.395734128206968,
+    "examples": 250
+  },
+  {
+    "model": "residual",
+    "latent_cosine": 0.7165526323318482,
+    "latent_relative_l2": 0.6160369763374328,
+    "teacher_logit_kl": 358.82502421569825,
+    "gsm8k_accuracy": 0.0,
+    "mean_generation_latency_seconds": 2.946808208659291,
+    "examples": 250
+  }
+]

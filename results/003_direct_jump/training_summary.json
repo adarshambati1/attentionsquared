@@ -1,0 +1,24 @@
+[
+  {
+    "model": "direct",
+    "parameters": 83645760,
+    "approx_flops_per_token": 167270400,
+    "train_mse": 0.37219483638243456,
+    "train_cosine": 0.8008408546447754,
+    "train_relative_l2": 0.49730411171913147,
+    "val_mse": 0.4613612349119502,
+    "val_cosine": 0.7373762726783752,
+    "val_relative_l2": 0.5520284175872803
+  },
+  {
+    "model": "residual",
+    "parameters": 83645760,
+    "approx_flops_per_token": 167270400,
+    "train_mse": 0.4587116475279505,
+    "train_cosine": 0.7468084692955017,
+    "train_relative_l2": 0.5937002301216125,
+    "val_mse": 0.5214472988257038,
+    "val_cosine": 0.7039503455162048,
+    "val_relative_l2": 0.6309518218040466
+  }
+]
