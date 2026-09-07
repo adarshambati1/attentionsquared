@@ -1,0 +1,21 @@
+{
+  "experiment": "001_depth_scaling_instrumentation_smoke",
+  "model_id": "tomg-group-umd/huginn-0125",
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "upstream_repository": "https://github.com/seal-rg/recurrent-pretraining",
+  "upstream_revision": "1ea7220ec7eb42d13e89db0663df254d0bcdc28e",
+  "dataset_id": "openai/gsm8k",
+  "dataset_config": "main",
+  "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "dataset_split": "test",
+  "example_ids": [0],
+  "depths": [4, 64],
+  "dtype": "bfloat16",
+  "seed": 0,
+  "max_new_tokens": 256,
+  "do_sample": false,
+  "num_fewshot": 0,
+  "system_instruction": "You are a helpful assistant that can assist users with mathematical reasoning.",
+  "prompt_format": "Huginn native chat template; system instruction; user asks the GSM8K question; generation prompt enabled",
+  "notes": "Instrumentation-only smoke check before N=20."
+}
