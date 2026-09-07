@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """Evaluate Exp3 latent fidelity, frozen-coda KL, and greedy GSM8K generation."""
 from __future__ import annotations
-import argparse, json, re, time, sys
+import argparse, json, time, sys
 from pathlib import Path
 from types import MethodType
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 from datasets import load_dataset
 from train_003_predictors import JumpMLP
+from src.evaluation.gsm8k import extract_answer
 
-NUM_RE=re.compile(r"####\s*([-+]?\$?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)")
 def answer(text):
- m=NUM_RE.findall(text.replace("\u202f","")); return m[-1].replace(",","").replace("$","") if m else None
+ return extract_answer(text, allow_fallback=True)
 
 def prompt(tok,q,system):
  return tok.apply_chat_template([{"role":"system","content":system},{"role":"user","content":q}],tokenize=False,add_generation_prompt=True)
