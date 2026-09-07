@@ -1,0 +1,22 @@
+{
+  "experiment": "004A_attention2_tiny_overfit",
+  "model_id": "tomg-group-umd/huginn-0125",
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "dataset_id": "openai/gsm8k",
+  "dataset_config": "main",
+  "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "dataset_split": "test",
+  "example_ids": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+  "depth": 16,
+  "dtype": "bfloat16",
+  "seed": 4000,
+  "system_instruction": "You are a helpful assistant that can assist users with mathematical reasoning.",
+  "max_prompt_tokens": 512,
+  "refinement_rounds": 4,
+  "num_heads": 16,
+  "mlp_ratio": 1,
+  "train_steps": 1000,
+  "learning_rate": 0.0001,
+  "endpoint_loss_weight": 2.0,
+  "notes": "4A only: tiny overfit correctness gate; no benchmark or architecture sweep."
+}
