@@ -15,7 +15,7 @@ def cosine(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return np.sum(a * b, axis=-1) / (np.linalg.norm(a, axis=-1) * np.linalg.norm(b, axis=-1) + 1e-12)
 
 
-def analyze(path: Path, output_dir: Path) -> None:
+def analyze(path: Path, output_dir: Path, n100_raw: Path | None = None) -> None:
     data = np.load(path)
     keys = sorted(k for k in data.files if k.endswith("_final_token"))
     trajectories = np.stack([data[k] for k in keys])  # [examples, depth+1, hidden]
@@ -56,6 +56,27 @@ def analyze(path: Path, output_dir: Path) -> None:
     np.savetxt(output_dir / "update_pca_explained_variance.csv", explained, delimiter=",")
     (output_dir / "trajectory_metadata.json").write_text(json.dumps({"examples": len(keys), "depth": 64}, indent=2))
 
+    if n100_raw is not None:
+        groups = _label_groups(n100_raw)
+        grouped_rows = []
+        for group in ["low-depth-solved", "high-depth-solved", "unsolved"]:
+            indices = [i for i, key in enumerate(keys) if groups.get(int(key.split("_")[1]), "unsolved") == group]
+            if not indices:
+                continue
+            for depth in range(64):
+                grouped_rows.append({
+                    "group": group,
+                    "examples": len(indices),
+                    "depth": depth,
+                    "adjacent_cosine_mean": float(adjacent[indices, depth].mean()),
+                    "normalized_step_mean": float(step_size[indices, depth].mean()),
+                    "cosine_to_final_mean": float(to_final[indices, depth].mean()),
+                })
+        with (output_dir / "group_trajectory_summary.csv").open("w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=grouped_rows[0].keys())
+            writer.writeheader()
+            writer.writerows(grouped_rows)
+
     try:
         import matplotlib.pyplot as plt
     except ImportError:
@@ -86,9 +107,23 @@ def analyze(path: Path, output_dir: Path) -> None:
     plt.close()
 
 
+def _label_groups(raw: Path) -> dict[int, str]:
+    rows = [json.loads(line) for line in raw.read_text().splitlines() if line.strip()]
+    by_example = {}
+    for row in rows:
+        by_example.setdefault(row["example_id"], []).append(row)
+    groups = {}
+    for example_id, items in by_example.items():
+        low = any(row["correct"] and row["depth"] <= 8 for row in items)
+        high = any(row["correct"] and row["depth"] >= 16 for row in items)
+        groups[example_id] = "low-depth-solved" if low else "high-depth-solved" if high else "unsolved"
+    return groups
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("raw", type=Path)
     parser.add_argument("--output-dir", type=Path, default=Path("results/002_trajectory_analysis"))
+    parser.add_argument("--n100-raw", type=Path)
     args = parser.parse_args()
-    analyze(args.raw, args.output_dir)
+    analyze(args.raw, args.output_dir, args.n100_raw)
