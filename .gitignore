@@ -24,3 +24,5 @@ results/001_depth_scaling/*.jsonl
 results/001_depth_scaling/**/*.jsonl
 
 results/002_trajectory_analysis/*.npz
+
+results/003_direct_jump/

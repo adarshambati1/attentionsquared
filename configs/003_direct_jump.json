@@ -1,0 +1,16 @@
+{
+  "experiment": "003_direct_jump",
+  "model_id": "tomg-group-umd/huginn-0125",
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "dataset_id": "openai/gsm8k",
+  "dataset_config": "main",
+  "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "dataset_split": "train",
+  "depth": 16,
+  "dtype": "bfloat16",
+  "seed": 3000,
+  "max_prompt_tokens": 512,
+  "splits": {"train": [0, 1999], "val": [2000, 2249], "test": [2250, 2499]},
+  "system_instruction": "You are a helpful assistant that can assist users with mathematical reasoning.",
+  "notes": "Frozen Huginn direct-jump baseline. Cache exact tokenwise (h0, x, h16) triples before predictor training."
+}
