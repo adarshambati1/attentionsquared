@@ -71,7 +71,10 @@ and correctness. Summary CSVs include 95% Wilson accuracy intervals.
 - `configs/001_depth_scaling_n20.json`: next fixed 20-example validation run.
 
 The 20-example run must pass instrumentation and output-inspection checks
-before expanding to 100 examples.
+before expanding to 100 examples. The completed cap-sensitivity analysis is
+`results/001_depth_scaling/cap_sensitivity.md`; it selects a 1024-token cap for
+the final N=100 run. The final run is the last Experiment 001 computation;
+no Experiment 002 work should begin automatically afterward.
 
 ## Notes
 
