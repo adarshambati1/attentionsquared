@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Train only the 4A tiny overfit Attention²-lite gate."""
 from __future__ import annotations
-import argparse, json, time
+import argparse, json, time, sys
 from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
 import numpy as np
 import torch
 from src.models.attention2 import Attention2Lite
