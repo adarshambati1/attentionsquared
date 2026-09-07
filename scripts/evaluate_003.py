@@ -34,7 +34,7 @@ def patch_jump(model,predictor):
 def generate(model,tok,text,depth):
  enc=tok(text,return_tensors="pt",add_special_tokens=False); enc.pop("token_type_ids",None); enc={k:v.cuda() for k,v in enc.items()}
  with torch.inference_mode():
-  out=model.generate(**enc,generation_config=GenerationConfig(max_new_tokens=1024,do_sample=False,use_cache=True,return_dict_in_generate=True,return_legacy_cache=False,eos_token_id=tok.eos_token_id,pad_token_id=tok.pad_token_id or tok.eos_token_id),num_steps=depth,tokenizer=tok)
+  out=model.generate(**enc,generation_config=GenerationConfig(max_new_tokens=1024,stop_strings=["<|end_text|>","<|end_turn|>"],do_sample=False,use_cache=True,return_dict_in_generate=True,return_legacy_cache=False,eos_token_id=tok.eos_token_id,pad_token_id=tok.pad_token_id or tok.eos_token_id),num_steps=depth,tokenizer=tok)
  seq=out.sequences[0]; return tok.decode(seq[enc["input_ids"].shape[-1]:],skip_special_tokens=False)
 
 def main():
@@ -51,6 +51,7 @@ def main():
   correct=0; total=0; lat=[]
   for i in range(cfg["splits"]["test"][0],cfg["splits"]["test"][1]+1):
    text=prompt(tok,ds[i]["question"],cfg["system_instruction"]); t=time.perf_counter(); generated=generate(model,tok,text,16); lat.append(time.perf_counter()-t); correct += answer(generated)==answer(ds[i]["answer"]); total += 1
+   if total % 10 == 0: print(f"{name} generation {total}/250", flush=True)
   model.iterate_forward=original
   results.append({"model":name,"latent_cosine":float(np.mean(cos)),"latent_relative_l2":float(np.mean(rel)),"teacher_logit_kl":float(np.mean(kl)),"gsm8k_accuracy":correct/total,"mean_generation_latency_seconds":float(np.mean(lat)),"examples":total})
   del model,p; torch.cuda.empty_cache(); print(results[-1],flush=True)
