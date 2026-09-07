@@ -12,13 +12,17 @@ from src.models.huginn import HuginnAdapter
 
 
 _NUMBER = re.compile(r"####\s*([-+]?[\d,]+(?:\.\d+)?)")
+_FALLBACK_NUMBER = re.compile(r"[-+]?[\d,]+(?:\.\d+)?")
 
 
 def extract_answer(text: str) -> str | None:
     matches = _NUMBER.findall(text.replace("\u202f", ""))
-    if not matches:
-        return None
-    return matches[-1].replace(",", "").strip()
+    if matches:
+        return matches[-1].replace(",", "").strip()
+    # Huginn commonly emits a natural-language final answer followed by its
+    # end-of-turn token rather than GSM8K's training-time #### marker.
+    fallback = _FALLBACK_NUMBER.findall(text)
+    return fallback[-1].replace(",", "").strip() if fallback else None
 
 
 def evaluate(config: dict[str, Any], output_path: Path) -> None:
