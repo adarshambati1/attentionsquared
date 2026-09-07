@@ -10,18 +10,34 @@ from typing import Any
 from src.models.huginn import HuginnAdapter
 
 
-_NUMBER = re.compile(r"####\s*([-+]?[\d,]+(?:\.\d+)?)")
-_FALLBACK_NUMBER = re.compile(r"[-+]?[\d,]+(?:\.\d+)?")
+_NUMERIC = r"[-+]?\$?(?:(?:\d{1,3}(?:,\d{3})+)|\d+)(?:\.\d+)?"
+_MARKED_NUMBER = re.compile(rf"####\s*({_NUMERIC})")
+_EXPLICIT_NUMBER = re.compile(
+    rf"(?:answer(?: is|:)|final answer(?: is|:)|therefore(?:,|\s+))[^\d$+-]{{0,48}}({_NUMERIC})",
+    re.IGNORECASE,
+)
+_FALLBACK_NUMBER = re.compile(_NUMERIC)
 
 
-def extract_answer(text: str) -> str | None:
-    matches = _NUMBER.findall(text.replace("\u202f", ""))
+def _normalize_number(value: str) -> str:
+    return value.replace(",", "").replace("$", "").strip()
+
+
+def extract_answer(text: str, *, allow_fallback: bool = True) -> str | None:
+    text = text.replace("\u202f", "")
+    matches = _MARKED_NUMBER.findall(text)
     if matches:
-        return matches[-1].replace(",", "").strip()
-    # Huginn commonly emits a natural-language final answer followed by its
-    # end-of-turn token rather than GSM8K's training-time #### marker.
+        return _normalize_number(matches[-1])
+    explicit = _EXPLICIT_NUMBER.findall(text)
+    if explicit:
+        return _normalize_number(explicit[-1])
+    # Natural-language answers often have no marker, but fallback extraction
+    # is unsafe for a response truncated at max_new_tokens. In that case only
+    # marked/explicit answers are eligible for exact-match scoring.
+    if not allow_fallback:
+        return None
     fallback = _FALLBACK_NUMBER.findall(text)
-    return fallback[-1].replace(",", "").strip() if fallback else None
+    return _normalize_number(fallback[-1]) if fallback else None
 
 
 def evaluate(config: dict[str, Any], output_path: Path) -> None:
@@ -47,7 +63,7 @@ def evaluate(config: dict[str, Any], output_path: Path) -> None:
                     max_new_tokens=config["max_new_tokens"],
                 )
                 gold = extract_answer(example["answer"])
-                predicted = extract_answer(result.text)
+                predicted = extract_answer(result.text, allow_fallback=not result.hit_max_new_tokens)
                 record = {
                     "example_id": example_id,
                     "depth": depth,
