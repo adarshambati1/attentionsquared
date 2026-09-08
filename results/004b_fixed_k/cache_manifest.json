@@ -1,0 +1,89 @@
+{
+  "examples": 2500,
+  "splits": {
+    "train": 2000,
+    "val": 250,
+    "test": 250
+  },
+  "sample_shapes": [
+    {
+      "path": "results/004b_fixed_k/cache/train/00000.npz",
+      "T": 67,
+      "H": 5280
+    },
+    {
+      "path": "results/004b_fixed_k/cache/train/00500.npz",
+      "T": 84,
+      "H": 5280
+    },
+    {
+      "path": "results/004b_fixed_k/cache/train/01000.npz",
+      "T": 60,
+      "H": 5280
+    },
+    {
+      "path": "results/004b_fixed_k/cache/train/01500.npz",
+      "T": 100,
+      "H": 5280
+    },
+    {
+      "path": "results/004b_fixed_k/cache/val/02000.npz",
+      "T": 117,
+      "H": 5280
+    }
+  ],
+  "cache_dtypes": [
+    "float16"
+  ],
+  "source_model_dtype": "bfloat16",
+  "state_capture": "h0 initialized state; trajectory[d-1] is state after d core_block_forward applications, before final ln_f/coda",
+  "h1_h16_convention_checks": [
+    {
+      "id": 0,
+      "h1_max_abs_error": 0.0038251876831054688,
+      "h16_max_abs_error": 0.0019359588623046875
+    },
+    {
+      "id": 500,
+      "h1_max_abs_error": 0.001918792724609375,
+      "h16_max_abs_error": 0.0019359588623046875
+    },
+    {
+      "id": 1000,
+      "h1_max_abs_error": 0.0019001960754394531,
+      "h16_max_abs_error": 0.0019369125366210938
+    },
+    {
+      "id": 1500,
+      "h1_max_abs_error": 0.0019502639770507812,
+      "h16_max_abs_error": 0.0019326210021972656
+    },
+    {
+      "id": 2000,
+      "h1_max_abs_error": 0.0019497871398925781,
+      "h16_max_abs_error": 0.0019388198852539062
+    }
+  ],
+  "max_coda_self_difference": 0.050498008728027344,
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "tokenizer_chat_template": "native tokenizer apply_chat_template(add_generation_prompt=True), add_special_tokens=False",
+  "config_commit": "51ad2b3ffa3b0a296d052558702bb752babc630f",
+  "cache_immutable": true,
+  "quantization_check": {
+    "cache_dtype": "float16",
+    "source_dtype": "bfloat16",
+    "hidden_max_abs_error": 0.002,
+    "mean_logit_abs_error": 0.003,
+    "top1_token_agreement": 1.0,
+    "mean_kl": 0.0002977175521664321,
+    "approx_p99_kl": 0.0004078235337510705,
+    "spot_examples": [
+      0,
+      500,
+      1000,
+      1500,
+      2000
+    ]
+  }
+}

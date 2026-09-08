@@ -26,3 +26,6 @@ results/001_depth_scaling/**/*.jsonl
 results/002_trajectory_analysis/*.npz
 
 results/003_direct_jump/
+
+results/004b_fixed_k/cache/
+results/004b_fixed_k/models/
