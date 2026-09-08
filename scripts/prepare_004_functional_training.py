@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Prepare full-sequence h0/x and detached teacher logits for functional KL."""
 from __future__ import annotations
-import argparse,json
+import argparse,json,gc
 from pathlib import Path
 from types import MethodType
 import numpy as np,torch
@@ -27,6 +27,9 @@ def main(config,seq_dir,out):
    finally: model.core_block_forward=original
    logits=result.logits[0,start:end].float().cpu().numpy().astype(np.float16)
    np.savez(dp,h0=captured['h0'].numpy().astype(np.float16),x=captured['x'].numpy().astype(np.float16),teacher_logits=logits,input_ids=ids[0].cpu().numpy().astype(np.int32),answer_start=np.array(start,dtype=np.int32),valid_end=np.array(end,dtype=np.int32))
-   print(f'{split} {sp.stem}: T={len(captured["h0"])} answer_tokens={end-start}',flush=True)
+   seq_len=len(captured['h0'])
+   del result, logits, captured, states, enc, ids
+   torch.cuda.empty_cache(); gc.collect()
+   print(f'{split} {sp.stem}: T={seq_len} answer_tokens={end-start}',flush=True)
 if __name__=='__main__':
  p=argparse.ArgumentParser(); p.add_argument('--config',type=Path,default=Path('configs/004b_fixed_k.json')); p.add_argument('--sequences',type=Path,default=Path('results/004_functional/teacher_sequences')); p.add_argument('--output',type=Path,default=Path('results/004_functional/training_cache')); a=p.parse_args(); main(a.config,a.sequences,a.output)
