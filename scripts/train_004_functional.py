@@ -20,14 +20,14 @@ def main(config,cache,output,steps):
   torch.manual_seed(6000+k); torch.cuda.manual_seed_all(6000+k); random.seed(6000+k); np.random.seed(6000+k); (h0,x,target),ids=load(train[0],device); a2=Attention2Lite(h0.shape[-1],16,16,k,1,16.0,False).to(device); opt=torch.optim.AdamW(a2.parameters(),lr=1e-4,weight_decay=0.0); log=[]; start=time.perf_counter()
   for step in range(1,steps+1):
    path=random.choice(train); (h0,x,target),ids=load(path,device); ids=ids.unsqueeze(0); opt.zero_grad(set_to_none=True)
-   with torch.inference_mode(): teacher=hug(input_ids=ids,input_states=target[-1:].to(torch.bfloat16).unsqueeze(0),num_steps=0,use_cache=False).logits.detach()
+   with torch.inference_mode(): teacher=hug(input_ids=ids,input_states=target[-1].to(torch.bfloat16).unsqueeze(0),num_steps=0,use_cache=False).logits.detach()
    with torch.autocast(device_type='cuda',dtype=torch.bfloat16): z,_,_=a2(h0[None],x[None]); pred=z[:,15]; student=hug(input_ids=ids,input_states=pred.to(torch.bfloat16),num_steps=0,use_cache=False).logits; loss=logits_kl(student,teacher)
    loss.backward(); torch.nn.utils.clip_grad_norm_(a2.parameters(),1.0); opt.step(); log.append(loss.item())
    if step%100==0:
     vals=[]
     with torch.inference_mode():
      for vp in val:
-      (vh,vx,vt),vi=load(vp,device); vi=vi.unsqueeze(0); tz=hug(input_ids=vi,input_states=vt[-1:].to(torch.bfloat16).unsqueeze(0),num_steps=0,use_cache=False).logits; vz,_,_=a2(vh[None],vx[None]); sz=hug(input_ids=vi,input_states=vz[:,15].to(torch.bfloat16),num_steps=0,use_cache=False).logits; vals.append(logits_kl(sz,tz).item())
+      (vh,vx,vt),vi=load(vp,device); vi=vi.unsqueeze(0); tz=hug(input_ids=vi,input_states=vt[-1].to(torch.bfloat16).unsqueeze(0),num_steps=0,use_cache=False).logits; vz,_,_=a2(vh[None],vx[None]); sz=hug(input_ids=vi,input_states=vz[:,15].to(torch.bfloat16),num_steps=0,use_cache=False).logits; vals.append(logits_kl(sz,tz).item())
     print(f'functional K={k} step={step}/{steps} train_kl={np.mean(log[-100:]):.6g} val_kl={np.mean(vals):.6g} seconds={time.perf_counter()-start:.1f}',flush=True)
   result={'K':k,'objective':'teacher_logit_KL_only','steps':steps,'parameters':sum(p.numel() for p in a2.parameters()),'train_kl_final':float(log[-1]),'seconds':time.perf_counter()-start}; kd=output/f'K{k}'; kd.mkdir(exist_ok=True); torch.save({'state_dict':a2.state_dict(),'config':{**c,'K':k,'objective':'teacher_logit_KL_only'},'result':result},kd/'model.pt'); (kd/'result.json').write_text(json.dumps(result,indent=2)); tok_results.append(result); del a2; torch.cuda.empty_cache()
  (output/'summary.json').write_text(json.dumps(tok_results,indent=2))
