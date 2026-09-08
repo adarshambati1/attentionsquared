@@ -29,7 +29,7 @@ def main(config_path, data_path, output_dir, depth_scale=None, film=False, objec
   with torch.autocast(device_type='cuda',dtype=torch.bfloat16): z,_,_=model(h0[i],x[i])
   valid=mask[i,None,:,None].expand_as(z); diff=(z-target[i]).float()
   if objective=='normalized_trajectory':
-   p=z.float(); y=target[i].float(); token_valid=mask[i].reshape(-1).expand(d,t); rel=((p-y).norm(dim=-1)/(y.norm(dim=-1)+1e-8))[token_valid].mean(); cos=(1-torch.nn.functional.cosine_similarity(p[token_valid],y[token_valid],dim=-1)).mean(); loss=rel+eta*cos
+   p=z[0].float(); y=target[i][0].float(); token_valid=mask[i].reshape(-1).expand(d,t); rel=((p-y).norm(dim=-1)/(y.norm(dim=-1)+1e-8))[token_valid].mean(); cos=(1-torch.nn.functional.cosine_similarity(p[token_valid],y[token_valid],dim=-1)).mean(); loss=rel+eta*cos
   else:
    mse=(diff.pow(2)[valid]).mean(); endpoint=(diff[:, -1].pow(2)[mask[i,:,None].expand_as(diff[:, -1])]).mean(); loss=mse+c['endpoint_loss_weight']*endpoint
   loss.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(),1.0); opt.step(); losses.append(loss.item())
