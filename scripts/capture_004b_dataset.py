@@ -25,7 +25,7 @@ def main(config,output):
    try:
     with torch.inference_mode(): model(**enc,num_steps=16,use_cache=False,output_details={'return_logits':False,'return_latents':False,'return_head':False,'return_stats':False})
    finally: model.core_block_forward=original
-   traj=torch.cat([captured['h0'],*states],0)[0].numpy().astype(np.float16)
+   traj=torch.cat([captured['h0'],*states],0)[:,0].numpy().astype(np.float16)
    np.savez(path,h0=captured['h0'][0].numpy().astype(np.float16),x=captured['x'][0].numpy().astype(np.float16),trajectory=traj[1:],input_ids=enc['input_ids'].cpu().numpy()[0])
    print(f'{split} {i}: T={traj.shape[1]}',flush=True)
 if __name__=='__main__':
