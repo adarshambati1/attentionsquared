@@ -22,7 +22,7 @@ def per_depth(pred,target,mask):
 
 def main(config,data,checkpoint,outdir):
  c=json.loads(config.read_text()); a=np.load(data); device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'); h0=torch.from_numpy(a['h0'].astype('float32')).to(device); x=torch.from_numpy(a['x'].astype('float32')).to(device); target=torch.from_numpy(a['trajectory'][:,1:].astype('float32')).to(device); mask=torch.from_numpy(a['mask']).to(device)
- ck=torch.load(checkpoint,map_location='cpu'); scale=ck.get('config',{}).get('depth_scale',1.0); model=Attention2Lite(h0.shape[-1],16,c['num_heads'],c['refinement_rounds'],c['mlp_ratio'],scale).to(device); model.load_state_dict(ck['state_dict']); model.eval(); outdir.mkdir(parents=True,exist_ok=True)
+ ck=torch.load(checkpoint,map_location='cpu'); scale=ck.get('config',{}).get('depth_scale',1.0); film=ck.get('config',{}).get('film',False); model=Attention2Lite(h0.shape[-1],16,c['num_heads'],c['refinement_rounds'],c['mlp_ratio'],scale,film).to(device); model.load_state_dict(ck['state_dict']); model.eval(); outdir.mkdir(parents=True,exist_ok=True)
  with torch.inference_mode():
   z0=model.initialize(h0,x); states=[z0]; attns=[]; z=z0
   for _ in range(c['refinement_rounds']): z,att=model.operator(z,return_attention=True); states.append(z); attns.append(att['depth'])

@@ -4,18 +4,22 @@ import torch
 from torch import nn
 
 class Attention2Lite(nn.Module):
-    def __init__(self, hidden: int, depth: int = 16, heads: int = 16, rounds: int = 4, mlp_ratio: int = 1, depth_scale: float = 1.0):
+    def __init__(self, hidden: int, depth: int = 16, heads: int = 16, rounds: int = 4, mlp_ratio: int = 1, depth_scale: float = 1.0, film: bool = False):
         super().__init__(); assert hidden % heads == 0
-        self.depth,self.rounds,self.hidden=depth,rounds,hidden; self.depth_scale=depth_scale
+        self.depth,self.rounds,self.hidden=depth,rounds,hidden; self.depth_scale=depth_scale; self.film=film
         self.init_proj=nn.Linear(2*hidden,hidden)
         self.depth_embedding=nn.Parameter(torch.zeros(depth,hidden)); nn.init.normal_(self.depth_embedding,std=0.02)
+        if film:
+            self.film_gamma=nn.Parameter(torch.ones(depth,hidden)); self.film_beta=nn.Parameter(torch.zeros(depth,hidden))
         self.token_norm=nn.LayerNorm(hidden); self.token_attn=nn.MultiheadAttention(hidden,heads,batch_first=True)
         self.depth_norm=nn.LayerNorm(hidden); self.depth_attn=nn.MultiheadAttention(hidden,heads,batch_first=True)
         mid=hidden*mlp_ratio; self.mlp_norm=nn.LayerNorm(hidden); self.mlp=nn.Sequential(nn.Linear(hidden,mid),nn.GELU(),nn.Linear(mid,hidden))
         self.reset_parameters()
     def reset_parameters(self): nn.init.xavier_uniform_(self.init_proj.weight); nn.init.zeros_(self.init_proj.bias)
     def initialize(self,h0,x):
-        base=self.init_proj(torch.cat([h0,x],dim=-1)); return base[:,None,:,:]+self.depth_scale*self.depth_embedding[None,:,None,:]
+        base=self.init_proj(torch.cat([h0,x],dim=-1))
+        if self.film: return base[:,None,:,:]*self.film_gamma[None,:,None,:]+self.film_beta[None,:,None,:]
+        return base[:,None,:,:]+self.depth_scale*self.depth_embedding[None,:,None,:]
     def operator(self,z,token_mask=None,return_attention=False):
         b,d,t,h=z.shape; attns={}
         q=self.token_norm(z).reshape(b*d,t,h); causal=torch.triu(torch.ones(t,t,device=z.device,dtype=torch.bool),diagonal=1)
