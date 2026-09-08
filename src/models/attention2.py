@@ -4,9 +4,9 @@ import torch
 from torch import nn
 
 class Attention2Lite(nn.Module):
-    def __init__(self, hidden: int, depth: int = 16, heads: int = 16, rounds: int = 4, mlp_ratio: int = 1):
+    def __init__(self, hidden: int, depth: int = 16, heads: int = 16, rounds: int = 4, mlp_ratio: int = 1, depth_scale: float = 1.0):
         super().__init__(); assert hidden % heads == 0
-        self.depth,self.rounds,self.hidden=depth,rounds,hidden
+        self.depth,self.rounds,self.hidden=depth,rounds,hidden; self.depth_scale=depth_scale
         self.init_proj=nn.Linear(2*hidden,hidden)
         self.depth_embedding=nn.Parameter(torch.zeros(depth,hidden)); nn.init.normal_(self.depth_embedding,std=0.02)
         self.token_norm=nn.LayerNorm(hidden); self.token_attn=nn.MultiheadAttention(hidden,heads,batch_first=True)
@@ -15,7 +15,7 @@ class Attention2Lite(nn.Module):
         self.reset_parameters()
     def reset_parameters(self): nn.init.xavier_uniform_(self.init_proj.weight); nn.init.zeros_(self.init_proj.bias)
     def initialize(self,h0,x):
-        base=self.init_proj(torch.cat([h0,x],dim=-1)); return base[:,None,:,:]+self.depth_embedding[None,:,None,:]
+        base=self.init_proj(torch.cat([h0,x],dim=-1)); return base[:,None,:,:]+self.depth_scale*self.depth_embedding[None,:,None,:]
     def operator(self,z,token_mask=None,return_attention=False):
         b,d,t,h=z.shape; attns={}
         q=self.token_norm(z).reshape(b*d,t,h); causal=torch.triu(torch.ones(t,t,device=z.device,dtype=torch.bool),diagonal=1)
