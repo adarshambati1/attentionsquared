@@ -45,7 +45,8 @@ def main(config,data,checkpoint,outdir):
  losses={'trajectory_mse':float(sum(r['mse'] for r in rows)/16),'endpoint_mse':rows[-1]['mse'],'total_with_endpoint_weight':float(sum(r['mse'] for r in rows)/16+c['endpoint_loss_weight']*rows[-1]['mse'])}; (outdir/'loss_decomposition.json').write_text(json.dumps(losses,indent=2))
  # One diagnostic backward pass for gradient norms; this is not optimization.
  model.train(); model.zero_grad(set_to_none=True); z,_,_=model(h0[:1],x[:1]); valid=mask[:1,None,:,None].expand_as(z); diff=(z-target[:1]).float(); loss=diff.pow(2)[valid].mean()+c['endpoint_loss_weight']*diff[:,-1].pow(2)[mask[:1,:,None].expand_as(diff[:,-1])].mean(); loss.backward(); groups={}
- for name,module in [('depth_embedding',model.depth_embedding),('init_proj',model.init_proj),('token_qkv',model.token_attn),('depth_qkv',model.depth_attn),('mlp',model.mlp)]: groups[name]=float(torch.sqrt(sum((p.grad.detach().float().pow(2).sum() for p in module.parameters() if p.grad is not None))).item())
+ for name,module in [('depth_embedding',[model.depth_embedding]),('init_proj',model.init_proj.parameters()),('token_qkv',model.token_attn.parameters()),('depth_qkv',model.depth_attn.parameters()),('mlp',model.mlp.parameters())]:
+  grads=[p.grad.detach().float().pow(2).sum() for p in module if p.grad is not None]; groups[name]=float(torch.sqrt(sum(grads)).item()) if grads else 0.0
  (outdir/'gradient_norms.json').write_text(json.dumps(groups,indent=2))
  try:
   import matplotlib.pyplot as plt
