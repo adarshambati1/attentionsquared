@@ -29,3 +29,6 @@ results/003_direct_jump/
 
 results/004b_fixed_k/cache/
 results/004b_fixed_k/models/
+
+# Local pi agent/session configuration; may contain machine-specific data.
+.pi/
