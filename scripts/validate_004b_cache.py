@@ -12,7 +12,7 @@ def main(config_path,cache,manifest):
  samples=[]; dtype_set=set(); max_errs=[]
  for p in files[::max(1,len(files)//5)]:
   with np.load(p) as a:
-   assert a['h0'].shape==a['x'].shape and a['trajectory'].shape[1:]==a['h0'].shape and a['trajectory'].shape[0]==16; dtype_set.update([str(a['h0'].dtype),str(a['x'].dtype),str(a['trajectory'].dtype)]); samples.append({'path':p,'T':int(a['h0'].shape[0]),'H':int(a['h0'].shape[1])})
+   assert a['h0'].shape==a['x'].shape and a['trajectory'].shape[1:]==a['h0'].shape and a['trajectory'].shape[0]==16; dtype_set.update([str(a['h0'].dtype),str(a['x'].dtype),str(a['trajectory'].dtype)]); samples.append({'path':str(p),'T':int(a['h0'].shape[0]),'H':int(a['h0'].shape[1])})
  tok=AutoTokenizer.from_pretrained(c['model_id'],revision=c['model_revision']); ds=load_dataset(c['dataset_id'],c['dataset_config'],split=c['dataset_split'],revision=c['dataset_revision']); model=AutoModelForCausalLM.from_pretrained(c['model_id'],revision=c['model_revision'],torch_dtype=torch.bfloat16,trust_remote_code=True).eval().cuda(); convention=[]; coda=[]
  for p in files[::max(1,len(files)//5)]:
   i=int(p.stem); with_np=np.load(p); ids=torch.from_numpy(with_np['input_ids']).cuda().unsqueeze(0); target=torch.from_numpy(with_np['trajectory']).cuda(); torch.manual_seed(c['seed']+i); torch.cuda.manual_seed_all(c['seed']+i); states=[]; original=model.core_block_forward
