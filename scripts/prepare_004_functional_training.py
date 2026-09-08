@@ -28,7 +28,7 @@ def main(config,seq_dir,out):
    logits=result.logits[0,start:end].float().cpu().numpy().astype(np.float16)
    np.savez(dp,h0=captured['h0'].numpy().astype(np.float16),x=captured['x'].numpy().astype(np.float16),teacher_logits=logits,input_ids=ids[0].cpu().numpy().astype(np.int32),answer_start=np.array(start,dtype=np.int32),valid_end=np.array(end,dtype=np.int32))
    seq_len=len(captured['h0'])
-   del result, logits, captured, states, enc, ids
+   del result, logits, captured, enc, ids
    torch.cuda.empty_cache(); gc.collect()
    print(f'{split} {sp.stem}: T={seq_len} answer_tokens={end-start}',flush=True)
 if __name__=='__main__':
