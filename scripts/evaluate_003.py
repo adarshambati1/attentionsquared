@@ -40,7 +40,7 @@ from src.evaluation.correctness import (
     tokenize_prompt,
     write_json_exclusive,
 )
-from scripts.archive.train_003_predictors import JumpMLP
+from src.models.jump_mlp import JumpMLP
 
 
 def load_model(config):
