@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import stat
 import subprocess
 import sys
 import tempfile
@@ -136,6 +137,9 @@ def write_json_exclusive_fsync(path: Path, value: dict) -> None:
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
+        os.chmod(temporary, 0o444)
+        if stat.S_IMODE(temporary.stat().st_mode) != 0o444:
+            raise RuntimeError("metadata record is not read-only before publication")
         os.link(temporary, path)
         directory = os.open(path.parent, os.O_RDONLY)
         try:

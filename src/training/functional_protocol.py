@@ -8,6 +8,7 @@ import hashlib
 import os
 from pathlib import Path
 import random
+import stat
 import tempfile
 from typing import Any, Iterable, Iterator, Mapping
 
@@ -171,6 +172,9 @@ def create_shared_initialization(
         with temporary.open("rb") as stream:
             os.fsync(stream.fileno())
         validate_shared_initialization(temporary, architecture=architecture)
+        os.chmod(temporary, 0o444)
+        if stat.S_IMODE(temporary.stat().st_mode) != 0o444:
+            raise RuntimeError("shared initialization is not read-only before publication")
         os.link(temporary, output)
         directory = os.open(output.parent, os.O_RDONLY)
         try:

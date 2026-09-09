@@ -6,6 +6,7 @@ import pytest
 import torch
 
 from scripts import create_004_a2_initialization as initialization_script
+from scripts import validate_004_a2_initialization as validation_script
 from scripts.create_004_a2_initialization import validate_config
 from src.evaluation.correctness import per_example_seed
 from src.training.functional_protocol import (
@@ -85,6 +86,7 @@ def test_one_shared_initialization_loads_byte_identical_weights_for_all_k(tmp_pa
     torch.manual_seed(88)
 
     metadata = create_shared_initialization(path, architecture=architecture)
+    assert path.stat().st_mode & 0o777 == 0o444
     assert metadata["initialization_seed"] == A2_INITIALIZATION_SEED
     assert validate_shared_initialization(path, architecture=architecture) == metadata
     assert torch.equal(torch.rand(3), expected_after)
@@ -160,6 +162,49 @@ def test_production_training_config_freezes_all_paired_conditions():
             validate_config(changed, output)
 
 
+def test_runtime_attestation_requires_and_records_read_only_modes(tmp_path):
+    architecture = Attention2Architecture(hidden=8, depth=2, heads=2)
+    artifact = tmp_path / "a2_init_seed_0.pt"
+    metadata = create_shared_initialization(artifact, architecture=architecture)
+    record = tmp_path / "a2_init_seed_0.json"
+    record.write_text(
+        json.dumps(
+            {
+                "artifact_sha256": validation_script.sha256_file(artifact),
+                "artifact_bytes": artifact.stat().st_size,
+                "state_dict_sha256": metadata["state_dict_sha256"],
+                "git_commit": "a" * 40,
+            }
+        )
+    )
+    validation_log = tmp_path / "validation.log"
+    validation_log.write_text("pass\n")
+    record.chmod(0o444)
+    validation_log.chmod(0o444)
+
+    observed = validation_script.attest(
+        artifact,
+        record,
+        validation_log,
+        validation_commit="b" * 40,
+        architecture=architecture,
+    )
+    assert observed["modes"] == {
+        "artifact": "0444",
+        "builder_record": "0444",
+        "validation_log": "0444",
+    }
+    record.chmod(0o644)
+    with pytest.raises(ValueError, match="mode 0444"):
+        validation_script.attest(
+            artifact,
+            record,
+            validation_log,
+            validation_commit="b" * 40,
+            architecture=architecture,
+        )
+
+
 def test_metadata_record_publication_is_atomic_and_no_replace(tmp_path, monkeypatch):
     blocked_output = tmp_path / "blocked.pt"
     blocked_record = blocked_output.with_suffix(".json")
@@ -170,6 +215,7 @@ def test_metadata_record_publication_is_atomic_and_no_replace(tmp_path, monkeypa
 
     record = tmp_path / "a2_init_seed_0.json"
     initialization_script.write_json_exclusive_fsync(record, {"valid": True})
+    assert record.stat().st_mode & 0o777 == 0o444
     assert json.loads(record.read_text()) == {"valid": True}
     with pytest.raises(FileExistsError):
         initialization_script.write_json_exclusive_fsync(record, {"valid": False})

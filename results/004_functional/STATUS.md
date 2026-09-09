@@ -115,7 +115,7 @@ The compact cache is not yet built. All v2 work must follow
   reject malformed/all-padding masks.
 - Pod test suite: 109 passed.
 
-### Phase 9 paired randomness and initialization — pre-build PASS/PASS; artifact pending
+### Phase 9 paired randomness and initialization — mode remediation PASS/PASS; attestation pending
 
 - Smoke/debug runs use deterministic Huginn `h0` seed index 0 per example;
   final results use paired seed indices 0, 1, and 2 per example under the Phase
@@ -127,5 +127,18 @@ The compact cache is not yet built. All v2 work must follow
   parameters.
 - Split roles, epoch order, optimizer, preprocessing, loss, and applicable
   seeds are frozen in `configs/004_functional_v2_training.json`.
-- Focused Pod suite: 8 passed; full Pod suite: 117 passed. The production
-  initialization has not yet been generated.
+- Focused Pod suite: 8 passed; full Pod suite: 117 passed.
+- Production artifact builder commit:
+  `e3b5c97e0fa49b6d654bc0f4569a93127ac07499`.
+- `a2_init_seed_0.pt`: 1,338,868,224 bytes; file SHA-256
+  `92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747`;
+  canonical state-dict SHA-256
+  `93ac1869c68521ff5498ade5731c1ffea534527838df8a27d396490a043a533a`.
+- Strict K=1, K=2, and K=4 loads independently reproduced the exact canonical
+  state-dict hash; only each model's refinement-round count differed.
+- Builder metadata SHA-256:
+  `b949b934c63b6c4d4d273ba495c7f02b8ef38fc428fb79a6a66f625d5c0f0e0f`.
+- The first shell wrapper could not open its optional tee log before the builder
+  created the output directory. The builder itself completed and atomically
+  published the artifact and metadata; a subsequent immutable validation log
+  records all hashes and three strict K loads.
