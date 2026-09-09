@@ -1,0 +1,14 @@
+{
+  "builder_git_commit": "01439eee033ec6b86c5a53806b16fd1b8c0100a1",
+  "cache_item_count": 2500,
+  "cache_manifest_sha256": "32db951f6cfbf76220b1c7126e23149f087eba58934ab691b588aeb3a43535bf",
+  "durable_volume_id": "jggambl3qv",
+  "inventory_sha256": "f0122058a273a973913b41f9b07fb557d4c6e20d99410f03b5ed77e5a4f20711",
+  "payload_inventory_file_count": 2501,
+  "protocol": "functional-cache-v2-freeze-v1",
+  "runtime_attestation_sha256": "a56d74695a878671e2081303eea8956d83dbbebf7e0f5c6ed3a26a4ff7b7f1e4",
+  "status": "frozen",
+  "validation_git_commit": "0cb3bf8694e5b451ec381a8b94251409083a6aa8",
+  "validation_pod_id": "jwc04iw92bdebm",
+  "validation_report_sha256": "2a998d8458e8d5b9b7790395d213e4eca8b67485c4b1d1b57f06dce0e0dd1c62"
+}

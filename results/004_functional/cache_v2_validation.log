@@ -1,0 +1,22 @@
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  1.72it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.72it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  1.70it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  2.19it/s]
+{
+  "freeze_sha256": "94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0",
+  "hidden_size": 5280,
+  "inventory_sha256": "f0122058a273a973913b41f9b07fb557d4c6e20d99410f03b5ed77e5a4f20711",
+  "item_count": 2500,
+  "replay_ids": [
+    0,
+    22,
+    817,
+    1671,
+    2249,
+    2250,
+    2389,
+    2499
+  ],
+  "total_tokens": 700976,
+  "total_valid_answer_tokens": 462952,
+  "train_count": 2250,
+  "validation_count": 250,
+  "validation_report_sha256": "2a998d8458e8d5b9b7790395d213e4eca8b67485c4b1d1b57f06dce0e0dd1c62"
+}

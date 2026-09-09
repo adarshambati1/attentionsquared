@@ -87,16 +87,20 @@ The compact cache is not yet built. All v2 work must follow
 - Preserved manifest/build records: `cache_v2_manifest.json` and
   `cache_v2_build.log`.
 
-### Phase 7 validation and durability — pending execution review
+### Phase 7 validation and durability — PASS/PASS; cache v2 frozen
 
-- Validator checks the exact committed manifest bytes/hash, all 2,500 compact
-  items, all source token arrays/hashes, reviewed boundaries, schemas, dtypes,
-  finiteness, role counts, and hidden size.
-- Control-plane attestation binds Pod `jwc04iw92bdebm` to dedicated 100 GB
-  network volume `jggambl3qv` in `US-GA-2`; mount and payload symlinks are
-  rejected.
-- Eight representative examples are replayed through frozen Huginn D16 under
-  their authoritative seeds and compared by dtype, shape, and raw bytes.
-- The payload inventory covers the manifest plus all 2,500 items, is re-read in
-  full, and is published with immutable validation and freeze records.
+- Validator commit: `0cb3bf8694e5b451ec381a8b94251409083a6aa8`.
+- All 2,500 items passed schema, shape, dtype, finiteness, bounds, split, seed,
+  manifest, source-token, source-hash, and reviewed-`valid_end` validation.
+- Counts: 2,250 train, 250 validation, 700,976 total tokens, and 462,952 valid
+  answer tokens; hidden size is 5,280.
+- Control-plane and mount checks bind the cache to dedicated 100 GB network
+  volume `jggambl3qv` in `US-GA-2`; no symlinks, temporaries, or quarantine files
+  are present.
+- Live frozen-Huginn D16 replay for IDs 0, 22, 817, 1671, 2249, 2250, 2389, and
+  2499 matched `h0_full`, `x_full`, and `h16_teacher` byte-for-byte.
+- The re-read payload inventory covers the manifest plus all 2,500 items.
+  Inventory SHA-256: `f0122058a273a973913b41f9b07fb557d4c6e20d99410f03b5ed77e5a4f20711`.
+- Validation report SHA-256: `2a998d8458e8d5b9b7790395d213e4eca8b67485c4b1d1b57f06dce0e0dd1c62`.
+- Freeze record SHA-256: `94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0`.
 - Pod test suite: 100 passed.
