@@ -1,0 +1,52 @@
+{
+  "a2_parameter_count": 334715040,
+  "a2_parameters_with_nonzero_gradient": 21,
+  "all_huginn_parameters_frozen": true,
+  "answer_start": 67,
+  "cache_freeze_sha256": "94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0",
+  "cache_item": "/workspace/functional_cache_v2/train/00000.npz",
+  "example_id": 0,
+  "git_commit": "8060f9e943ac1d74a28421ab99dd6ad4d87c9db1",
+  "gradient_gate_K": 1,
+  "gradient_loss_per_token": 10.719717025756836,
+  "gradient_token_count": 88,
+  "huginn_parameter_count": 3564976800,
+  "huginn_parameters_with_gradient": 0,
+  "initialization_sha256": "92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747",
+  "literal_alignment_control": {
+    "answer_tokens": [
+      4,
+      5,
+      6
+    ],
+    "passed": true,
+    "predicting_logit_positions": [
+      2,
+      3,
+      4
+    ],
+    "predictions": [
+      4,
+      5,
+      6
+    ]
+  },
+  "loss_mask_count": 88,
+  "padding_influence_control": "tests/test_attention2_padding.py",
+  "padding_loss_positions": 0,
+  "post_valid_end_loss_positions": 0,
+  "prompt_loss_positions": 0,
+  "protocol": "functional-correctness-gate-v1",
+  "sequence_length": 155,
+  "status": "pass",
+  "teacher_logits_has_grad_fn": false,
+  "teacher_self_kl_per_token": -2.5924651314568337e-09,
+  "teacher_self_kl_token_count": 88,
+  "teacher_state_requires_grad": false,
+  "untrained_a2_K4_kl_per_token": 11.122273445129395,
+  "untrained_a2_K4_token_count": 88,
+  "valid_answer_token_count": 88,
+  "valid_end": 155,
+  "z16_gradient_l2": 0.14131605625152588,
+  "z16_gradient_nonzero_count": 813120
+}

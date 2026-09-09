@@ -148,7 +148,7 @@ The compact cache is not yet built. All v2 work must follow
   The artifact, builder record, prior validation log, and attestation are all
   regular non-symlink files published read-only; each observed mode is `0444`.
 
-### Phase 10 correctness/unit-test gate — pre-run PASS/PASS; execution pending
+### Phase 10 correctness/unit-test gate — PASS/PASS
 
 - Literal `prompt | A B C` alignment verifies logits at positions immediately
   preceding A, B, and C predict those answer tokens.
@@ -159,5 +159,18 @@ The compact cache is not yet built. All v2 work must follow
 - The production gate transiently computes real frozen-Huginn teacher logits,
   measured teacher self-KL, an untrained shared-initialization K=4 KL/token
   baseline, and a K=1 backward control. No logits are persisted.
-- Focused Pod suite: 5 passed; full Pod suite: 123 passed. The real-model gate
-  has not yet run.
+- Focused Pod suite: 5 passed; full Pod suite: 123 passed.
+- Real-model example 0 used 88 valid answer tokens. Teacher self-KL/token was
+  calculated as `-2.5924651314568337e-09`; untrained K=4 KL/token was
+  `11.122273445129395`.
+- The K=1 backward control produced nonzero gradients for 21 Attention²
+  parameters and 813,120 `z16` elements (`L2=0.14131605625152588`), while all
+  3,564,976,800 frozen Huginn/coda parameters had no gradients.
+- Prompt, post-`valid_end`, and padding loss-position counts were all zero;
+  literal A/B/C alignment passed.
+- Gate artifact SHA-256:
+  `7da66ae3d85e35e0d4de96a754c81c338cc2b1be3f000e2363916138ceafa723`.
+- Runtime stat attestation SHA-256:
+  `9faa898c859ce80e845ac46829f526f410579c35f7aa38b18878febbb01474ba`;
+  the authoritative gate artifact and attestation are regular, non-symlink,
+  mode-`0444` files on the durable volume.

@@ -1,0 +1,11 @@
+{
+  "artifact": "/workspace/functional_protocol/correctness_gate.json",
+  "artifact_bytes": 1581,
+  "artifact_is_symlink": false,
+  "artifact_mode": "0444",
+  "artifact_sha256": "7da66ae3d85e35e0d4de96a754c81c338cc2b1be3f000e2363916138ceafa723",
+  "artifact_type": "regular-file",
+  "attestation_git_commit": "8060f9e943ac1d74a28421ab99dd6ad4d87c9db1",
+  "protocol": "functional-correctness-gate-runtime-attestation-v1",
+  "status": "pass"
+}
