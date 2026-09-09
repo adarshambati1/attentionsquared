@@ -147,3 +147,17 @@ The compact cache is not yet built. All v2 work must follow
   `bfd5bef4fa4d33a9f0686b20967830411a4a2c6a69494982b2a8eb29687dd60e`.
   The artifact, builder record, prior validation log, and attestation are all
   regular non-symlink files published read-only; each observed mode is `0444`.
+
+### Phase 10 correctness/unit-test gate — pre-run PASS/PASS; execution pending
+
+- Literal `prompt | A B C` alignment verifies logits at positions immediately
+  preceding A, B, and C predict those answer tokens.
+- Batched causal loss masks exclude prompt positions, post-`valid_end`
+  positions, and padding; logits outside the mask have exactly zero influence.
+- A frozen-coda gradient test requires nonzero Attention² and `z16` gradients
+  while teacher/coda parameters receive no gradients.
+- The production gate transiently computes real frozen-Huginn teacher logits,
+  measured teacher self-KL, an untrained shared-initialization K=4 KL/token
+  baseline, and a K=1 backward control. No logits are persisted.
+- Focused Pod suite: 5 passed; full Pod suite: 123 passed. The real-model gate
+  has not yet run.
