@@ -70,6 +70,7 @@ def validate_mount_output(
     *,
     expected_mount: Path,
     expected_data_center_id: str,
+    expected_volume_id: str,
 ) -> None:
     """Reject symlinked roots and require the exact expected RunPod MFS mount."""
     if cache_root.is_symlink() or expected_mount.is_symlink():
@@ -80,9 +81,12 @@ def validate_mount_output(
     if len(fields) != 3:
         raise ValueError("unexpected findmnt output")
     source, filesystem_type, target = fields
-    expected_source = f"mfs#{expected_data_center_id.lower()}.runpod.net:9421"
-    if not source.startswith(expected_source):
-        raise ValueError("cache mount source has wrong RunPod data center")
+    expected_source = (
+        f"mfs#{expected_data_center_id.lower()}.runpod.net:9421"
+        f"[/networkvolumes/{expected_volume_id}]"
+    )
+    if source != expected_source:
+        raise ValueError("cache mount source has wrong RunPod volume or data center")
     if filesystem_type != "fuse" or Path(target) != expected_mount:
         raise ValueError("cache mount type or target is not the dedicated mount")
 

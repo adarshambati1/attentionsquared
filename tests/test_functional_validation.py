@@ -125,12 +125,13 @@ def test_runtime_attestation_and_exact_mount_are_enforced(tmp_path):
 
     cache = tmp_path / "functional_cache_v2"
     cache.mkdir()
-    mount = f"mfs#us-ga-2.runpod.net:9421 fuse {tmp_path}"
+    mount = f"mfs#us-ga-2.runpod.net:9421[/networkvolumes/volume] fuse {tmp_path}"
     validate_mount_output(
         cache,
         mount,
         expected_mount=tmp_path,
         expected_data_center_id="US-GA-2",
+        expected_volume_id="volume",
     )
     with pytest.raises(ValueError, match="dedicated mount"):
         validate_mount_output(
@@ -138,6 +139,7 @@ def test_runtime_attestation_and_exact_mount_are_enforced(tmp_path):
             mount.replace("fuse", "ext4"),
             expected_mount=tmp_path,
             expected_data_center_id="US-GA-2",
+            expected_volume_id="volume",
         )
 
 

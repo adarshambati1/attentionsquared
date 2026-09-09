@@ -216,6 +216,7 @@ def main() -> None:
         mount,
         expected_mount=MOUNT_ROOT,
         expected_data_center_id=DATA_CENTER_ID,
+        expected_volume_id=VOLUME_ID,
     )
 
     rows = load_and_validate_manifest(VALID_END_PATH)
