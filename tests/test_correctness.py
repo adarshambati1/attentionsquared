@@ -79,6 +79,44 @@ def test_answer_bounds_select_causal_predecessors_and_only_valid_positions():
     assert bounds.token_count == 3
 
 
+def test_literal_prompt_abc_next_token_supervision_and_zero_loss_outside_answer():
+    # Token positions: prompt_0 prompt_1 | A B C | ignored_0 ignored_1
+    prompt_0, prompt_1, token_a, token_b, token_c, ignored_0, ignored_1 = range(7)
+    input_ids = torch.tensor(
+        [prompt_0, prompt_1, token_a, token_b, token_c, ignored_0, ignored_1]
+    )
+    bounds = answer_bounds(answer_start=2, valid_end=5, sequence_length=7)
+
+    logits = torch.full((7, 7), -1.0)
+    logits[1, token_a] = 1.0  # logit before A -> A
+    logits[2, token_b] = 1.0  # logit before B -> B
+    logits[3, token_c] = 1.0  # logit before C -> C
+
+    answer_logits, answer_targets = aligned_answer_logits_and_targets(
+        logits, input_ids, bounds
+    )
+    assert answer_logits.argmax(dim=-1).tolist() == [token_a, token_b, token_c]
+    assert answer_targets.tolist() == [token_a, token_b, token_c]
+    assert torch.equal(answer_logits[0], logits[1])
+    assert torch.equal(answer_logits[1], logits[2])
+    assert torch.equal(answer_logits[2], logits[3])
+
+    # Index losses by target-token position. Only A, B, and C receive loss.
+    loss_by_target_position = torch.zeros(len(input_ids))
+    loss_by_target_position[bounds.answer_slice] = torch.nn.functional.cross_entropy(
+        answer_logits, answer_targets, reduction="none"
+    )
+    assert torch.equal(
+        loss_by_target_position[: bounds.answer_start],
+        torch.zeros(bounds.answer_start),
+    )
+    assert torch.equal(
+        loss_by_target_position[bounds.valid_end :],
+        torch.zeros(bounds.sequence_length - bounds.valid_end),
+    )
+    assert torch.all(loss_by_target_position[bounds.answer_slice] > 0)
+
+
 def test_answer_bounds_bounds_reject_invalid_empty_or_mismatched_sequences():
     with pytest.raises(ValueError):
         answer_bounds(answer_start=0, valid_end=2, sequence_length=3)
