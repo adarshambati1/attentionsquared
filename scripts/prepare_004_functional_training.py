@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""Prepare full-sequence h0/x and detached teacher logits for functional KL."""
+"""QUARANTINED v1 cache builder with off-by-one teacher-logit targets."""
 from __future__ import annotations
-import argparse,json,gc
+import argparse,json,gc,sys
 from pathlib import Path
+
+ROOT=Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 from types import MethodType
 import numpy as np,torch
 from transformers import AutoModelForCausalLM
+from src.evaluation.correctness import ensure_audit_rerun_root, require_invalid_v1_opt_in, seed_for_example
 
-def main(config,seq_dir,out):
- c=json.loads(config.read_text()); model=AutoModelForCausalLM.from_pretrained(c['model_id'],revision=c['model_revision'],torch_dtype=torch.bfloat16,trust_remote_code=True).eval().cuda(); out.mkdir(parents=True,exist_ok=True)
+def main(config,seq_dir,out,allow_invalid_v1=False):
+ require_invalid_v1_opt_in(allow_invalid_v1, Path(__file__).name)
+ ensure_audit_rerun_root(out)
+ c=json.loads(config.read_text()); model=AutoModelForCausalLM.from_pretrained(c['model_id'],revision=c['model_revision'],torch_dtype=torch.bfloat16,trust_remote_code=True).eval().cuda()
  for split in ('train','val','test'):
   od=out/split; od.mkdir(exist_ok=True)
   for sp in sorted((seq_dir/split).glob('*.npz')):
@@ -22,7 +28,7 @@ def main(config,seq_dir,out):
     return original(x,input_embeds,*args,**kwargs)
    model.core_block_forward=MethodType(wrapped,model)
    try:
-    torch.manual_seed(c['seed']+int(sp.stem)); torch.cuda.manual_seed_all(c['seed']+int(sp.stem))
+    seed_for_example(c['seed'],int(sp.stem))
     with torch.inference_mode(): result=model(input_ids=ids,num_steps=16,use_cache=False)
    finally: model.core_block_forward=original
    logits=result.logits[0,start:end].float().cpu().numpy().astype(np.float16)
@@ -32,4 +38,4 @@ def main(config,seq_dir,out):
    torch.cuda.empty_cache(); gc.collect()
    print(f'{split} {sp.stem}: T={seq_len} answer_tokens={end-start}',flush=True)
 if __name__=='__main__':
- p=argparse.ArgumentParser(); p.add_argument('--config',type=Path,default=Path('configs/004b_fixed_k.json')); p.add_argument('--sequences',type=Path,default=Path('results/004_functional/teacher_sequences')); p.add_argument('--output',type=Path,default=Path('results/004_functional/training_cache')); a=p.parse_args(); main(a.config,a.sequences,a.output)
+ p=argparse.ArgumentParser(); p.add_argument('--config',type=Path,default=Path('configs/004b_fixed_k.json')); p.add_argument('--sequences',type=Path,default=Path('results/004_functional/teacher_sequences')); p.add_argument('--output',type=Path,default=Path('results/004_functional/training_cache')); p.add_argument('--allow-invalid-v1',action='store_true',help='audit rerun only; outputs remain scientifically invalid'); a=p.parse_args(); main(a.config,a.sequences,a.output,a.allow_invalid_v1)

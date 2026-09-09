@@ -18,5 +18,5 @@ def test_comma_group_is_not_split():
 
 
 def test_truncated_output_does_not_use_intermediate_number():
-    text = "The answer is still being calculated after 70,000"
+    text = "The answer is " + "still being calculated " * 3 + "after 70,000"
     assert extract_answer(text, allow_fallback=False) is None

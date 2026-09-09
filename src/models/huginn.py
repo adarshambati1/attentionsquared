@@ -7,10 +7,20 @@ import threading
 import time
 from typing import Any
 
+from src.evaluation.correctness import (
+    build_chat_prompt,
+    generation_config_kwargs,
+    generation_status,
+    stop_token_ids,
+    synchronize_cuda,
+    tokenize_prompt,
+)
+
 
 @dataclass
 class GenerationResult:
     text: str
+    generated_token_ids: tuple[int, ...]
     generated_tokens: int
     prompt_tokens: int
     generation_latency_seconds: float
@@ -42,19 +52,13 @@ class HuginnAdapter:
         self.model.to(self.device)
 
     def format_prompt(self, question: str, system_instruction: str) -> str:
-        messages = [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": question},
-        ]
-        return self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        return build_chat_prompt(self.tokenizer, question, system_instruction)
 
     def generate(self, question: str, depth: int, system_instruction: str, max_new_tokens: int) -> GenerationResult:
         from transformers import GenerationConfig, TextIteratorStreamer
 
         prompt = self.format_prompt(question, system_instruction)
-        encoded = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False)
-        # Huginn is decoder-only and rejects tokenizer-generated segment IDs.
-        encoded.pop("token_type_ids", None)
+        encoded = tokenize_prompt(self.tokenizer, prompt)
         encoded = {key: value.to(self.device) for key, value in encoded.items()}
         streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=False)
         result_holder: dict[str, Any] = {}
@@ -64,16 +68,7 @@ class HuginnAdapter:
                 result_holder["outputs"] = self.model.generate(
                     **encoded,
                     generation_config=GenerationConfig(
-                        max_new_tokens=max_new_tokens,
-                        stop_strings=["<|end_text|>", "<|end_turn|>"],
-                        do_sample=False,
-                        use_cache=True,
-                        return_dict_in_generate=True,
-                        # Huginn's custom DynamicCache is sparse by design; do not force
-                        # Transformers 4.44.2 to convert it back to a legacy tuple.
-                        return_legacy_cache=False,
-                        eos_token_id=self.tokenizer.eos_token_id,
-                        pad_token_id=self.tokenizer.pad_token_id or self.tokenizer.eos_token_id,
+                        **generation_config_kwargs(self.tokenizer, max_new_tokens)
                     ),
                     streamer=streamer,
                     # Huginn's documented recurrent-depth control. Do not put this in GenerationConfig.
@@ -101,8 +96,11 @@ class HuginnAdapter:
         prompt_tokens = int(encoded["input_ids"].shape[-1])
         generated = sequence[prompt_tokens:]
         generated_tokens = int(generated.shape[-1])
-        eos_ids = {self.tokenizer.eos_token_id, self.tokenizer.convert_tokens_to_ids("<|end_text|>"), self.tokenizer.convert_tokens_to_ids("<|end_turn|>")}
-        ended_naturally = bool(generated_tokens and int(generated[-1]) in eos_ids)
+        status = generation_status(
+            generated.tolist(),
+            max_new_tokens=max_new_tokens,
+            stop_token_ids=stop_token_ids(self.tokenizer),
+        )
         self._synchronize()
         single_start = time.perf_counter()
         with self.torch.inference_mode():
@@ -111,15 +109,15 @@ class HuginnAdapter:
         single_forward_latency = time.perf_counter() - single_start
         return GenerationResult(
             text=self.tokenizer.decode(generated, skip_special_tokens=False),
+            generated_token_ids=tuple(int(token) for token in generated.tolist()),
             generated_tokens=generated_tokens,
             prompt_tokens=prompt_tokens,
             generation_latency_seconds=generation_latency,
             time_to_first_token_seconds=(first_token_time - start) if first_token_time is not None else None,
             single_forward_latency_seconds=single_forward_latency,
-            ended_naturally=ended_naturally,
-            hit_max_new_tokens=generated_tokens >= max_new_tokens and not ended_naturally,
+            ended_naturally=status.ended_naturally,
+            hit_max_new_tokens=status.hit_max_new_tokens,
         )
 
     def _synchronize(self) -> None:
-        if self.device.type == "cuda":
-            self.torch.cuda.synchronize(self.device)
+        synchronize_cuda(self.device)

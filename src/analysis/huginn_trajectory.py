@@ -9,6 +9,8 @@ from typing import Any
 
 import numpy as np
 
+from src.evaluation.correctness import SEED_PROTOCOL, build_chat_prompt, ensure_new_output_path, seed_everything, seed_for_example, tokenize_prompt, write_json_exclusive
+
 
 class HuginnTrajectoryCapture:
     def __init__(self, model_id: str, revision: str, dtype: str = "bfloat16") -> None:
@@ -26,16 +28,9 @@ class HuginnTrajectoryCapture:
 
     def capture(self, question: str, system_instruction: str, depth: int, seed: int) -> dict[str, np.ndarray]:
         torch = self.torch
-        torch.manual_seed(seed)
-        if self.device.type == "cuda":
-            torch.cuda.manual_seed_all(seed)
-        messages = [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": question},
-        ]
-        prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        encoded = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False)
-        encoded.pop("token_type_ids", None)
+        seed_everything(seed)
+        prompt = build_chat_prompt(self.tokenizer, question, system_instruction)
+        encoded = tokenize_prompt(self.tokenizer, prompt)
         encoded = {key: value.to(self.device) for key, value in encoded.items()}
 
         final_token_states: list[np.ndarray] = []
@@ -85,19 +80,22 @@ def run(config: dict[str, Any], output: Path) -> None:
     dataset = load_dataset(
         config["dataset_id"], config["dataset_config"], split=config["dataset_split"], revision=config["dataset_revision"]
     )
+    ensure_new_output_path(output)
+    ensure_new_output_path(output.with_suffix(".json"))
     capture = HuginnTrajectoryCapture(config["model_id"], config["model_revision"], config["dtype"])
     trajectories: dict[str, np.ndarray] = {}
     prompt_tokens = []
+    derived_seeds = []
     for example_id in config["example_ids"]:
+        derived_seed = seed_for_example(config["seed"], example_id)
+        derived_seeds.append({"example_id": example_id, "seed": derived_seed})
         item = capture.capture(
-            dataset[example_id]["question"], config["system_instruction"], config["depth"], config["seed"] + example_id
+            dataset[example_id]["question"], config["system_instruction"], config["depth"], derived_seed
         )
         trajectories[f"example_{example_id}_final_token"] = item["final_token"]
         trajectories[f"example_{example_id}_mean_token"] = item["mean_token"]
         prompt_tokens.append(int(item["prompt_tokens"][0]))
         print(f"captured example {example_id}: {config['depth'] + 1} states")
-    output.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(output, **trajectories)
-    output.with_suffix(".json").write_text(
-        json.dumps({"config": config, "prompt_tokens": prompt_tokens, "state_layout": "[depth+1, hidden]"}, indent=2)
-    )
+    with output.open("xb") as stream:
+        np.savez_compressed(stream, **trajectories)
+    write_json_exclusive(output.with_suffix(".json"), {"config": config, "prompt_tokens": prompt_tokens, "state_layout": "[depth+1, hidden]", "seed_protocol": SEED_PROTOCOL, "derived_seeds": derived_seeds})

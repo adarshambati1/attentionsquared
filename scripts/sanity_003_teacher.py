@@ -1,20 +1,123 @@
 #!/usr/bin/env python3
-import argparse, json, sys, time
+"""Re-run the frozen Huginn D16 teacher control with shared Phase 1 mechanics."""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT))
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import torch
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
-from src.evaluation.gsm8k import extract_answer
 
-def main(cfg_path, output):
- c=json.loads(cfg_path.read_text()); tok=AutoTokenizer.from_pretrained(c['model_id'],revision=c['model_revision']); ds=load_dataset(c['dataset_id'],c['dataset_config'],split=c['dataset_split'],revision=c['dataset_revision']); model=AutoModelForCausalLM.from_pretrained(c['model_id'],revision=c['model_revision'],torch_dtype=torch.bfloat16,trust_remote_code=True).eval().cuda(); correct=0; lat=[]
- for n,i in enumerate(range(c['splits']['test'][0],c['splits']['test'][1]+1),1):
-  messages=[{'role':'system','content':c['system_instruction']},{'role':'user','content':ds[i]['question']}]; text=tok.apply_chat_template(messages,tokenize=False,add_generation_prompt=True); enc=tok(text,return_tensors='pt',add_special_tokens=False); enc.pop('token_type_ids',None); enc={k:v.cuda() for k,v in enc.items()}; t=time.perf_counter()
-  with torch.inference_mode(): out=model.generate(**enc,generation_config=GenerationConfig(max_new_tokens=1024,stop_strings=['<|end_text|>','<|end_turn|>'],do_sample=False,use_cache=True,return_dict_in_generate=True,return_legacy_cache=False,eos_token_id=tok.eos_token_id,pad_token_id=tok.pad_token_id or tok.eos_token_id),num_steps=16,tokenizer=tok)
-  text_out=tok.decode(out.sequences[0][enc['input_ids'].shape[-1]:],skip_special_tokens=False); lat.append(time.perf_counter()-t); correct += extract_answer(text_out,allow_fallback=True)==extract_answer(ds[i]['answer'],allow_fallback=True)
-  if n%10==0: print(f'teacher generation {n}/250',flush=True)
- result={'model':'huginn_d16_teacher','examples':250,'gsm8k_accuracy':correct/250,'mean_generation_latency_seconds':sum(lat)/len(lat)}; output.write_text(json.dumps(result,indent=2)); print(result,flush=True)
-if __name__=='__main__':
- p=argparse.ArgumentParser(); p.add_argument('--config',type=Path,default=Path('configs/003_direct_jump.json')); p.add_argument('--output',type=Path,default=Path('results/003_direct_jump/teacher_control.json')); a=p.parse_args(); main(a.config,a.output)
+from src.evaluation.correctness import (
+    CORRECTED_V2_PROTOCOL,
+    SCORER_PROTOCOL,
+    SEED_PROTOCOL,
+    build_chat_prompt,
+    prepare_corrected_v2_output,
+    generation_config_kwargs,
+    generation_status,
+    score_generation,
+    seed_for_example,
+    stop_token_ids,
+    synchronized_cuda_timer,
+    tokenize_prompt,
+    write_json_exclusive,
+)
+
+
+def main(cfg_path: Path, output: Path) -> None:
+    prepare_corrected_v2_output(output)
+    cfg = json.loads(cfg_path.read_text())
+    tokenizer = AutoTokenizer.from_pretrained(
+        cfg["model_id"], revision=cfg["model_revision"]
+    )
+    dataset = load_dataset(
+        cfg["dataset_id"],
+        cfg["dataset_config"],
+        split=cfg["dataset_split"],
+        revision=cfg["dataset_revision"],
+    )
+    model = AutoModelForCausalLM.from_pretrained(
+        cfg["model_id"],
+        revision=cfg["model_revision"],
+        torch_dtype=torch.bfloat16,
+        trust_remote_code=True,
+    ).eval().cuda()
+    correct = 0
+    latencies: list[float] = []
+    cap_hits = 0
+    max_new_tokens = int(cfg.get("max_new_tokens", 1024))
+    start_id, end_id = cfg["splits"]["test"]
+    for number, example_id in enumerate(range(start_id, end_id + 1), 1):
+        seed_for_example(cfg["seed"], example_id)
+        prompt = build_chat_prompt(
+            tokenizer, dataset[example_id]["question"], cfg["system_instruction"]
+        )
+        encoded = {
+            key: value.cuda()
+            for key, value in tokenize_prompt(tokenizer, prompt).items()
+        }
+        with synchronized_cuda_timer("cuda") as timing:
+            with torch.inference_mode():
+                generated_output = model.generate(
+                    **encoded,
+                    generation_config=GenerationConfig(
+                        **generation_config_kwargs(tokenizer, max_new_tokens)
+                    ),
+                    num_steps=16,
+                    tokenizer=tokenizer,
+                )
+        latencies.append(timing.seconds)
+        generated = generated_output.sequences[0][encoded["input_ids"].shape[-1] :]
+        status = generation_status(
+            generated.tolist(),
+            max_new_tokens=max_new_tokens,
+            stop_token_ids=stop_token_ids(tokenizer),
+        )
+        cap_hits += int(status.hit_max_new_tokens)
+        text = tokenizer.decode(generated, skip_special_tokens=False)
+        score = score_generation(
+            text,
+            dataset[example_id]["answer"],
+            hit_max_new_tokens=status.hit_max_new_tokens,
+        )
+        correct += int(score.correct)
+        if number % 10 == 0:
+            print(f"teacher generation {number}/{end_id - start_id + 1}", flush=True)
+    examples = end_id - start_id + 1
+    result = {
+        "model": "huginn_d16_teacher",
+        "protocol": CORRECTED_V2_PROTOCOL,
+        "seed_protocol": SEED_PROTOCOL,
+        "base_seed": cfg["seed"],
+        "model_revision": cfg["model_revision"],
+        "dataset_revision": cfg["dataset_revision"],
+        "examples": examples,
+        "gsm8k_accuracy": correct / examples,
+        "cap_hits": cap_hits,
+        "mean_generation_latency_seconds": sum(latencies) / len(latencies),
+        "timing_protocol": "cuda-synchronized-wall-clock-v1",
+        "scorer_protocol": SCORER_PROTOCOL,
+        "scientific_validity": "teacher_control; no Attention2 execution",
+    }
+    write_json_exclusive(output, result)
+    print(result, flush=True)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=Path, default=Path("configs/003_direct_jump.json"))
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("results/003_direct_jump/corrected-v2/teacher_control.json"),
+    )
+    arguments = parser.parse_args()
+    main(arguments.config, arguments.output)
