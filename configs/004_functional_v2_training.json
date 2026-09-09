@@ -1,0 +1,51 @@
+{
+  "protocol": "functional-paired-randomness-v1",
+  "cache_freeze_sha256": "94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0",
+  "cache_manifest_sha256": "32db951f6cfbf76220b1c7126e23149f087eba58934ab691b588aeb3a43535bf",
+  "gradient_update_ids": [0, 2249],
+  "checkpoint_validation_ids": [2250, 2499],
+  "scientific_test_ids": [0, 249],
+  "scientific_test_dataset_split": "test",
+  "h0": {
+    "base_seed": 3000,
+    "seed_protocol": "injective-packed-coordinates-v3",
+    "smoke_seed_indices": [0],
+    "final_seed_indices": [0, 1, 2],
+    "step": 0
+  },
+  "attention2": {
+    "hidden": 5280,
+    "depth": 16,
+    "heads": 16,
+    "mlp_ratio": 1,
+    "depth_scale": 16.0,
+    "film": false,
+    "paired_K": [1, 2, 4],
+    "initialization_seed": 0,
+    "initialization_artifact": "/workspace/functional_protocol/a2_init_seed_0.pt"
+  },
+  "data_order": {
+    "protocol": "paired-epoch-permutation-v1",
+    "seed": 9100
+  },
+  "optimizer": {
+    "name": "AdamW",
+    "learning_rate": 0.0001,
+    "betas": [0.9, 0.999],
+    "epsilon": 1e-8,
+    "weight_decay": 0.0
+  },
+  "preprocessing": {
+    "cache_state_dtype": "float16",
+    "training_state_dtype": "float32",
+    "model_compute_dtype": "bfloat16",
+    "padding_mask": "boolean-real-token-mask-v1",
+    "causal_alignment": "answer-token-t-is-predicted-by-logit-t-minus-1-v1"
+  },
+  "loss": {
+    "name": "teacher-to-student-KL",
+    "normalization": "global-sum-over-valid-answer-token-count",
+    "mask": "answer_start:valid_end-only",
+    "trajectory_loss_weight": 0.0
+  }
+}

@@ -113,4 +113,19 @@ The compact cache is not yet built. All v2 work must follow
 - Interspersed-padding tests prove arbitrary padded `h0/x` changes cannot alter
   any real-token output; separate tests prove causal future-token isolation and
   reject malformed/all-padding masks.
-- Pod test suite: 106 passed.
+- Pod test suite: 109 passed.
+
+### Phase 9 paired randomness and initialization — pre-build PASS/PASS; artifact pending
+
+- Smoke/debug runs use deterministic Huginn `h0` seed index 0 per example;
+  final results use paired seed indices 0, 1, and 2 per example under the Phase
+  2 injective seed protocol.
+- Huginn initialization runs in a forked RNG scope, restoring process-global
+  CPU/CUDA RNG states after each deterministic `h0` creation.
+- K=1, 2, and 4 load one strict, checksummed state dictionary from
+  `/workspace/functional_protocol/a2_init_seed_0.pt`; K is not encoded in its
+  parameters.
+- Split roles, epoch order, optimizer, preprocessing, loss, and applicable
+  seeds are frozen in `configs/004_functional_v2_training.json`.
+- Focused Pod suite: 8 passed; full Pod suite: 117 passed. The production
+  initialization has not yet been generated.
