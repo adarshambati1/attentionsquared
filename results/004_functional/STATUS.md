@@ -4,7 +4,8 @@
 
 The following remote artifacts must not be used for scientific conclusions:
 
-- teacher-logit training cache v1: deletion explicitly authorized on 2026-09-09;
+- teacher-logit training cache v1: deleted from
+  `/root/functional_training_cache` with explicit authorization on 2026-09-09;
   its pre-deletion inventory and checksums are preserved under
   `deletion_records/functional_training_cache_v1_20260909/`;
 - trained checkpoints: `/root/functional_models_full/`; and

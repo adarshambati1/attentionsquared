@@ -40,5 +40,12 @@ not promised.
 - Inventory SHA-256: `8e0cd2e7c40b7c2732de6c4cc4e7ff988be7bd7438cbc49154f379ce5b34bdcb`
 - Checksum-list SHA-256: `d7887aa0d2d6651906e13cf3e8e8ebbd1dedbcf3d13356b187bf5584c02a437a`
 
-No model, teacher continuation, evaluation result, or corrected-v2 artifact is covered by
-this deletion authorization.
+## Completion
+
+Deletion completed at `2026-09-09T07:49:50Z`. The failed 4.48 GB partial staging
+copy created during the preceding durability attempt was also removed. The durable
+audit metadata was retained, and the original models, teacher continuations, and
+evaluation remain present.
+
+No model, teacher continuation, evaluation result, or corrected-v2 artifact was covered
+by this deletion authorization.
