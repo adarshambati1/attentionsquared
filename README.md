@@ -14,3 +14,13 @@ Can a learned parallel depth operator match the capability gains of recurrent-de
 The functional-v1 cache, models, and evaluation are preserved but invalid for
 scientific inference. No further Experiment 004 training should begin until the
 recovery plan's correctness gates pass.
+
+## Repository layout
+
+- `src/` — active reusable model, evaluation, and analysis code
+- `scripts/` — active experiment entry points
+- `scripts/archive/` — preserved historical entry points; not for new runs
+- `tests/` — correctness and regression tests
+- `results/` — preserved scientific artifacts and lightweight summaries
+
+See [`scripts/archive/README.md`](scripts/archive/README.md) before using an archived script.
