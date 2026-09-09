@@ -1,0 +1,20 @@
+{
+  "experiment": "004_functional_v2",
+  "model_id": "tomg-group-umd/huginn-0125",
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "dataset_id": "openai/gsm8k",
+  "dataset_config": "main",
+  "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "split_manifest": "configs/004_functional_v2_splits.json",
+  "training_dataset_split": "train",
+  "training_splits": {
+    "train": [0, 2249],
+    "validation": [2250, 2499]
+  },
+  "scientific_evaluation": {
+    "dataset_split": "test",
+    "example_range": [0, 249],
+    "allow_checkpoint_selection": false
+  },
+  "notes": "Phase 3 frozen split only. The held-out GSM8K test examples are forbidden for checkpoint selection."
+}

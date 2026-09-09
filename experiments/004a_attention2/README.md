@@ -18,3 +18,15 @@ latency. In this A²-lite baseline, `x` is injected only when constructing
 
 Historical 4A results remain useful mechanical/exploratory evidence. Future
 Experiment 004 work is governed by [RECOVERY_PLAN.md](RECOVERY_PLAN.md).
+
+## Frozen functional-v2 splits
+
+Phase 3 freezes the corrected functional experiment split in
+`configs/004_functional_v2_splits.json`:
+
+- GSM8K `train` IDs 0–2249: gradient updates only;
+- GSM8K `train` IDs 2250–2499: permanent checkpoint-selection validation; and
+- GSM8K `test` IDs 0–249: scientific evaluation only, never checkpoint selection.
+
+The exact IDs, pinned dataset revision, roles, and deterministic split policy
+are recorded in the manifest. Historical experiment configs remain unchanged.
