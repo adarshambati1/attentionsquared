@@ -10,7 +10,7 @@ venv/
 *.safetensors
 *.bin
 
-data/
+/data/
 cache/
 trajectories/
 wandb/
