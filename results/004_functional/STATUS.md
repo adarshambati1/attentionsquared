@@ -104,3 +104,13 @@ The compact cache is not yet built. All v2 work must follow
 - Validation report SHA-256: `2a998d8458e8d5b9b7790395d213e4eca8b67485c4b1d1b57f06dce0e0dd1c62`.
 - Freeze record SHA-256: `94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0`.
 - Pod test suite: 100 passed.
+
+### Phase 8 padding semantics — PASS/PASS
+
+- `Attention2Lite` now combines a causal token-attention mask with a boolean
+  key-padding mask in every refinement round.
+- Padded states are made inert after every residual sublayer.
+- Interspersed-padding tests prove arbitrary padded `h0/x` changes cannot alter
+  any real-token output; separate tests prove causal future-token isolation and
+  reject malformed/all-padding masks.
+- Pod test suite: 106 passed.

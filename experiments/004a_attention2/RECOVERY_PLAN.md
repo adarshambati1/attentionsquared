@@ -148,40 +148,41 @@ or create K-specific caches.
 
 ## Phase 8 — Padding semantics
 
-Implement causal and key-padding masks in `Attention2Lite.operator()`. Test that
-changing padded token values cannot affect any real-token output. Batch-size-one
-smoke work may proceed first, but no padded batched result is trusted until this
-passes.
+Implement both causal and key-padding masks in `Attention2Lite.operator()` and
+thread `token_mask` through every refinement round. Test with interspersed
+padding—not only right padding—that arbitrary changes to padded `h0/x` values
+cannot affect any real-token output. Padded outputs remain inert. Batch-size-one
+smoke work may proceed without padding, but no padded batched result is trusted
+until this gate passes.
 
-## Phase 9 — Deterministic paired h0
+## Phase 9 — Deterministic paired randomness and initialization
 
 Explicitly create/reuse `h0(example, seed, step)` across Huginn D16,
 Attention² K1/K2/K4, and controls. One seed per example is sufficient for smoke
 tests. Final results use three paired seeds per example and report variation.
 
-## Phase 10 — Paired K initialization
+Create one immutable shared Attention² state dictionary, initially
+`a2_init_seed_0.pt`, and load those exact weights for K=1, K=2, and K=4. Keep
+data split, minibatch order, preprocessing, optimizer, loss, and random policy
+fixed where possible. K=8 remains a separate stability experiment.
 
-Create one immutable `a2_init_seed_X.pt` and load the same state dictionary for
-K=1, K=2, and K=4. Keep data split, minibatch order, preprocessing, optimizer,
-loss, and random policy fixed where possible. K=8 remains a separate stability
-experiment.
-
-## Phase 11 — Mandatory unit gates
+## Phase 10 — Mandatory correctness and unit gates
 
 Before real training, executable tests must prove:
 
+- literal causal alignment: if answer tokens are
+  `input_ids[answer_start:valid_end]`, supervise them with
+  `logits[answer_start-1:valid_end-1]`, including explicit `A B C` targets;
 - all Huginn and coda parameter gradients are absent;
 - Attention² receives nonzero gradients;
 - `dL/dz16` is nonzero through the frozen coda;
-- measured `KL(pT || pT)` is approximately zero;
-- causal target alignment is exact;
-- prompt/post-`valid_end` positions receive zero loss;
-- padded tokens cannot influence real tokens; and
-- initial untrained Attention² KL/token is recorded.
+- prompt and post-`valid_end` positions receive zero loss;
+- padding receives zero loss and has zero influence on real tokens;
+- measured, non-hardcoded `KL(pT || pT)` is approximately zero; and
+- initial untrained Attention² KL per valid answer token is measured and
+  recorded.
 
-Do not hardcode control values.
-
-## Phase 12 — Eight-example functional-overfit gate
+## Phase 11 — Eight-example functional-overfit gate
 
 Use eight examples, no trajectory loss, and the unchanged baseline:
 
@@ -194,14 +195,14 @@ dramatic KL/token decrease, improved first-answer-token predictions,
 approaching teacher/student distributions, and sensible generation on the same
 eight examples. Stop if this gate fails.
 
-## Phase 13 — Correct full-prefix autoregressive evaluator
+## Phase 12 — Correct full-prefix autoregressive evaluator
 
 For every generation step, recompute the entire prompt plus generated prefix,
 then run `h0/x --> Attention² --> frozen coda --> next-token logits`. Do not pass
 only the newest token to Attention². This evaluator establishes correctness,
 not speed.
 
-## Phase 14 — Evaluator controls
+## Phase 13 — Evaluator controls
 
 Before evaluating Attention²:
 
@@ -212,39 +213,39 @@ Before evaluating Attention²:
 
 Do not proceed if these controls disagree.
 
-## Phase 15 — Correct trajectory-checkpoint reevaluation
+## Phase 14 — Correct trajectory-checkpoint reevaluation
 
 Run existing trajectory K1/K2/K4 checkpoints through full-prefix generation.
 Treat each model's corrected accuracy as useful, but retain the seed-confound
 label on cross-K comparisons. Do not use functional-v1 checkpoints for claims.
 
-## Phase 16 — Correct functional K1 smoke
+## Phase 15 — Correct functional K1 smoke
 
 Train only K=1 for 200–500 steps using cache v2, paired initialization, exact
 alignment, and the frozen train/validation split. Evaluate validation KL per
 valid answer token and run full-prefix downstream generation. K2/K4 remain
 blocked until the complete cache-to-generation pipeline passes.
 
-## Phase 17 — Full K1
+## Phase 16 — Full K1
 
 After smoke success, train K1 for at least 2,000 steps and continue toward 5,000
 only while validation KL/token improves. Validate/checkpoint every 100–200
 steps and retain the best validation checkpoint, never a test-selected one.
 
-## Phase 18 — Correct K2/K4
+## Phase 17 — Correct K2/K4
 
 Train K2 and K4 from the same base state and data ordering as K1. Compare
 validation KL/token, validation generation stability, and endpoint diagnostics.
-The untouched GSM8K test set remains sealed until Phase 20.
+The untouched GSM8K test set remains sealed until Phase 19.
 
-## Phase 19 — K8 stability study
+## Phase 18 — K8 stability study
 
 After valid K1/K2/K4 results, diagnose K8 roundwise hidden-state norms, gradient
 norms, residual magnitudes, and attention-output scales. Any stabilizer—learning
 rate, residual scaling, normalization, or clipping—is a separately documented
 change.
 
-## Phase 20 — Correct downstream evaluation
+## Phase 19 — Correct downstream evaluation
 
 On the untouched 250-example GSM8K test set, run full-prefix K1/K2/K4 and report:
 
@@ -254,20 +255,20 @@ On the untouched 250-example GSM8K test set, run full-prefix K1/K2/K4 and report
 - average generation length; and
 - endpoint cosine/L2 diagnostics.
 
-## Phase 21 — Attention² KV cache
+## Phase 20 — Attention² KV cache
 
 Only after full-prefix correctness, implement an incremental token-attention KV
 cache. For many prefixes, require full-prefix and cached logits to agree within
 a predefined tolerance and greedy next-token choices to be identical. Cached
 execution cannot support speed claims until this passes.
 
-## Phase 22 — Timing repair
+## Phase 21 — Timing repair
 
 Use one harness with GPU warmup and CUDA synchronization before/after timing.
 Report separately: one Attention² round, one model forward, and end-to-end
 generation. Historical 4C times are not final evidence.
 
-## Phase 23 — Ordinary-attention functional control (4E)
+## Phase 22 — Ordinary-attention functional control (4E)
 
 Train an ordinary Transformer/sequential-adapter student with the same teacher,
 functional objective, examples, checkpoint protocol, and approximately matched
@@ -278,7 +279,7 @@ parameters/training compute. Interpret outcomes as:
 - ordinary attention distills while Attention² fails: evidence against
   Attention² expressivity or optimization.
 
-## Phase 24 — Additional 4E controls
+## Phase 23 — Additional 4E controls
 
 After a valid baseline, run:
 
@@ -287,7 +288,7 @@ After a valid baseline, run:
 - Experiment 3 direct jump; and
 - sequential depth-attention prior art retaining recurrence.
 
-## Phase 25 — Resume architecture ablations
+## Phase 24 — Resume architecture ablations
 
 Only after the functional baseline works, continue:
 
@@ -297,20 +298,20 @@ Only after the functional baseline works, continue:
   value-focused mixing, shared/separate projections, and full joint
   `(depth,token)` QKV.
 
-## Phase 26 — Explicit x-injection ablation
+## Phase 25 — Explicit x-injection ablation
 
 Document the repaired baseline as **Attention²-lite: x injected only at
 initialization**. Do not alter it during baseline recovery. Later compare init-
 only against x reinjection/cross-attention on every refinement round.
 
-## Phase 27 — Objective ablations (4G)
+## Phase 26 — Objective ablations (4G)
 
 After a valid functional-only baseline, compare functional-only,
 trajectory-only, functional plus weak trajectory, endpoint emphasis,
 delta/update supervision, and random versus compatible Huginn initialization.
 These are ablations, not recovery gates.
 
-## Phase 28 — Historical reporting repair
+## Phase 27 — Historical reporting repair
 
 Before final reporting:
 
@@ -320,7 +321,7 @@ Before final reporting:
 
 These repairs do not block the corrected K1 smoke.
 
-## Phase 29 — Final 4H benchmark
+## Phase 28 — Final 4H benchmark
 
 Only after correct causal execution/alignment/splits/scoring, paired seeds,
 KV-cache equivalence, and synchronized timing, compare the winning Attention²
@@ -331,7 +332,7 @@ and seed variance.
 The target question remains whether `Attention²(K << 16)` approximates frozen
 `Huginn(D=16)` with less sequential latency.
 
-## Phase 30 — Matched post-training (4I)
+## Phase 29 — Matched post-training (4I)
 
 Only after the frozen-teacher result, create Huginn+ and Attention²+ copies and
 give both matched additional LM/reasoning training. Then test whether Attention²
@@ -347,25 +348,24 @@ learns useful new patterns better than recurrence.
 6. Build one compact functional cache v2 from the preserved continuations.
 7. Validate every item, checksum durable storage, and freeze cache v2.
 8. Fix padding masks before padded batching.
-9. Implement deterministic paired `h0`.
-10. Create one shared Attention² initialization.
-11. Run all unit gates.
-12. Run eight-example functional overfit.
-13. Build the full-prefix autoregressive evaluator.
-14. Validate it with Huginn D16 and true `h16` controls.
-15. Re-evaluate trajectory checkpoints.
-16. Run corrected K1 200–500-step smoke.
-17. Train corrected K1 to convergence if clean.
-18. Train corrected K2 and K4.
-19. Diagnose/retry K8 separately.
-20. Evaluate untouched held-out GSM8K 250.
-21. Implement the Attention² KV cache and prove cached/full-prefix equivalence.
-22. Measure synchronized latency.
-23. Run the ordinary-Transformer distillation control.
-24. Run no-depth, parameter-matched, and prior-art controls.
-25. Resume topology and QKV ablations.
-26. Run the explicit x-injection ablation.
-27. Run objective ablations.
-28. Repair Exp2 and historical KL reporting.
-29. Run final 4H benchmark.
-30. Run 4I matched post-training.
+9. Pair deterministic `h0` and load one shared Attention² initialization.
+10. Run all mandatory correctness and unit gates.
+11. Run eight-example functional overfit.
+12. Build the full-prefix autoregressive evaluator.
+13. Validate it with Huginn D16 and true `h16` controls.
+14. Re-evaluate trajectory checkpoints.
+15. Run corrected K1 200–500-step smoke.
+16. Train corrected K1 to convergence if clean.
+17. Train corrected K2 and K4.
+18. Diagnose/retry K8 separately.
+19. Evaluate untouched held-out GSM8K 250.
+20. Implement the Attention² KV cache and prove cached/full-prefix equivalence.
+21. Measure synchronized latency.
+22. Run the ordinary-Transformer distillation control.
+23. Run no-depth, parameter-matched, and prior-art controls.
+24. Resume topology and QKV ablations.
+25. Run the explicit x-injection ablation.
+26. Run objective ablations.
+27. Repair Exp2 and historical KL reporting.
+28. Run final 4H benchmark.
+29. Run 4I matched post-training.
