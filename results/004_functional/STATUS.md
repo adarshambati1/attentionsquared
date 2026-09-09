@@ -28,5 +28,22 @@ remaining v1 models, evaluations, or teacher continuations.
 
 ## Version 2
 
-Not yet built. All v2 work must follow
+The compact cache is not yet built. All v2 work must follow
 [`../../experiments/004a_attention2/RECOVERY_PLAN.md`](../../experiments/004a_attention2/RECOVERY_PLAN.md).
+
+### Phase 4 input review — complete, pending gate review
+
+- All 2,500 raw continuation NPZ files remain unchanged.
+- Both independent reviewers inspected every one of the 27 capped generations;
+  all 27 contain clear repetitive degeneration.
+- `capped_continuation_review.json` preserves decoded review evidence, both
+  proposed boundaries, and conservative final adjudication. When proposals
+  differed, the later onset was selected to preserve the longest defensible
+  prefix.
+- `valid_end_manifest.jsonl` contains exactly one source-hash-bound record for
+  each GSM8K-train example ID 0–2499 in ID order. Historical source directory
+  names are recorded separately from Phase 3 scientific roles.
+- Manifest SHA-256:
+  `25188506cb7afe426e42beb5fa96455fe8ac0cff6c0ae47b72363a3fa7af187f`.
+- The artificial 1,024-token generation cap is recorded as truncation, never as
+  EOS.
