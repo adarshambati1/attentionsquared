@@ -1,0 +1,17 @@
+{
+  "artifact": "/workspace/functional_protocol/a2_init_seed_0.pt",
+  "artifact_bytes": 1338868224,
+  "artifact_sha256": "92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747",
+  "builder_git_commit": "e3b5c97e0fa49b6d654bc0f4569a93127ac07499",
+  "builder_record_sha256": "b949b934c63b6c4d4d273ba495c7f02b8ef38fc428fb79a6a66f625d5c0f0e0f",
+  "modes": {
+    "artifact": "0444",
+    "builder_record": "0444",
+    "validation_log": "0444"
+  },
+  "prior_validation_log_sha256": "5c58f104ed13b73e04a4a52cb9754fbe91eef273a77ac73abe0be3d12da63097",
+  "protocol": "attention2-shared-initialization-runtime-attestation-v1",
+  "state_dict_sha256": "93ac1869c68521ff5498ade5731c1ffea534527838df8a27d396490a043a533a",
+  "status": "pass",
+  "validation_git_commit": "d1a3fbb3c78166f7fd01da055f3e7e27426e0ec7"
+}
