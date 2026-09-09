@@ -174,3 +174,31 @@ The compact cache is not yet built. All v2 work must follow
   `9faa898c859ce80e845ac46829f526f410579c35f7aa38b18878febbb01474ba`;
   the authoritative gate artifact and attestation are regular, non-symlink,
   mode-`0444` files on the durable volume.
+
+### Phase 11 eight-example functional-overfit gate — pre-run PASS/PASS; execution pending
+
+- Uses frozen training-side examples 0–7, one deterministic cached `h0` seed
+  per example, K=4 loaded from the Phase 9 shared initialization, and no
+  trajectory loss.
+- Every optimizer update accumulates the teacher-to-student KL numerator over
+  all eight examples and divides once by the total valid-answer-token count.
+- Predeclared pass criteria require at least an 80% global KL/token reduction
+  to at most 0.5 KL/token; first-token distribution KL must fall at least 50%
+  to at most 0.5; mean first-target probability must increase to at least 0.5;
+  and first-target top-1 count must increase to at least 6/8.
+- Teacher full-vocabulary logits are recomputed, consumed, and deleted for one
+  example/loss computation at a time; they are never stored in examples or
+  persisted.
+- Greedy generation recomputes the entire prompt plus generated prefix with
+  `use_cache=False` at every token. It records natural-stop/cap status, decoded
+  teacher/generated text, teacher-prefix agreement, extracted-answer agreement,
+  and degeneration checks. Automated adequacy requires at least 6/8 natural
+  stops, fixed-width first-32 teacher-token agreement at least 0.5, and at
+  least 6/8 authoritative cap-safe teacher-answer matches; missing generated
+  prefix tokens count as mismatches and stop-only text is non-substantive.
+  Final PASS still requires science review.
+- A separate prelaunch attestation must show the final path absent and no other
+  gate process. Each run uses a unique preserved attempt directory; only a
+  complete read-only model/result pair can be atomically published no-replace.
+- Focused Pod suite: 10 passed; full Pod suite: 133 passed. No overfit training
+  has begun.
