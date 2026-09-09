@@ -86,3 +86,17 @@ The compact cache is not yet built. All v2 work must follow
 - Full storage and migration record: `cache_v2_storage_preflight.md`.
 - Preserved manifest/build records: `cache_v2_manifest.json` and
   `cache_v2_build.log`.
+
+### Phase 7 validation and durability — pending execution review
+
+- Validator checks the exact committed manifest bytes/hash, all 2,500 compact
+  items, all source token arrays/hashes, reviewed boundaries, schemas, dtypes,
+  finiteness, role counts, and hidden size.
+- Control-plane attestation binds Pod `jwc04iw92bdebm` to dedicated 100 GB
+  network volume `jggambl3qv` in `US-GA-2`; mount and payload symlinks are
+  rejected.
+- Eight representative examples are replayed through frozen Huginn D16 under
+  their authoritative seeds and compared by dtype, shape, and raw bytes.
+- The payload inventory covers the manifest plus all 2,500 items, is re-read in
+  full, and is published with immutable validation and freeze records.
+- Pod test suite: 100 passed.

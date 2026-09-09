@@ -1,0 +1,47 @@
+{
+  "captured_at_utc": "2026-09-09T14:23:48.849010+00:00",
+  "network_volume": {
+    "dataCenterId": "US-GA-2",
+    "id": "jggambl3qv",
+    "name": "attentionsquared-functional-v2",
+    "size": 100
+  },
+  "pod": {
+    "containerDiskInGb": 50,
+    "costPerHr": 3.49,
+    "createdAt": "2026-09-09 09:54:04.067 +0000 UTC",
+    "desiredStatus": "RUNNING",
+    "env": {
+      "PUBLIC_KEY": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF3TPCkkFrVB6Zlbp+iaGHFFzV/oQhS5fiuWeUzqg/Jg attentionsquared-runpod"
+    },
+    "gpuCount": 1,
+    "id": "jwc04iw92bdebm",
+    "imageName": "runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404",
+    "lastStatusChange": "Rented by User: Wed Sep 09 2026 09:54:04 GMT+0000 (Coordinated Universal Time)",
+    "memoryInGb": 251,
+    "name": "attentionsquared-cache-v2-h100",
+    "networkVolumeId": "jggambl3qv",
+    "ports": [
+      "22/tcp"
+    ],
+    "runtimeStatus": "running",
+    "ssh": {
+      "id": "jwc04iw92bdebm",
+      "ip": "205.196.17.58",
+      "name": "attentionsquared-cache-v2-h100",
+      "port": 18304,
+      "setup": "runpodctl doctor",
+      "ssh_command": "ssh root@205.196.17.58 -p 18304",
+      "ssh_key": {
+        "exists": false,
+        "path": "/Users/adarshambati/.runpod/ssh/runpodctl-ssh-key",
+        "source": "runpodctl doctor"
+      }
+    },
+    "uptimeSeconds": 15945,
+    "vcpuCount": 24,
+    "volumeInGb": 0,
+    "volumeMountPath": "/workspace"
+  },
+  "protocol": "runpod-cache-v2-runtime-attestation-v1"
+}
