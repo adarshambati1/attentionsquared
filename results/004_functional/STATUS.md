@@ -61,7 +61,7 @@ The compact cache is not yet built. All v2 work must follow
   review protocol.
 - Pod test suite: 84 passed after crash-recovery remediation.
 
-### Phase 6 pre-build gate — pending review
+### Phase 6 compact cache build — PASS/PASS
 
 - Dedicated 100 GB network volume `jggambl3qv` in `US-GA-2` passed atomic
   no-replace, rename, fsync, capacity, and throughput preflight.
@@ -73,4 +73,16 @@ The compact cache is not yet built. All v2 work must follow
   arrays, and provenance. It creates one shared cache and no vocabulary logits
   or K-specific artifacts.
 - New-Pod test suite: 91 passed after provenance remediation.
+- Pre-build code/science review: PASS/PASS.
+- The committed builder created exactly 2,500 items: 2,250 train and 250
+  validation, with zero quarantine files and no K-specific directories.
+- Cache size after construction: 20,529,356,986 bytes.
+- Cache manifest SHA-256:
+  `32db951f6cfbf76220b1c7126e23149f087eba58934ab691b588aeb3a43535bf`.
+- Cache-internal canonical manifest digest:
+  `c6d32e897701ae14805c84533cb0409a90ca6bb561557861a3375cf3f0b37efc`.
+- Preserved build-log SHA-256:
+  `e9d2197150fcae8a4d631c41a0a328913ffe9db87383e49e6ede407e7f3f7e81`.
 - Full storage and migration record: `cache_v2_storage_preflight.md`.
+- Preserved manifest/build records: `cache_v2_manifest.json` and
+  `cache_v2_build.log`.
