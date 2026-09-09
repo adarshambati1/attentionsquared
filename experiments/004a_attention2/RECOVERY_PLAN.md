@@ -23,7 +23,7 @@ in [`../../results/TRUST_STATUS.md`](../../results/TRUST_STATUS.md).
   baseline.
 - Stop at a failed gate rather than changing protocol silently.
 
-## Phase 0 — Freeze prior work
+## Phase 1 — Freeze the scientific record
 
 Apply the statuses in `results/TRUST_STATUS.md`. In particular:
 
@@ -33,9 +33,12 @@ Apply the statuses in `results/TRUST_STATUS.md`. In particular:
 - 4A remains mechanical/exploratory evidence.
 - Trajectory 4B is exploratory and seed-confounded.
 - Trajectory 4C is invalid/provisional under one-token Attention² execution.
-- Functional cache/models/evaluation v1 are invalid for scientific inference.
+- Functional models/evaluation v1 are invalid for scientific inference.
+- The invalid giant functional-logit v1 cache was deleted with explicit user
+  authorization; preserve its committed inventory and checksums and never
+  regenerate it.
 
-## Phase 1 — Shared correctness layer
+## Phase 2 — Shared correctness infrastructure
 
 Replace divergent experiment-local implementations with shared utilities for:
 
@@ -49,20 +52,11 @@ Replace divergent experiment-local implementations with shared utilities for:
 - synchronized CUDA timing; and
 - generation scoring.
 
-One scorer is authoritative for all future experiments.
-
-## Phase 2 — Causal supervision test
-
-If answer tokens are `input_ids[answer_start:valid_end]`, supervise them using
-`logits[answer_start-1:valid_end-1]`.
-
-Add a literal artificial `prompt | A B C` test proving:
-
-- the logit before A targets A;
-- the logit before B targets B;
-- the logit before C targets C;
-- prompt positions have zero loss; and
-- positions at or after `valid_end` have zero loss.
+One scorer is authoritative for all future experiments. A literal artificial
+`prompt | A B C` test must prove that answer tokens
+`input_ids[answer_start:valid_end]` are supervised by logits
+`logits[answer_start-1:valid_end-1]`, with zero loss on prompt targets and at or
+after `valid_end`.
 
 ## Phase 3 — Frozen splits
 
@@ -73,64 +67,84 @@ Freeze the 2,500 training-side examples as:
 - a separate untouched 250-example GSM8K test set for final evaluation.
 
 Store exact IDs and split-generation policy in the manifest. Never select a
-checkpoint using the test set.
+checkpoint using the test set. Historical continuation directory names do not
+define these roles: all 2,500 continuations came from GSM8K train.
 
-## Phase 4 — Compact functional cache v2
+## Phase 4 — Finalize v2 inputs
 
-Do not regenerate a full-vocabulary logit cache. Store per example:
+Keep every raw teacher-continuation NPZ exactly unchanged. Review all 27 capped
+continuations and record decisions in one immutable `valid_end_manifest.jsonl`
+sidecar. For every example record source identity/hash, Phase 3 role, original
+and reviewed `valid_end`, cap/degeneration flags, and review decision.
+
+Where repetitive degeneration clearly starts, training excludes the tail via
+`valid_end`; it does not truncate the source file. Preserve every valid prefix
+and never treat the artificial 1,024-token cap as EOS.
+
+## Phase 5 — Crash-safe cache writer and manifest
+
+For each cache item:
+
+```text
+write unique temporary file
+close and fsync
+reopen and validate keys/shapes/dtypes/finiteness/provenance
+atomically rename to final .npz
+```
+
+Resume behavior is:
+
+- valid final: validate exact expected contents and reuse;
+- invalid final: move to a uniquely named quarantine record and regenerate;
+- complete valid temporary file: validate and atomically promote; and
+- invalid/incomplete temporary file: quarantine and regenerate.
+
+Never trust `path.exists()` and never silently delete or overwrite corruption.
+The immutable manifest records Huginn model/revision, dataset identity/revision,
+tokenizer/template, exact repository commit, dtype/extraction location,
+sequence count and exact split IDs, seed policy, and cap/degeneration policy.
+
+## Phase 6 — Build compact functional cache v2
+
+Do not regenerate teacher continuations and do not store full-vocabulary
+logits. Run frozen Huginn over the exact reviewed continuations and store:
 
 - `input_ids`, `attention_mask`, and token metadata;
-- `answer_start` and `valid_end`;
+- `answer_start` and reviewed `valid_end`;
 - `h0_full [T,H]`;
 - `x_full [T,H]`;
 - `h16_teacher [T,H]`; and
-- seed metadata.
+- seed/example/manifest metadata.
 
-During training, run both teacher and student states through the same frozen
-Huginn coda:
+Use the Phase 5 writer from the first item onward and build one shared cache for
+all future K values. During later training, run teacher and student states
+through the same frozen Huginn coda:
 
 ```text
 h16_teacher --no_grad--> frozen coda --> detached teacher logits
 (h0,x) --> Attention² --> z16 --> frozen coda --> student logits --> loss
 ```
 
-Coda parameters remain frozen, but autograd must flow through the coda into
-`z16` and Attention².
+Coda parameters remain frozen, but autograd must flow through the student coda
+into `z16` and Attention². Full-vocabulary logits exist only transiently in GPU
+memory and are discarded after loss computation.
 
-## Phase 5 — Crash-safe cache and manifest
+## Phase 7 — Validate and make cache v2 durable
 
-For each cache item:
+Before extraction, verify real durable capacity, write access, atomic rename
+behavior, and throughput. After all 2,500 items are built:
 
-```text
-write unique temporary file
-close it
-reopen and validate keys/shapes/dtypes/finiteness
-atomically rename to final .npz
-```
+- validate every item and the immutable manifest;
+- verify exact IDs, shapes, dtypes, finiteness, bounds, and source hashes;
+- replay selected examples through frozen Huginn and compare cached states;
+- create a SHA-256 inventory;
+- place v2 on durable workspace or network storage and verify exact checksums;
+  and
+- mark the shared functional cache v2 frozen.
 
-Resume logic must validate contents rather than only call `path.exists()`.
-The immutable manifest records:
-
-- Huginn model and revision;
-- dataset and revision;
-- tokenizer/chat template;
-- exact repository commit;
-- dtype and extraction location;
-- sequence count and split IDs;
-- seed policy; and
-- cap/degeneration policy.
-
-## Phase 6 — Durable storage
-
-Before the Pod can be destroyed, copy cache v2 to durable workspace or network
-storage and verify checksums. Preserve v1 until explicit permission to delete
-it. `/root` is not accepted as the sole long-term copy.
-
-## Phase 7 — Degeneration review
-
-Inspect all 27 capped teacher continuations. Assign `valid_end` where repetitive
-degeneration clearly starts, preserve every valid prefix, and never treat the
-artificial 1,024-token cap as EOS. Record the review decision per example.
+The invalid giant v1 logit cache was deleted with explicit authorization and a
+committed audit record. Never recreate it, silently overwrite another artifact,
+or create K-specific caches.
 
 ## Phase 8 — Padding semantics
 
@@ -220,8 +234,8 @@ steps and retain the best validation checkpoint, never a test-selected one.
 ## Phase 18 — Correct K2/K4
 
 Train K2 and K4 from the same base state and data ordering as K1. Compare
-validation KL/token, untouched-test GSM8K accuracy, generation stability, and
-endpoint diagnostics.
+validation KL/token, validation generation stability, and endpoint diagnostics.
+The untouched GSM8K test set remains sealed until Phase 20.
 
 ## Phase 19 — K8 stability study
 
@@ -325,31 +339,33 @@ learns useful new patterns better than recurrence.
 
 ## Locked execution order
 
-1. Freeze and label existing artifacts.
-2. Create shared scoring/alignment/timing utilities.
+1. Freeze and label the scientific record.
+2. Create shared correctness infrastructure and prove causal supervision.
 3. Freeze train/validation/test separation.
-4. Build compact functional cache v2.
-5. Make cache atomic and durable.
-6. Review all capped examples and `valid_end` values.
-7. Fix padding masks before padded batching.
-8. Implement deterministic paired `h0`.
-9. Create one shared Attention² initialization.
-10. Run all unit gates.
-11. Run eight-example functional overfit.
-12. Build full-prefix autoregressive evaluator.
-13. Validate it with Huginn D16 and true `h16` controls.
-14. Re-evaluate trajectory checkpoints.
-15. Run corrected K1 200–500-step smoke.
-16. Train corrected K1 to convergence if clean.
-17. Train corrected K2 and K4.
-18. Evaluate untouched held-out GSM8K 250.
+4. Review capped continuations and freeze `valid_end` metadata.
+5. Validate the crash-safe writer, quarantine, resume, and manifest behavior.
+6. Build one compact functional cache v2 from the preserved continuations.
+7. Validate every item, checksum durable storage, and freeze cache v2.
+8. Fix padding masks before padded batching.
+9. Implement deterministic paired `h0`.
+10. Create one shared Attention² initialization.
+11. Run all unit gates.
+12. Run eight-example functional overfit.
+13. Build the full-prefix autoregressive evaluator.
+14. Validate it with Huginn D16 and true `h16` controls.
+15. Re-evaluate trajectory checkpoints.
+16. Run corrected K1 200–500-step smoke.
+17. Train corrected K1 to convergence if clean.
+18. Train corrected K2 and K4.
 19. Diagnose/retry K8 separately.
-20. Implement the Attention² KV cache.
-21. Prove cached/full-prefix equivalence.
+20. Evaluate untouched held-out GSM8K 250.
+21. Implement the Attention² KV cache and prove cached/full-prefix equivalence.
 22. Measure synchronized latency.
-23. Run ordinary-Transformer distillation control.
+23. Run the ordinary-Transformer distillation control.
 24. Run no-depth, parameter-matched, and prior-art controls.
-25. Resume topology/QKV/objective ablations.
-26. Repair Exp2 and historical KL reporting.
-27. Run final 4H benchmark.
-28. Run 4I matched post-training.
+25. Resume topology and QKV ablations.
+26. Run the explicit x-injection ablation.
+27. Run objective ablations.
+28. Repair Exp2 and historical KL reporting.
+29. Run final 4H benchmark.
+30. Run 4I matched post-training.

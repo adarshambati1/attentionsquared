@@ -15,7 +15,7 @@ listed as provisional or invalid.
 | Trajectory-trained 004B | **Exploratory, seed-confounded** | K models used different parameter initializations, so K was not the sole manipulated variable. |
 | Trajectory-trained 004C | **Invalid/provisional downstream result** | Generation invoked A² incrementally on one token without an A² KV cache although training used full sequences. Re-evaluate with full-prefix execution. Historical KL is also not token-normalized. |
 | Functional continuation cache | **Preserved source data** | Teacher continuations are useful, subject to corrected/manual `valid_end` review for all 27 capped examples. |
-| Functional full-logit cache v1 | **Invalid target alignment** | Teacher logits used `[answer_start:valid_end]` instead of `[answer_start-1:valid_end-1]`. Preserve but never train from it again. |
+| Functional full-logit cache v1 | **Invalid; deleted with authorization** | Teacher logits used `[answer_start:valid_end]` instead of `[answer_start-1:valid_end-1]`. The 77,824,465,425-byte (72.5 GiB) derived cache was explicitly deleted on 2026-09-09; its inventory and 2,501 SHA-256 checksums are preserved under `results/004_functional/deletion_records/`. Never regenerate it. |
 | Functional models v1 | **Invalid** | Trained against off-by-one targets and selected on only 16 validation examples. |
 | Functional evaluation v1 | **Invalid** | Combines invalid models with mismatched incremental A² execution, unpaired random `h0`, inconsistent cap scoring, unsynchronized timing, and non-token-normalized KL. |
 
@@ -23,4 +23,5 @@ listed as provisional or invalid.
 
 No Attention² quality or speed claim may use an artifact marked incomplete,
 provisional, seed-confounded, or invalid. Existing artifacts remain preserved
-for auditability.
+for auditability unless the user explicitly authorizes a documented deletion;
+the functional-logit v1 deletion is the only such exception.
