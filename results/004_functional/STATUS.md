@@ -31,7 +31,7 @@ remaining v1 models, evaluations, or teacher continuations.
 The compact cache is not yet built. All v2 work must follow
 [`../../experiments/004a_attention2/RECOVERY_PLAN.md`](../../experiments/004a_attention2/RECOVERY_PLAN.md).
 
-### Phase 4 input review — complete, pending gate review
+### Phase 4 input review — PASS/PASS
 
 - All 2,500 raw continuation NPZ files remain unchanged.
 - Both independent reviewers inspected every one of the 27 capped generations;
@@ -47,3 +47,16 @@ The compact cache is not yet built. All v2 work must follow
   `25188506cb7afe426e42beb5fa96455fe8ac0cff6c0ae47b72363a3fa7af187f`.
 - The artificial 1,024-token generation cap is recorded as truncation, never as
   EOS.
+
+### Phase 5 crash-safe writer — PASS/PASS
+
+- Valid finals are reused only after exact schema, content, seed, split, and
+  manifest validation.
+- Invalid finals and invalid/incomplete temporaries are moved—not deleted—to a
+  visible `quarantine/` directory with unique names, SHA-256 hashes, reasons,
+  and UTC timestamps, then regenerated.
+- Complete valid temporary files are promoted atomically; mixed and multiple
+  temporary-file cases preserve all non-selected files in quarantine.
+- The cache manifest is bound to the exact reviewed Phase 4 sidecar SHA-256 and
+  review protocol.
+- Pod test suite: 78 passed.

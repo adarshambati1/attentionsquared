@@ -8,12 +8,16 @@ import json
 import os
 import re
 import tempfile
+import time
+import uuid
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 import numpy as np
 
+from src.data.valid_end_manifest import REVIEW_PROTOCOL
 from src.evaluation.correctness import SEED_PROTOCOL, per_example_seed
 from src.evaluation.splits import (
     GSM8K_DATASET_CONFIG,
@@ -31,6 +35,9 @@ HUGINN_MODEL_ID = "tomg-group-umd/huginn-0125"
 STATE_DTYPE = np.dtype(np.float16)
 FROZEN_SPLIT_MANIFEST_SHA256 = (
     "f8202a1327e65168ae33b6417813969436ed2d6743e9923e7d4bb58d3c50a139"
+)
+FROZEN_VALID_END_MANIFEST_SHA256 = (
+    "25188506cb7afe426e42beb5fa96455fe8ac0cff6c0ae47b72363a3fa7af187f"
 )
 
 CACHE_ITEM_KEYS = frozenset(
@@ -75,6 +82,8 @@ CACHE_MANIFEST_KEYS = frozenset(
         "seed_policy",
         "base_seed",
         "cap_degeneration_policy",
+        "valid_end_manifest_sha256",
+        "valid_end_review_protocol",
     }
 )
 
@@ -144,7 +153,7 @@ def write_cache_item_atomic(
     arrays: Mapping[str, Any],
     manifest: Mapping[str, Any],
 ) -> str:
-    """Write, close, reopen-validate, then atomically rename an NPZ item.
+    """Write, close, reopen-validate, then atomically publish an NPZ item.
 
     A directory lock serializes compliant writers, so interrupted temporary
     files can only belong to a crashed prior lock holder. Existing, temporary,
@@ -161,18 +170,43 @@ def write_cache_item_atomic(
 def _write_cache_item_locked(
     final_path: Path, arrays: Mapping[str, Any], manifest: Mapping[str, Any]
 ) -> str:
+    _repair_quarantine_records(final_path.parent)
+    quarantined = False
     if final_path.exists():
-        _validate_expected_item(final_path, arrays, manifest)
-        return "validated_existing"
+        try:
+            _validate_expected_item(final_path, arrays, manifest)
+        except Exception as error:
+            _quarantine(final_path, "invalid_final", error)
+            quarantined = True
+        else:
+            _quarantine_stale_temporaries(
+                final_path,
+                lambda candidate: _validate_expected_item(candidate, arrays, manifest),
+                final_is_valid=True,
+            )
+            return "validated_existing"
 
-    stale = _temporary_candidates(final_path)
-    if stale:
-        if len(stale) != 1:
-            raise ValueError(f"multiple interrupted temporary files for {final_path}")
-        _validate_expected_item(stale[0], arrays, manifest)
-        return _publish_by_rename(
-            stale[0], final_path, arrays, manifest, "resumed_tmp"
-        )
+    valid_temporaries: list[Path] = []
+    for candidate in _temporary_candidates(final_path):
+        try:
+            _validate_expected_item(candidate, arrays, manifest)
+        except Exception as error:
+            _quarantine(candidate, "invalid_temporary", error)
+            quarantined = True
+        else:
+            valid_temporaries.append(candidate)
+
+    if valid_temporaries:
+        selected = valid_temporaries[0]
+        for redundant in valid_temporaries[1:]:
+            _quarantine(
+                redundant,
+                "redundant_valid_temporary",
+                "another complete temporary file was selected for promotion",
+            )
+            quarantined = True
+        status = "resumed_tmp_after_quarantine" if quarantined else "resumed_tmp"
+        return _publish_item(selected, final_path, arrays, manifest, status)
 
     descriptor, temporary_name = tempfile.mkstemp(
         prefix=f".{final_path.name}.", suffix=".tmp", dir=final_path.parent
@@ -183,9 +217,8 @@ def _write_cache_item_locked(
         stream.flush()
         os.fsync(stream.fileno())
     _validate_expected_item(temporary_path, arrays, manifest)
-    return _publish_by_rename(
-        temporary_path, final_path, arrays, manifest, "created"
-    )
+    status = "created_after_quarantine" if quarantined else "created"
+    return _publish_item(temporary_path, final_path, arrays, manifest, status)
 
 
 def build_cache_manifest(
@@ -198,6 +231,7 @@ def build_cache_manifest(
     seed_policy: str,
     base_seed: int,
     cap_degeneration_policy: str,
+    valid_end_manifest_sha256: str,
     tokenizer_id: str = HUGINN_MODEL_ID,
     tokenizer_revision: str | None = None,
 ) -> dict[str, Any]:
@@ -226,6 +260,8 @@ def build_cache_manifest(
         "seed_policy": seed_policy,
         "base_seed": base_seed,
         "cap_degeneration_policy": cap_degeneration_policy,
+        "valid_end_manifest_sha256": valid_end_manifest_sha256,
+        "valid_end_review_protocol": REVIEW_PROTOCOL,
     }
     validate_cache_manifest(manifest)
     return manifest
@@ -271,10 +307,14 @@ def validate_cache_manifest(manifest: Mapping[str, Any]) -> None:
         raise ValueError("cache manifest base_seed must be a nonnegative integer")
     if manifest["split_manifest_sha256"] != FROZEN_SPLIT_MANIFEST_SHA256:
         raise ValueError("cache split manifest checksum is not the frozen manifest")
+    if manifest["valid_end_review_protocol"] != REVIEW_PROTOCOL:
+        raise ValueError("cache valid-end review protocol is not authoritative")
+    if manifest["valid_end_manifest_sha256"] != FROZEN_VALID_END_MANIFEST_SHA256:
+        raise ValueError("cache valid-end manifest checksum is not the frozen sidecar")
 
 
 def write_manifest_atomic(path: str | Path, manifest: Mapping[str, Any]) -> str:
-    """Write, reopen, validate, and atomically rename the cache manifest."""
+    """Write, reopen, validate, and atomically publish the cache manifest."""
     validate_cache_manifest(manifest)
     final_path = Path(path)
     final_path.parent.mkdir(parents=True, exist_ok=True)
@@ -286,16 +326,51 @@ def write_manifest_atomic(path: str | Path, manifest: Mapping[str, Any]) -> str:
 def _write_manifest_locked(
     final_path: Path, manifest: Mapping[str, Any], payload: str
 ) -> str:
-    if final_path.exists():
-        if final_path.read_text(encoding="utf-8") != payload:
-            raise ValueError(f"existing manifest does not match: {final_path}")
-        return "validated_existing"
+    _repair_quarantine_records(final_path.parent)
 
-    stale = _temporary_candidates(final_path)
-    if stale:
-        if len(stale) != 1 or stale[0].read_text(encoding="utf-8") != payload:
-            raise ValueError(f"interrupted temporary manifest does not match: {final_path}")
-        return _publish_text_by_rename(stale[0], final_path, payload, "resumed_tmp")
+    def validate_expected(candidate: Path) -> None:
+        try:
+            parsed = json.loads(candidate.read_text(encoding="utf-8"))
+        except Exception as error:
+            raise ValueError(f"invalid manifest JSON: {error}") from error
+        validate_cache_manifest(parsed)
+        if candidate.read_text(encoding="utf-8") != payload:
+            raise ValueError("manifest does not match requested canonical payload")
+
+    quarantined = False
+    if final_path.exists():
+        try:
+            validate_expected(final_path)
+        except Exception as error:
+            _quarantine(final_path, "invalid_final", error)
+            quarantined = True
+        else:
+            _quarantine_stale_temporaries(
+                final_path, validate_expected, final_is_valid=True
+            )
+            return "validated_existing"
+
+    valid_temporaries: list[Path] = []
+    for candidate in _temporary_candidates(final_path):
+        try:
+            validate_expected(candidate)
+        except Exception as error:
+            _quarantine(candidate, "invalid_temporary", error)
+            quarantined = True
+        else:
+            valid_temporaries.append(candidate)
+
+    if valid_temporaries:
+        selected = valid_temporaries[0]
+        for redundant in valid_temporaries[1:]:
+            _quarantine(
+                redundant,
+                "redundant_valid_temporary",
+                "another complete temporary manifest was selected for promotion",
+            )
+            quarantined = True
+        status = "resumed_tmp_after_quarantine" if quarantined else "resumed_tmp"
+        return _publish_text(selected, final_path, payload, status)
 
     descriptor, temporary_name = tempfile.mkstemp(
         prefix=f".{final_path.name}.", suffix=".tmp", dir=final_path.parent
@@ -305,9 +380,9 @@ def _write_manifest_locked(
         stream.write(payload)
         stream.flush()
         os.fsync(stream.fileno())
-    if json.loads(temporary_path.read_text(encoding="utf-8")) != dict(manifest):
-        raise ValueError("temporary manifest failed reopen validation")
-    return _publish_text_by_rename(temporary_path, final_path, payload, "created")
+    validate_expected(temporary_path)
+    status = "created_after_quarantine" if quarantined else "created"
+    return _publish_text(temporary_path, final_path, payload, status)
 
 
 def _validate_expected_item(
@@ -351,31 +426,167 @@ def _validate_item_against_manifest(
         raise ValueError(f"{path}: derived seed is invalid")
 
 
-def _publish_by_rename(
+def _quarantine_stale_temporaries(
+    final_path: Path,
+    validator: Callable[[Path], None],
+    *,
+    final_is_valid: bool,
+) -> None:
+    for candidate in _temporary_candidates(final_path):
+        try:
+            validator(candidate)
+        except Exception as error:
+            _quarantine(candidate, "invalid_temporary", error)
+        else:
+            category = (
+                "redundant_valid_temporary"
+                if final_is_valid
+                else "valid_temporary_not_selected"
+            )
+            _quarantine(candidate, category, "a valid final file already exists")
+
+
+def _quarantine(path: Path, category: str, error: Exception | str) -> Path:
+    """Move a suspect file into a visible, unique, checksummed quarantine."""
+    quarantine_directory = path.parent / "quarantine"
+    quarantine_directory.mkdir(parents=True, exist_ok=True)
+    token = f"{time.time_ns()}-{uuid.uuid4().hex}"
+    quarantined = quarantine_directory / (
+        f"{path.name}.{category}.{token}.quarantine"
+    )
+    os.rename(path, quarantined)
+    _fsync_file(quarantined)
+    _fsync_directory(quarantine_directory)
+    _fsync_directory(path.parent)
+    _write_quarantine_record(
+        quarantined,
+        category=category,
+        original_name=path.name,
+        error=str(error),
+    )
+    return quarantined
+
+
+def _write_quarantine_record(
+    quarantined: Path, *, category: str, original_name: str, error: str
+) -> Path:
+    digest = hashlib.sha256(quarantined.read_bytes()).hexdigest()
+    event = {
+        "protocol": "functional-cache-quarantine-v1",
+        "category": category,
+        "original_name": original_name,
+        "quarantined_name": quarantined.name,
+        "sha256": digest,
+        "error": error,
+        "quarantined_at_utc": datetime.now(timezone.utc).isoformat(),
+    }
+    payload = json.dumps(event, indent=2, sort_keys=True) + "\n"
+    quarantine_directory = quarantined.parent
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{quarantined.name}.", suffix=".json.tmp", dir=quarantine_directory
+    )
+    temporary_record = Path(temporary_name)
+    record = quarantined.with_suffix(quarantined.suffix + ".json")
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            os.link(temporary_record, record)
+        except FileExistsError:
+            pass
+        else:
+            _fsync_directory(quarantine_directory)
+        temporary_record.unlink()
+        _fsync_directory(quarantine_directory)
+    finally:
+        temporary_record.unlink(missing_ok=True)
+    return record
+
+
+def _repair_quarantine_records(parent: Path) -> None:
+    quarantine_directory = parent / "quarantine"
+    if not quarantine_directory.is_dir():
+        return
+    pattern = re.compile(
+        r"^(?P<original>.+)\.(?P<category>[a-z_]+)\."
+        r"(?P<token>[0-9]+-[0-9a-f]{32})\.quarantine$"
+    )
+    for quarantined in sorted(quarantine_directory.glob("*.quarantine")):
+        record = quarantined.with_suffix(quarantined.suffix + ".json")
+        if record.exists():
+            continue
+        match = pattern.fullmatch(quarantined.name)
+        category = match.group("category") if match else "recovered_unclassified"
+        original_name = match.group("original") if match else quarantined.name
+        _fsync_file(quarantined)
+        _write_quarantine_record(
+            quarantined,
+            category=category,
+            original_name=original_name,
+            error="recovered quarantined artifact after missing audit-record publication",
+        )
+
+
+def _publish_no_replace(
+    temporary: Path,
+    final: Path,
+    validate_final: Callable[[Path], None],
+    *,
+    invalid_category: str,
+    redundant_reason: str,
+) -> bool:
+    """Atomically publish without replacing a concurrently created final path."""
+    while True:
+        try:
+            os.link(temporary, final)
+        except FileExistsError:
+            try:
+                validate_final(final)
+            except Exception as error:
+                _quarantine(final, invalid_category, error)
+                continue
+            _quarantine(temporary, "redundant_valid_temporary", redundant_reason)
+            return False
+        _fsync_directory(final.parent)
+        temporary.unlink()
+        _fsync_directory(final.parent)
+        return True
+
+
+def _publish_item(
     temporary: Path,
     final: Path,
     arrays: Mapping[str, Any],
     manifest: Mapping[str, Any],
     success_status: str,
 ) -> str:
-    if final.exists():
-        _validate_expected_item(final, arrays, manifest)
-        return "validated_existing"
-    os.rename(temporary, final)
-    _fsync_directory(final.parent)
-    return success_status
+    published = _publish_no_replace(
+        temporary,
+        final,
+        lambda candidate: _validate_expected_item(candidate, arrays, manifest),
+        invalid_category="invalid_concurrent_final",
+        redundant_reason="a matching final item appeared before promotion",
+    )
+    return success_status if published else "validated_existing"
 
 
-def _publish_text_by_rename(
+def _publish_text(
     temporary: Path, final: Path, payload: str, success_status: str
 ) -> str:
-    if final.exists():
-        if final.read_text(encoding="utf-8") != payload:
-            raise ValueError(f"concurrent manifest does not match: {final}")
-        return "validated_existing"
-    os.rename(temporary, final)
-    _fsync_directory(final.parent)
-    return success_status
+    def validate_final(candidate: Path) -> None:
+        if candidate.read_text(encoding="utf-8") != payload:
+            raise ValueError("manifest does not match requested canonical payload")
+
+    published = _publish_no_replace(
+        temporary,
+        final,
+        validate_final,
+        invalid_category="invalid_concurrent_final",
+        redundant_reason="a matching final manifest appeared before promotion",
+    )
+    return success_status if published else "validated_existing"
 
 
 @contextmanager
@@ -406,6 +617,11 @@ def cache_manifest_sha256(manifest: Mapping[str, Any]) -> str:
 def _mapping_sha256(value: Mapping[str, Any]) -> str:
     payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(payload).hexdigest()
+
+
+def _fsync_file(path: Path) -> None:
+    with path.open("rb") as stream:
+        os.fsync(stream.fileno())
 
 
 def _fsync_directory(directory: Path) -> None:
