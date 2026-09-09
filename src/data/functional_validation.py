@@ -95,9 +95,15 @@ def _safe_inventory_path(root: Path, relative: str) -> Path:
     candidate = Path(relative)
     if candidate.is_absolute() or ".." in candidate.parts or candidate.as_posix() != relative:
         raise ValueError(f"inventory path is not normalized and relative: {relative}")
-    path = root / candidate
-    if path.is_symlink():
-        raise ValueError(f"inventory payload must not be a symlink: {relative}")
+    if root.is_symlink():
+        raise ValueError("inventory root must not be a symlink")
+    path = root
+    for component in candidate.parts:
+        path = path / component
+        if path.is_symlink():
+            raise ValueError(
+                f"inventory path contains a symlink component: {relative}"
+            )
     try:
         path.resolve(strict=True).relative_to(root.resolve(strict=True))
     except (FileNotFoundError, ValueError) as error:

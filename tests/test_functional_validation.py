@@ -54,6 +54,18 @@ def test_inventory_rejects_traversal_absolute_and_symlink_paths(tmp_path):
     with pytest.raises(ValueError, match="symlink"):
         checksum_inventory_bytes(tmp_path, [symlink])
 
+    real_directory = tmp_path / "real"
+    real_directory.mkdir()
+    nested = real_directory / "nested"
+    nested.write_bytes(b"nested")
+    alias = tmp_path / "alias"
+    alias.symlink_to(real_directory, target_is_directory=True)
+    with pytest.raises(ValueError, match="symlink component"):
+        checksum_inventory_bytes(tmp_path, [alias / "nested"])
+    payload = f"{hashlib.sha256(b'nested').hexdigest()}\t6\talias/nested\n".encode()
+    with pytest.raises(ValueError, match="symlink component"):
+        verify_checksum_inventory(tmp_path, payload)
+
 
 def test_inventory_rejects_duplicate_paths(tmp_path):
     path = tmp_path / "item.npz"
