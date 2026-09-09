@@ -30,5 +30,9 @@ results/003_direct_jump/
 results/004b_fixed_k/cache/
 results/004b_fixed_k/models/
 
+# Immutable raw continuations are too large/file-heavy for Git. Phase 4 binds
+# every file by SHA-256 in valid_end_manifest.jsonl.
+results/004_functional/teacher_sequences/
+
 # Local pi agent/session configuration; may contain machine-specific data.
 .pi/

@@ -59,4 +59,18 @@ The compact cache is not yet built. All v2 work must follow
   temporary-file cases preserve all non-selected files in quarantine.
 - The cache manifest is bound to the exact reviewed Phase 4 sidecar SHA-256 and
   review protocol.
-- Pod test suite: 78 passed.
+- Pod test suite: 84 passed after crash-recovery remediation.
+
+### Phase 6 pre-build gate — pending review
+
+- Dedicated 100 GB network volume `jggambl3qv` in `US-GA-2` passed atomic
+  no-replace, rename, fsync, capacity, and throughput preflight.
+- Exact inputs, pinned environment, and pinned Huginn cache are present on H100
+  Pod `jwc04iw92bdebm`; the old H100 is stopped but not deleted.
+- Live D16 extraction produced finite `(T, 5280)` float16 state arrays and
+  repeated byte-identically under the authoritative per-example seed.
+- The builder stores only `h0_full`, `x_full`, `h16_teacher`, token/boundary
+  arrays, and provenance. It creates one shared cache and no vocabulary logits
+  or K-specific artifacts.
+- New-Pod test suite: 91 passed after provenance remediation.
+- Full storage and migration record: `cache_v2_storage_preflight.md`.

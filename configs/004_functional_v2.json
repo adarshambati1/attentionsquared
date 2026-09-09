@@ -16,5 +16,14 @@
     "example_range": [0, 249],
     "allow_checkpoint_selection": false
   },
-  "notes": "Phase 3 frozen split only. The held-out GSM8K test examples are forbidden for checkpoint selection."
+  "teacher_depth": 16,
+  "model_compute_dtype": "bfloat16",
+  "cache_state_dtype": "float16",
+  "base_seed": 3000,
+  "seed_policy": "injective-packed-coordinates-v3",
+  "source_continuations": "results/004_functional/teacher_sequences",
+  "valid_end_manifest": "results/004_functional/valid_end_manifest.jsonl",
+  "cache_output": "/workspace/functional_cache_v2",
+  "cap_degeneration_policy": "dual-independent-conservative-valid-end-v1; generation cap is truncation, never EOS",
+  "notes": "One shared compact D16 cache for every future K. No full-vocabulary logits are stored. IDs 0-2249 update gradients; IDs 2250-2499 select checkpoints; GSM8K test remains sealed."
 }
