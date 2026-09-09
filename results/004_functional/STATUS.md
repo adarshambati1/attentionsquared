@@ -2,10 +2,11 @@
 
 ## Version 1 — INVALID
 
-The following remote artifacts are preserved for auditability but must not be
-used for scientific conclusions:
+The following remote artifacts must not be used for scientific conclusions:
 
-- teacher-logit training cache: `/root/functional_training_cache/`;
+- teacher-logit training cache v1: deletion explicitly authorized on 2026-09-09;
+  its pre-deletion inventory and checksums are preserved under
+  `deletion_records/functional_training_cache_v1_20260909/`;
 - trained checkpoints: `/root/functional_models_full/`; and
 - downstream evaluation: `/root/evaluation_functional_4c.json`.
 
@@ -21,7 +22,8 @@ Reasons:
 6. latency lacked explicit CUDA synchronization.
 
 Teacher continuation sequences remain reusable after all 27 capped examples'
-`valid_end` annotations are reviewed. Do not overwrite or delete v1 artifacts.
+`valid_end` annotations are reviewed. No deletion authorization extends to the
+remaining v1 models, evaluations, or teacher continuations.
 
 ## Version 2
 
