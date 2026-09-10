@@ -8,6 +8,7 @@ import torch
 from torch import nn
 
 from scripts import preflight_004_functional_overfit_gate as preflight_script
+from scripts import recover_004_functional_overfit_publication as recovery_script
 from scripts import run_004_functional_overfit_gate as overfit_script
 from src.training.overfit_gate import gate_passed, quantitative_overfit_checks
 
@@ -304,10 +305,58 @@ def test_training_requires_recent_matching_prelaunch_attestation(tmp_path, monke
         overfit_script.validate_prelaunch_attestation(stale_record, commit)
 
 
+def test_complete_publication_recovery_preserves_source_and_bytes(tmp_path, monkeypatch):
+    source = tmp_path / "attempts" / "attempt-preserved"
+    source.mkdir(parents=True)
+    model = source / "model.pt"
+    model.write_bytes(b"unchanged-model")
+    model_hash = recovery_script.sha256_file(model)
+    result = source / "result.json"
+    result.write_text(
+        json.dumps(
+            {
+                "status": "pending_scientific_review",
+                "model_sha256": model_hash,
+            }
+        )
+    )
+    result_hash = recovery_script.sha256_file(result)
+    model.chmod(0o444)
+    result.chmod(0o444)
+    final = tmp_path / "final"
+    record = tmp_path / "attempts" / "publication.json"
+    monkeypatch.setattr(recovery_script, "SOURCE", source)
+    monkeypatch.setattr(recovery_script, "FINAL", final)
+    monkeypatch.setattr(recovery_script, "RECORD", record)
+    monkeypatch.setattr(recovery_script, "EXPECTED_RESULT_SHA256", result_hash)
+    monkeypatch.setattr(recovery_script, "clean_git_commit", lambda: "a" * 40)
+
+    observed = recovery_script.main()
+
+    assert source.is_dir()
+    assert (source / "model.pt").read_bytes() == b"unchanged-model"
+    assert recovery_script.sha256_file(final / "model.pt") == model_hash
+    assert recovery_script.sha256_file(final / "result.json") == result_hash
+    assert observed["retraining_performed"] is False
+    assert observed["model_or_result_bytes_changed"] is False
+    assert record.stat().st_mode & 0o777 == 0o444
+
+
+def test_publication_recovery_copies_bytes_read_only_without_mutation(tmp_path):
+    source = tmp_path / "source.bin"
+    destination = tmp_path / "destination.bin"
+    source.write_bytes(b"preserved-scientific-result")
+    source.chmod(0o444)
+
+    recovery_script.copy_fsync_read_only(source, destination)
+
+    assert source.read_bytes() == destination.read_bytes()
+    assert source.stat().st_mode & 0o777 == 0o444
+    assert destination.stat().st_mode & 0o777 == 0o444
+
+
 def test_attempt_directory_publication_is_atomic_and_no_replace(tmp_path):
-    attempts = tmp_path / "attempts"
-    attempts.mkdir()
-    attempt = attempts / "attempt-1"
+    attempt = tmp_path / ".final.attempt-1"
     attempt.mkdir()
     for name in ("model.pt", "result.json"):
         path = attempt / name
@@ -320,7 +369,7 @@ def test_attempt_directory_publication_is_atomic_and_no_replace(tmp_path):
     assert not attempt.exists()
     assert output.is_dir()
     assert (output / "model.pt").read_text() == "model.pt"
-    second = attempts / "attempt-2"
+    second = tmp_path / ".final.attempt-2"
     second.mkdir()
     for name in ("model.pt", "result.json"):
         path = second / name

@@ -175,7 +175,7 @@ The compact cache is not yet built. All v2 work must follow
   the authoritative gate artifact and attestation are regular, non-symlink,
   mode-`0444` files on the durable volume.
 
-### Phase 11 eight-example functional-overfit gate — pre-run PASS/PASS; execution pending
+### Phase 11 eight-example functional-overfit gate — Quantitative PASS; autoregressive generation quality pending
 
 - Uses frozen training-side examples 0–7, one deterministic cached `h0` seed
   per example, K=4 loaded from the Phase 9 shared initialization, and no
@@ -200,5 +200,23 @@ The compact cache is not yet built. All v2 work must follow
 - A separate prelaunch attestation must show the final path absent and no other
   gate process. Each run uses a unique preserved attempt directory; only a
   complete read-only model/result pair can be atomically published no-replace.
-- Focused Pod suite: 10 passed; full Pod suite: 133 passed. No overfit training
-  has begun.
+- Focused Pod suite after cleanup: 12 passed; full Pod suite: 135 passed.
+- Training completed from the exact shared K=4 initialization after 60 updates:
+  KL/token fell from `11.134534463392416` to `0.010831465410149616`;
+  first-token distribution KL fell from `9.623916625976562` to
+  `0.04451802000403404`; first-target top-1 improved from 0/8 to 7/8.
+- All eight generated sequences stopped naturally, none hit the cap, mean
+  fixed-width first-32 teacher-token agreement was 0.53125, and authoritative
+  teacher-answer agreement was 7/8. Quantitative and automated mechanical
+  checks passed, but generation quality remains pending Phase 12 investigation.
+- Manual comparison found all four teacher continuations question-specific and
+  non-repetitive, but IDs 2, 3, and 7 contain internal reasoning contradictions;
+  ID 5 is coherent within its stated interpretation. The students' semantic
+  loops and off-topic page-themed prefixes are not present in their teachers,
+  although teacher reasoning defects remain part of the supervision target.
+  Causal attribution stays deferred to Phase 12. Evidence is preserved in
+  `phase11_generation_comparison.json`.
+- A durable-FUSE cross-directory atomic rename failed after model/result
+  completion. The exact read-only model and result remain preserved in attempt
+  `5896a4f4ba174c2e8231c310ef0404dc`; same-parent publication recovery is
+  required and performs no retraining or byte mutation.

@@ -1,0 +1,39 @@
+{
+  "protocol": "functional-overfit-generation-comparison-v1",
+  "source_result": "results/004_functional/overfit_attempt_result.json",
+  "source_result_sha256": "0d84ac8353ca412c9e4b557d3fc42805e65585e4ec4e1f06b987f20340dbcd91",
+  "review_scope": [2, 3, 5, 7],
+  "review_question": "Are the observed student semantic loops or off-topic prefixes also present in the corresponding frozen teacher continuation?",
+  "items": [
+    {
+      "example_id": 2,
+      "teacher_assessment": "Question-specific, non-repetitive wallet calculation, but internally inconsistent: it states Betty has half the required $100 and then separately totals gifts as $45 before concluding she needs $55.",
+      "student_assessment": "Begins with an unrelated, repetitive pages-read loop, then converges to the teacher's final wallet-calculation suffix and answer 55.",
+      "repetition_inherited_from_teacher": false,
+      "student_loop_absent_from_teacher": true
+    },
+    {
+      "example_id": 3,
+      "teacher_assessment": "Question-specific and non-repetitive, but internally inconsistent: it first totals yesterday and today as 12 + 12 = 24 despite later stating today is twice 12, then uses 24 read and 96 remaining.",
+      "student_assessment": "Long repetitive pages-read loop with malformed fragments before recovering the teacher's final 96/2 calculation and answer 48.",
+      "repetition_inherited_from_teacher": false,
+      "student_loop_absent_from_teacher": true
+    },
+    {
+      "example_id": 5,
+      "teacher_assessment": "Question-specific, non-repetitive, and arithmetically coherent within its stated interpretation of the flower percentages.",
+      "student_assessment": "Starts with unrelated repetitive page-count fragments, then joins the teacher's flower-calculation suffix and answer 35.",
+      "repetition_inherited_from_teacher": false,
+      "student_loop_absent_from_teacher": true
+    },
+    {
+      "example_id": 7,
+      "teacher_assessment": "Question-specific and non-repetitive, but internally inconsistent: it says adding 2 pounds of gummy worms doubles an 8-pound box to 16 pounds.",
+      "student_assessment": "Starts with unrelated repetitive page-count fragments, then joins the teacher's later box-weight suffix and answer 16.",
+      "repetition_inherited_from_teacher": false,
+      "student_loop_absent_from_teacher": true
+    }
+  ],
+  "conclusion": "All four teacher continuations are question-specific and non-repetitive, but IDs 2, 3, and 7 contain internal reasoning contradictions; ID 5 is coherent within its stated interpretation. The students' semantic loops and off-topic page-themed prefixes are not present in the corresponding teachers, although some target reasoning defects are inherited from teacher supervision. The late recovery of teacher suffixes and answers is consistent with strong teacher-forced memorization plus free-running prefix drift. Phase 12 must independently regenerate with the canonical evaluator before attributing the drift to Attention2 rather than evaluator semantics.",
+  "phase11_status": "Quantitative PASS; autoregressive generation quality pending"
+}

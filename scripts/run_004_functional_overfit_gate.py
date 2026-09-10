@@ -586,7 +586,10 @@ def main(config_path: Path, output_root: Path, prelaunch_attestation: Path) -> d
     attempts_root = output_root.parent / f"{output_root.name}_attempts"
     attempts_root.mkdir(parents=True, exist_ok=True)
     attempt_id = uuid.uuid4().hex
-    attempt = attempts_root / f"attempt-{attempt_id}"
+    # Keep the staging directory beside the final path: Runpod's durable FUSE
+    # mount supports atomic no-replace rename within one parent, but rejected
+    # the original cross-directory publication after a complete first run.
+    attempt = output_root.parent / f".{output_root.name}.attempt-{attempt_id}"
     attempt.mkdir(exist_ok=False)
     print(f"preserved attempt directory: {attempt}", flush=True)
 
