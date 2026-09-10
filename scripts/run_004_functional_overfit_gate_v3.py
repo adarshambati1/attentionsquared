@@ -59,6 +59,11 @@ MODEL_ID = "tomg-group-umd/huginn-0125"
 MODEL_REVISION = "bb6621b65e90b6a4b9b29ef88dc83866d450470c"
 OVERFIT_PROTOCOL = "functional-eight-example-overfit-coda-v3"
 PRELAUNCH_PROTOCOL = "functional-eight-example-overfit-coda-v3-prelaunch-v1"
+BLOCKED_REASON = (
+    "Phase 11 coda-v3 is superseded before training: cache-v2 h0 is not "
+    "prefix-stable across changing sequence shapes; build and validate the "
+    "fixed-2048-schedule cache-v3 smoke first"
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -539,6 +544,9 @@ def validate_prelaunch_attestation(path: Path, commit: str) -> dict:
 def main(config_path: Path, output_root: Path, prelaunch_attestation: Path) -> dict:
     if config_path != CONFIG or output_root != OUTPUT_ROOT:
         raise ValueError("overfit gate requires exact production paths")
+    raise RuntimeError(BLOCKED_REASON)
+
+    # Unreachable preserved implementation: do not remove historical review code.
     commit = clean_git_commit()
     prelaunch = validate_prelaunch_attestation(prelaunch_attestation, commit)
     config_bytes = config_path.read_bytes()

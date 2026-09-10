@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from scripts.create_004_a2_initialization import write_json_exclusive_fsync
 from scripts.run_004_functional_overfit_gate_v3 import (
+    BLOCKED_REASON,
     CACHE_ROOT,
     INITIALIZATION,
     OUTPUT_ROOT,
@@ -32,22 +33,35 @@ PROTOCOL = PRELAUNCH_PROTOCOL
 ATTEMPTS_ROOT = Path("/workspace/functional_overfit_v3_attempts")
 
 
-def matching_training_processes() -> list[dict[str, object]]:
-    output = subprocess.run(
-        ["ps", "-eo", "pid=,args="], check=True, text=True, capture_output=True
-    ).stdout
+def matching_training_processes(proc_root: Path = Path("/proc")) -> list[dict[str, object]]:
+    """Find actual Python runner argv entries without matching parent shell text."""
     matches = []
-    for line in output.splitlines():
-        stripped = line.strip()
-        if not stripped:
+    for process_dir in proc_root.glob("[0-9]*"):
+        try:
+            raw = (process_dir / "cmdline").read_bytes()
+        except (FileNotFoundError, PermissionError, ProcessLookupError):
             continue
-        pid_text, arguments = stripped.split(maxsplit=1)
-        if "scripts/run_004_functional_overfit_gate_v3.py" in arguments:
-            matches.append({"pid": int(pid_text), "arguments": arguments})
-    return matches
+        argv = [part.decode("utf-8", errors="replace") for part in raw.split(b"\0") if part]
+        if not argv or not Path(argv[0]).name.startswith("python"):
+            continue
+        if not any(
+            Path(argument).name == "run_004_functional_overfit_gate_v3.py"
+            for argument in argv[1:]
+        ):
+            continue
+        matches.append(
+            {
+                "pid": int(process_dir.name),
+                "argv": argv,
+            }
+        )
+    return sorted(matches, key=lambda item: int(item["pid"]))
 
 
 def main() -> Path:
+    raise RuntimeError(BLOCKED_REASON)
+
+    # Unreachable preserved implementation pending prefix-stable cache-v3.
     commit = clean_git_commit()
     validate_phase10_prerequisites()
     if OUTPUT_ROOT.exists() or OUTPUT_ROOT.is_symlink():

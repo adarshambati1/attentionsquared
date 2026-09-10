@@ -127,6 +127,39 @@ def test_teacher_student_and_generation_share_single_authoritative_coda_helper(m
     assert [last_only for _, last_only in calls] == [False, False, True]
 
 
+def test_preflight_process_scan_ignores_parent_shell_text_and_matches_exact_python_script(tmp_path):
+    shell = tmp_path / "100"
+    shell.mkdir()
+    (shell / "cmdline").write_bytes(
+        b"bash\0-c\0python scripts/run_004_functional_overfit_gate_v3.py\0"
+    )
+    runner_process = tmp_path / "101"
+    runner_process.mkdir()
+    (runner_process / "cmdline").write_bytes(
+        b"python\0scripts/run_004_functional_overfit_gate_v3.py\0"
+    )
+    unrelated = tmp_path / "102"
+    unrelated.mkdir()
+    (unrelated / "cmdline").write_bytes(b"python\0other.py\0")
+
+    from scripts import preflight_004_functional_overfit_gate_v3 as preflight
+
+    assert preflight.matching_training_processes(tmp_path) == [
+        {
+            "pid": 101,
+            "argv": ["python", "scripts/run_004_functional_overfit_gate_v3.py"],
+        }
+    ]
+
+
+def test_superseded_v3_runner_and_preflight_are_hard_blocked(monkeypatch):
+    with pytest.raises(RuntimeError, match="prefix-stable"):
+        runner.main(runner.CONFIG, runner.OUTPUT_ROOT, Path("unused"))
+    from scripts import preflight_004_functional_overfit_gate_v3 as preflight
+    with pytest.raises(RuntimeError, match="prefix-stable"):
+        preflight.main()
+
+
 def test_v3_has_no_surrogate_patch_or_extra_initial_ln_f_and_persists_no_logits():
     source = (ROOT / "scripts/run_004_functional_overfit_gate_v3.py").read_text()
     assert "patched_attention2_recurrence" not in source

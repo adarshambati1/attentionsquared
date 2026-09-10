@@ -199,7 +199,7 @@ The compact cache is not yet built. All v2 work must follow
   the authoritative gate artifact and attestation are regular, non-symlink,
   mode-`0444` files on the durable volume.
 
-### Phase 11 v3 corrected eight-example functional-overfit gate — pre-run PASS/PASS; execution pending
+### Phase 11 v3 corrected eight-example functional-overfit gate — BLOCKED before training by `h0` prefix-instability finding
 
 - The phase-scoped v3 runner and preflight are implemented but have not been
   executed. Training and generation remain blocked pending independent review.
@@ -221,6 +221,16 @@ The compact cache is not yet built. All v2 work must follow
 - The new protocol writes only by atomic no-replace publication to
   `/workspace/functional_overfit_v3`. It does not target or mutate any v2
   model, result, or attempt, and no full-vocabulary logits are persisted.
+- A no-training audit found that rematerializing equal-seed `h0` at prompt shape
+  was float16-prefix exact for IDs 0, 1, 4, and 6, but differed radically for
+  IDs 2, 3, 5, and 7 (mean absolute error about `0.706`). Those are exactly the
+  four prior semantic-loop IDs; this is a strong diagnostic coincidence, not
+  causal proof. Prelude `x` also showed sequence-shape numerical differences
+  (mean absolute error about `7e-4`, maximum about `0.1`).
+- No optimizer step or v3 output occurred. The v3 runner and preflight are now
+  hard-blocked pending a reviewed eight-example cache-v3 smoke using one
+  transient fixed `[1,2048,H]` `h0` schedule per example/seed and exact prefix
+  slices. Cache v2 and all prior artifacts remain unchanged.
 - Pinned H100 tests: 28 focused passed; 156 full-suite passed.
 
 ### Phase 11 eight-example functional-overfit gate — surrogate-path quantitative PASS; live-Huginn equivalence not established

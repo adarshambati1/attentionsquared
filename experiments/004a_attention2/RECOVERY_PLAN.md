@@ -166,6 +166,33 @@ Create one immutable shared Attention² state dictionary, initially
 data split, minibatch order, preprocessing, optimizer, loss, and random policy
 fixed where possible. K=8 remains a separate stability experiment.
 
+### Phase 9R — Prefix-stable `h0` remediation
+
+Cache v2 materialized Huginn `h0` at each complete teacher-sequence shape,
+while autoregressive evaluation rematerialized it at changing prefix shapes.
+Equal CUDA seeds at different shapes do not guarantee preservation of earlier
+random values. A pre-training audit found major prefix mismatch exactly on
+smoke IDs 2, 3, 5, and 7; these were also the four looping Phase 12 examples.
+This coincidence is diagnostic, not causal proof. The coda-v3 Phase 11 runner
+is hard-blocked before training.
+
+The canonical remediation uses a fixed schedule of 2048 token positions. For
+each example and seed, materialize Huginn's initializer once at shape
+`[1, 2048, H]`; every prefix of length `t` receives the exact slice
+`H0_schedule[:, :t]`. Assert that the complete rendered prompt plus the
+1024-token cap and every cached teacher sequence fit within 2048. Never call the
+random initializer at the current prefix shape.
+
+First build only a new eight-example cache-v3 smoke from immutable raw teacher
+token sequences. Inject the scheduled `h0` slice into frozen Huginn D16 and
+recompute its corresponding `x` and normalized pre-coda `h16`. Persist only the
+required per-sequence `h0` slice, not the complete 2048-position schedule;
+persist schedule length, derived seed, protocol, and full-schedule hash. Persist
+no logits and never mutate cache v2. Require exact prefix stability at every
+represented prefix, live replay, coda equivalence, and code/science PASS/PASS
+before rerunning corrected Phases 10–12. Build a full 2,500-example cache v3
+only if the eight-example sequence succeeds.
+
 ## Phase 10 — Mandatory correctness and unit gates
 
 Before real training, executable tests must prove:
