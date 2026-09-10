@@ -120,8 +120,8 @@ def expected_config() -> dict:
         "closure_audit": "results/004_functional/phase12_v5_upstream_closure_audit.json",
         "closure_audit_sha256": "80d692c9d583d0bb522fe653ae799c7d179f4bdc6b3343e1052942f52fe5e800",
         "live_route_exact_requirements": [
-            "generated_token_ids", "stop_reason", "hit_max_new_tokens",
-            "extracted_answer", "correctness",
+            "generated_token_ids", "generated_text", "stop_reason",
+            "hit_max_new_tokens", "extracted_answer", "correctness",
         ],
         "cache_equivalence_scope": "eight preregistered length-stratified teacher-continuation items with exact native BF16/FP32 state storage",
         "persist_logits": False,
@@ -288,6 +288,7 @@ def compare_live_routes(
     evaluated = route(evaluator_text, evaluator_tokens, evaluator_reason, evaluator_cap)
     categorical = {
         "generated_token_ids": trusted_tokens == evaluator_tokens,
+        "generated_text": trusted_text == evaluator_text,
         "stop_reason": trusted_reason == evaluator_reason,
         "hit_max_new_tokens": trusted_cap == evaluator_cap,
         "extracted_answer": (

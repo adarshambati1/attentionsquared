@@ -107,6 +107,8 @@ def test_13b_literally_reuses_one_h0_object_in_both_independent_forwards(monkeyp
     assert result["passed"]
     assert result["trusted_live_model_forward"]["generated_token_ids"] == [9]
     assert result["full_prefix_huginn_evaluator"]["generated_token_ids"] == [9]
+    assert result["categorical_agreement"]["generated_text"] is True
+    assert result["trusted_live_model_forward"]["text"] == result["full_prefix_huginn_evaluator"]["text"]
     assert len(model.received_h0) == 2
     assert model.received_h0[0] is model.received_h0[1]
     assert result["prefixes"][0]["same_materialized_h0_object_and_value_reused"] is True
@@ -202,6 +204,7 @@ def test_phase13_runner_persists_no_logits_and_has_no_paid_execution():
     assert '"h0_bfloat16_bits_exact"' in source
     assert '"x_float32_bits_exact"' in source
     assert '"h16_float32_bits_exact"' in source
+    assert '"generated_text": trusted_text == evaluator_text' in source
     assert '"coda_logits_exact"' in source
     assert 'abs(kl.mean) <= config["native_cache_kl_absolute_tolerance"]' in source
     assert "TokenKLAggregator" in source

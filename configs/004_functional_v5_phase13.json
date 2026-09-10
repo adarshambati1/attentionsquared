@@ -45,6 +45,7 @@
   ],
   "live_route_exact_requirements": [
     "generated_token_ids",
+    "generated_text",
     "stop_reason",
     "hit_max_new_tokens",
     "extracted_answer",
