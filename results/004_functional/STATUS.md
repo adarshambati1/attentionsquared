@@ -148,7 +148,7 @@ The compact cache is not yet built. All v2 work must follow
   The artifact, builder record, prior validation log, and attestation are all
   regular non-symlink files published read-only; each observed mode is `0444`.
 
-### Phase 10 correctness/unit-test gate — PASS/PASS
+### Phase 10 correctness/unit-test gate — historical mechanics PASS; coda semantics require corrected rerun
 
 - Literal `prompt | A B C` alignment verifies logits at positions immediately
   preceding A, B, and C predict those answer tokens.
@@ -175,7 +175,7 @@ The compact cache is not yet built. All v2 work must follow
   the authoritative gate artifact and attestation are regular, non-symlink,
   mode-`0444` files on the durable volume.
 
-### Phase 11 eight-example functional-overfit gate — Quantitative PASS; autoregressive generation quality pending
+### Phase 11 eight-example functional-overfit gate — surrogate-path quantitative PASS; live-Huginn equivalence not established
 
 - Uses frozen training-side examples 0–7, one deterministic cached `h0` seed
   per example, K=4 loaded from the Phase 9 shared initialization, and no
@@ -229,7 +229,7 @@ The compact cache is not yet built. All v2 work must follow
   Both final files and both preserved source files are mode `0444`; final and
   source directories are mode `0555`.
 
-### Phase 12 canonical full-prefix evaluator — PASS/PASS
+### Phase 12 canonical full-prefix evaluator — engineering PASS/PASS; coda semantics superseded
 
 - `FullPrefixAttention2Evaluator` recomputes Huginn's frozen prelude, paired
   deterministic `h0`, Attention² over the complete prefix, and the frozen coda
@@ -263,7 +263,7 @@ The compact cache is not yet built. All v2 work must follow
   file in a non-symlink mode-`0555` directory, published by same-parent
   `renameat2(RENAME_NOREPLACE)`.
 
-### Phase 13 evaluator controls — preregistered, not executed
+### Phase 13 evaluator controls — PRE-RUN BLOCKED; not executed
 
 - Historical reference: GSM8K train IDs 2250–2499, D16, bfloat16, greedy,
   1024-token cap; base seed 3000/index 0 is prospective because the historical
@@ -276,5 +276,22 @@ The compact cache is not yet built. All v2 work must follow
   absolute error `<=0.003`, logit mean/max absolute error `<=0.005`/`<=0.06`,
   KL/token `<=5e-4`, and 100% next-token argmax agreement. Float16 bitwise
   identity is diagnostic rather than a hard gate.
-- Cache equivalence claims are limited to represented teacher prefixes. No
-  Phase 13 execution or Phase 14 work has begun.
+- Cache equivalence claims are limited to represented teacher prefixes.
+- The phase-scoped runner/config and dedicated literal tests are implemented in
+  the current worktree. They lock train IDs 2250–2499, prospective base seed
+  3000/index 0, dual historical/corrected scoring, same-object `h0` reuse for
+  the two live D16 routes, validation cache IDs 2250–2257 over every valid
+  teacher prediction position, the frozen aggregate bounds, normal-coda versus
+  functional-coda semantics, and atomic read-only pass/fail publication.
+- H100 tests: 12 focused passed; 147 full-suite passed.
+- Independent pre-run review `50629db0` returned code FAIL / science FAIL.
+  The functional path proved equality to Huginn `num_steps=0` but did not prove
+  equality to normal live D16: both paths applied an extra `ln_f` to cache v2's
+  already-normalized coda input. The two proposed live routes were also not
+  independent, and IDs 2250–2257 omitted sequence-length extremes.
+- Existing Phase 11 therefore proves optimization of the supplied surrogate
+  path, not live-Huginn functional equivalence. Existing Phase 12 remains valid
+  engineering evidence for full-prefix execution, but its generations are not
+  authoritative evidence about live-Huginn-equivalent model behavior.
+- Remediation will use new v3 outputs and preserve all v2 artifacts. No Phase 13
+  execution or Phase 14 work has begun.
