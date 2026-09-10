@@ -216,7 +216,15 @@ The compact cache is not yet built. All v2 work must follow
   although teacher reasoning defects remain part of the supervision target.
   Causal attribution stays deferred to Phase 12. Evidence is preserved in
   `phase11_generation_comparison.json`.
-- A durable-FUSE cross-directory atomic rename failed after model/result
-  completion. The exact read-only model and result remain preserved in attempt
-  `5896a4f4ba174c2e8231c310ef0404dc`; same-parent publication recovery is
-  required and performs no retraining or byte mutation.
+- The initial durable-FUSE cross-directory atomic rename failed after complete
+  model/result creation. Reviewed same-parent recovery then published
+  `/workspace/functional_overfit_v2` atomically with no replacement, no
+  retraining, and no byte mutation. The original attempt remains preserved.
+- Published model SHA-256:
+  `036a6578774d4352dd778a29a6c6214d1474ffb3b1e2d5e2db92e8267777777a`;
+  result SHA-256:
+  `0d84ac8353ca412c9e4b557d3fc42805e65585e4ec4e1f06b987f20340dbcd91`;
+  publication-recovery record SHA-256:
+  `dae6e1586b9cdfa5ba7c67410c5c0aaf715e5e71ae297a1ffde136ad7ec1ecda`.
+  Both final files and both preserved source files are mode `0444`; final and
+  source directories are mode `0555`.

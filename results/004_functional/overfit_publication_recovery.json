@@ -1,0 +1,14 @@
+{
+  "final_output": "/workspace/functional_overfit_v2",
+  "git_commit": "ddacf6699aa59b3ec9d1677b8007c807260417e6",
+  "model_or_result_bytes_changed": false,
+  "model_sha256": "036a6578774d4352dd778a29a6c6214d1474ffb3b1e2d5e2db92e8267777777a",
+  "protocol": "functional-overfit-publication-recovery-v1",
+  "publication": "same-parent-renameat2-RENAME_NOREPLACE",
+  "result_sha256": "0d84ac8353ca412c9e4b557d3fc42805e65585e4ec4e1f06b987f20340dbcd91",
+  "result_status": "pending_scientific_review",
+  "retraining_performed": false,
+  "source_attempt": "/workspace/functional_overfit_v2_attempts/attempt-5896a4f4ba174c2e8231c310ef0404dc",
+  "source_attempt_preserved": true,
+  "status": "pass"
+}
