@@ -16,7 +16,6 @@ sys.path.insert(0, str(ROOT))
 
 from scripts.create_004_a2_initialization import write_json_exclusive_fsync
 from scripts.run_004_functional_overfit_gate_v3 import (
-    BLOCKED_REASON,
     CACHE_ROOT,
     INITIALIZATION,
     OUTPUT_ROOT,
@@ -59,9 +58,6 @@ def matching_training_processes(proc_root: Path = Path("/proc")) -> list[dict[st
 
 
 def main() -> Path:
-    raise RuntimeError(BLOCKED_REASON)
-
-    # Unreachable preserved implementation pending prefix-stable cache-v3.
     commit = clean_git_commit()
     validate_phase10_prerequisites()
     if OUTPUT_ROOT.exists() or OUTPUT_ROOT.is_symlink():
@@ -81,7 +77,7 @@ def main() -> Path:
         "final_output": str(OUTPUT_ROOT),
         "final_output_absent": True,
         "matching_training_processes": processes,
-        "cache_freeze_sha256": sha256_file(CACHE_ROOT / "FROZEN.json"),
+        "cache_manifest_sha256": sha256_file(CACHE_ROOT / "manifest.json"),
         "initialization_sha256": sha256_file(INITIALIZATION),
         "phase10_artifact_sha256": PHASE10_ARTIFACT_SHA256,
         "phase10_attestation_sha256": PHASE10_ATTESTATION_SHA256,

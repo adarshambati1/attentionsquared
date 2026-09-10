@@ -209,15 +209,17 @@ The compact cache is not yet built. All v2 work must follow
   `c2036120` returned PASS. No optimizer step or Phase 10–13 rerun occurred
   during Phase 9R.
 
-### Phase 10 correctness/unit-test gate — historical coda-v3 PASS/PASS; cache-v3 rerun pending
+### Phase 10 correctness/unit-test gate — cache-v3 coda-v4 PASS
 
-- The prepared cache-v3 rerun targets only smoke item `00000.npz`, locks the
-  cache manifest and independent v3 validation hashes, maps the v3 `h0/x/h16`
-  schema, and writes a new no-replace
-  `/workspace/functional_protocol/correctness_gate_cache_v3_coda_v4.json`.
-  It preserves the corrected normalized-state coda semantics, shared A²
-  initialization, mask/alignment controls, frozen-Huginn gradient gate, and
-  exact live D16 decomposition. H100 suite: 173 passed. It has not executed.
+- The cache-v3 rerun passed on smoke item `00000.npz`, locking the cache
+  manifest and independent v3 validation hashes and reading v3 `h0/x/h16`.
+  New artifact SHA-256:
+  `cb180b0aae45dbbb0ea3e1be4a1a85afcbae2271f108db08b52b47a1a86db8`.
+  It used the unchanged shared initialization, 88 valid answer tokens, exact
+  16-call latent/logit decomposition, all 21 A² parameters with gradients,
+  zero Huginn parameter gradients, and zero optimizer steps. Teacher self-KL
+  was `-2.9381495014746406e-09`; untrained K=4 KL/token was
+  `11.253923416137695`. H100 full suite: 173 passed.
 - The historical gate targeted the new no-replace artifact
   `/workspace/functional_protocol/correctness_gate_coda_v3.json`; the historical
   `correctness_gate.json` and all other v2 artifacts remain untouched.

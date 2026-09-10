@@ -44,12 +44,17 @@ def test_runner_can_only_target_new_no_replace_v3_output():
 
 
 def test_phase10_artifact_and_attestation_are_both_immutable_prerequisites(tmp_path, monkeypatch):
-    artifact = tmp_path / "correctness_gate_coda_v3.json"
-    artifact.write_text(json.dumps({"protocol": "functional-correctness-gate-coda-v3", "status": "pass"}))
+    artifact = tmp_path / "correctness_gate_cache_v3_coda_v4.json"
+    artifact.write_text(json.dumps({
+        "protocol": "functional-correctness-gate-cache-v3-coda-v4",
+        "status": "pass",
+        "cache_manifest_sha256": "d56e79c291e238ec6f694070a6f4623c34d7ef72d92740b45bd25a76d42e64f4",
+        "initialization_sha256": "92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747",
+    }))
     artifact_hash = runner.sha256_file(artifact)
     attestation = tmp_path / "attestation.json"
     attestation.write_text(json.dumps({
-        "protocol": "functional-correctness-gate-coda-v3-runtime-attestation-v1",
+        "protocol": "functional-correctness-gate-cache-v3-coda-v4-runtime-attestation-v1",
         "status": "pass",
         "artifact": str(artifact),
         "artifact_sha256": artifact_hash,
@@ -154,12 +159,19 @@ def test_preflight_process_scan_ignores_parent_shell_text_and_matches_exact_pyth
     ]
 
 
-def test_superseded_v3_runner_and_preflight_are_hard_blocked(monkeypatch):
-    with pytest.raises(RuntimeError, match="prefix-stable"):
-        runner.main(runner.CONFIG, runner.OUTPUT_ROOT, Path("unused"))
+def test_v3_runner_and_preflight_are_unblocked_only_for_cache_v3():
     from scripts import preflight_004_functional_overfit_gate_v3 as preflight
-    with pytest.raises(RuntimeError, match="prefix-stable"):
-        preflight.main()
+
+    assert runner.CACHE_ROOT == Path("/workspace/functional_cache_v3_smoke")
+    assert runner.PHASE10_ARTIFACT.name == "correctness_gate_cache_v3_coda_v4.json"
+    runner_source = (ROOT / "scripts/run_004_functional_overfit_gate_v3.py").read_text()
+    preflight_source = (ROOT / "scripts/preflight_004_functional_overfit_gate_v3.py").read_text()
+    assert "raise RuntimeError(BLOCKED_REASON)" not in runner_source
+    assert "raise RuntimeError(BLOCKED_REASON)" not in preflight_source
+    assert 'CACHE_ROOT / f"{example_id:05d}.npz"' in runner_source
+    assert 'arrays["h0"]' in runner_source
+    assert 'arrays["x"]' in runner_source
+    assert 'arrays["h16"]' in runner_source
 
 
 def test_v3_has_no_surrogate_patch_or_extra_initial_ln_f_and_persists_no_logits():

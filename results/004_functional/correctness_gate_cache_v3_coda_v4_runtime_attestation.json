@@ -1,0 +1,11 @@
+{
+  "artifact": "/workspace/functional_protocol/correctness_gate_cache_v3_coda_v4.json",
+  "artifact_sha256": "cb180b0aae45dbbb0ea3e1be4a1a85a47a1c0c0d3857e576a1d589df5f76ef01",
+  "git_commit": "4eef61c10f2a9d7e6039a98ad0a26c239d076dd1",
+  "is_symlink": false,
+  "lstat_type": "regular-file",
+  "mode": "0444",
+  "optimizer_steps": 0,
+  "protocol": "functional-correctness-gate-cache-v3-coda-v4-runtime-attestation-v1",
+  "status": "pass"
+}

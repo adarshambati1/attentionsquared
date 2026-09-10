@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.create_004_a2_initialization import write_json_exclusive_fsync
-from src.data.functional_cache import validate_cache_item, validate_cache_manifest
+from src.data.functional_cache_v3 import validate_item, validate_manifest
 from src.evaluation.correctness import (
     find_repetition_onset,
     score_generation,
@@ -47,23 +47,18 @@ from src.training.functional_protocol import (
 from src.training.overfit_gate import gate_passed, quantitative_overfit_checks
 
 
-CACHE_ROOT = Path("/workspace/functional_cache_v2")
+CACHE_ROOT = Path("/workspace/functional_cache_v3_smoke")
 INITIALIZATION = Path("/workspace/functional_protocol/a2_init_seed_0.pt")
 CONFIG = Path("configs/004_functional_v3_overfit.json")
 OUTPUT_ROOT = Path("/workspace/functional_overfit_v3")
-PHASE10_ARTIFACT = Path("/workspace/functional_protocol/correctness_gate_coda_v3.json")
-PHASE10_ATTESTATION = ROOT / "results/004_functional/correctness_gate_coda_v3_runtime_attestation.json"
-PHASE10_ARTIFACT_SHA256 = "a83561b945f88607554087ce79f4b690e79f6094afd3b05d25c07c5c1c539788"
-PHASE10_ATTESTATION_SHA256 = "3c80f8d27d96542f50ef221d7ff35e06d9a9ebb2b9d08ad611de9a42a2e424be"
+PHASE10_ARTIFACT = Path("/workspace/functional_protocol/correctness_gate_cache_v3_coda_v4.json")
+PHASE10_ATTESTATION = ROOT / "results/004_functional/correctness_gate_cache_v3_coda_v4_runtime_attestation.json"
+PHASE10_ARTIFACT_SHA256 = "cb180b0aae45dbbb0ea3e1be4a1a85a47a1c0c0d3857e576a1d589df5f76ef01"
+PHASE10_ATTESTATION_SHA256 = "207f9c8d914fd75bcc406c266227ce87947a1ac1eb6149d3dbe7d948067c6df8"
 MODEL_ID = "tomg-group-umd/huginn-0125"
 MODEL_REVISION = "bb6621b65e90b6a4b9b29ef88dc83866d450470c"
-OVERFIT_PROTOCOL = "functional-eight-example-overfit-coda-v3"
-PRELAUNCH_PROTOCOL = "functional-eight-example-overfit-coda-v3-prelaunch-v1"
-BLOCKED_REASON = (
-    "Phase 11 coda-v3 is superseded before training: cache-v2 h0 is not "
-    "prefix-stable across changing sequence shapes; build and validate the "
-    "fixed-2048-schedule cache-v3 smoke first"
-)
+OVERFIT_PROTOCOL = "functional-eight-example-overfit-cache-v3-coda-v4"
+PRELAUNCH_PROTOCOL = "functional-eight-example-overfit-cache-v3-coda-v4-prelaunch-v1"
 
 
 def sha256_file(path: Path) -> str:
@@ -97,7 +92,7 @@ def validate_config(config: dict) -> None:
     if set(config) != {
         "protocol",
         "training_protocol",
-        "cache_freeze_sha256",
+        "cache_manifest_sha256",
         "initialization_sha256",
         "phase10_artifact_sha256",
         "phase10_attestation_sha256",
@@ -116,7 +111,7 @@ def validate_config(config: dict) -> None:
     fixed = {
         "protocol": OVERFIT_PROTOCOL,
         "training_protocol": "functional-paired-randomness-v1",
-        "cache_freeze_sha256": "94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0",
+        "cache_manifest_sha256": "d56e79c291e238ec6f694070a6f4623c34d7ef72d92740b45bd25a76d42e64f4",
         "initialization_sha256": "92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747",
         "phase10_artifact_sha256": PHASE10_ARTIFACT_SHA256,
         "phase10_attestation_sha256": PHASE10_ATTESTATION_SHA256,
@@ -174,11 +169,18 @@ def validate_phase10_prerequisites() -> dict:
         raise ValueError("Phase 10 coda-v3 attestation checksum mismatch")
     artifact = json.loads(PHASE10_ARTIFACT.read_text(encoding="utf-8"))
     attestation = json.loads(PHASE10_ATTESTATION.read_text(encoding="utf-8"))
-    if artifact.get("protocol") != "functional-correctness-gate-coda-v3" or artifact.get("status") != "pass":
-        raise ValueError("Phase 10 coda-v3 artifact is not an authoritative pass")
+    if (
+        artifact.get("protocol") != "functional-correctness-gate-cache-v3-coda-v4"
+        or artifact.get("status") != "pass"
+        or artifact.get("cache_manifest_sha256")
+        != "d56e79c291e238ec6f694070a6f4623c34d7ef72d92740b45bd25a76d42e64f4"
+        or artifact.get("initialization_sha256")
+        != "92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747"
+    ):
+        raise ValueError("Phase 10 cache-v3 coda-v4 artifact is not authoritative")
     if (
         attestation.get("protocol")
-        != "functional-correctness-gate-coda-v3-runtime-attestation-v1"
+        != "functional-correctness-gate-cache-v3-coda-v4-runtime-attestation-v1"
         or attestation.get("status") != "pass"
         or attestation.get("artifact") != str(PHASE10_ARTIFACT)
         or attestation.get("artifact_sha256") != PHASE10_ARTIFACT_SHA256
@@ -186,17 +188,17 @@ def validate_phase10_prerequisites() -> dict:
         or attestation.get("lstat_type") != "regular-file"
         or attestation.get("mode") != "0444"
     ):
-        raise ValueError("Phase 10 coda-v3 attestation is invalid")
+        raise ValueError("Phase 10 cache-v3 coda-v4 attestation is invalid")
     return attestation
 
 
 def load_examples(device: torch.device) -> list[dict]:
     manifest = json.loads((CACHE_ROOT / "manifest.json").read_text())
-    validate_cache_manifest(manifest)
+    validate_manifest(manifest)
     examples = []
     for example_id in range(8):
-        path = CACHE_ROOT / "train" / f"{example_id:05d}.npz"
-        validate_cache_item(path, manifest)
+        path = CACHE_ROOT / f"{example_id:05d}.npz"
+        validate_item(path, manifest)
         with np.load(path, allow_pickle=False) as archive:
             arrays = {key: archive[key] for key in archive.files}
         attention = torch.from_numpy(arrays["attention_mask"])[None].to(device)
@@ -209,14 +211,14 @@ def load_examples(device: torch.device) -> list[dict]:
                     None
                 ].to(device),
                 "attention_mask": attention,
-                "h0": torch.from_numpy(arrays["h0_full"].astype(np.float32))[
+                "h0": torch.from_numpy(arrays["h0"].astype(np.float32))[
                     None
                 ].to(device),
-                "x": torch.from_numpy(arrays["x_full"].astype(np.float32))[None].to(
+                "x": torch.from_numpy(arrays["x"].astype(np.float32))[None].to(
                     device
                 ),
                 "h16_teacher": torch.from_numpy(
-                    arrays["h16_teacher"].astype(np.float32)
+                    arrays["h16"].astype(np.float32)
                 )[None].to(device),
                 "answer_start": start,
                 "valid_end": end,
@@ -528,8 +530,8 @@ def validate_prelaunch_attestation(path: Path, commit: str) -> dict:
         or value.get("final_output") != str(OUTPUT_ROOT)
         or value.get("final_output_absent") is not True
         or value.get("matching_training_processes") != []
-        or value.get("cache_freeze_sha256")
-        != sha256_file(CACHE_ROOT / "FROZEN.json")
+        or value.get("cache_manifest_sha256")
+        != sha256_file(CACHE_ROOT / "manifest.json")
         or value.get("initialization_sha256") != sha256_file(INITIALIZATION)
         or value.get("phase10_artifact_sha256") != PHASE10_ARTIFACT_SHA256
         or value.get("phase10_attestation_sha256") != PHASE10_ATTESTATION_SHA256
@@ -544,17 +546,14 @@ def validate_prelaunch_attestation(path: Path, commit: str) -> dict:
 def main(config_path: Path, output_root: Path, prelaunch_attestation: Path) -> dict:
     if config_path != CONFIG or output_root != OUTPUT_ROOT:
         raise ValueError("overfit gate requires exact production paths")
-    raise RuntimeError(BLOCKED_REASON)
-
-    # Unreachable preserved implementation: do not remove historical review code.
     commit = clean_git_commit()
     prelaunch = validate_prelaunch_attestation(prelaunch_attestation, commit)
     config_bytes = config_path.read_bytes()
     config = json.loads(config_bytes)
     validate_config(config)
     phase10_attestation = validate_phase10_prerequisites()
-    if sha256_file(CACHE_ROOT / "FROZEN.json") != config["cache_freeze_sha256"]:
-        raise ValueError("cache freeze checksum mismatch")
+    if sha256_file(CACHE_ROOT / "manifest.json") != config["cache_manifest_sha256"]:
+        raise ValueError("cache-v3 manifest checksum mismatch")
     if sha256_file(INITIALIZATION) != config["initialization_sha256"]:
         raise ValueError("shared initialization checksum mismatch")
     if output_root.exists() or output_root.is_symlink():
@@ -639,7 +638,7 @@ def main(config_path: Path, output_root: Path, prelaunch_attestation: Path) -> d
         "prelaunch_attestation": str(prelaunch_attestation),
         "prelaunch_created_unix_seconds": prelaunch["created_unix_seconds"],
         "config_sha256": hashlib.sha256(config_bytes).hexdigest(),
-        "cache_freeze_sha256": config["cache_freeze_sha256"],
+        "cache_manifest_sha256": config["cache_manifest_sha256"],
         "initialization_sha256": config["initialization_sha256"],
         "phase10_artifact_sha256": config["phase10_artifact_sha256"],
         "phase10_attestation_sha256": config["phase10_attestation_sha256"],
