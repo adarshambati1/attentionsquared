@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from types import MethodType
 
 import numpy as np
 import torch
@@ -21,6 +22,9 @@ from src.data.functional_cache import validate_cache_item, validate_cache_manife
 from src.evaluation.correctness import (
     aligned_answer_logits_and_targets,
     answer_bounds,
+)
+from src.evaluation.functional_autoregressive import (
+    frozen_coda_logits_from_normalized_state,
 )
 from src.training.functional_objective import (
     any_parameter_gradient,
@@ -37,10 +41,10 @@ from src.training.functional_protocol import (
 
 CACHE_ROOT = Path("/workspace/functional_cache_v2")
 INITIALIZATION = Path("/workspace/functional_protocol/a2_init_seed_0.pt")
-OUTPUT = Path("/workspace/functional_protocol/correctness_gate.json")
+OUTPUT = Path("/workspace/functional_protocol/correctness_gate_coda_v3.json")
 MODEL_ID = "tomg-group-umd/huginn-0125"
 MODEL_REVISION = "bb6621b65e90b6a4b9b29ef88dc83866d450470c"
-PROTOCOL = "functional-correctness-gate-v1"
+PROTOCOL = "functional-correctness-gate-coda-v3"
 EXAMPLE_ID = 0
 
 
@@ -91,15 +95,88 @@ def literal_alignment_control() -> dict:
     }
 
 
-def coda_logits(model, input_ids, attention_mask, state):
-    return model(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-        input_states=state,
-        num_steps=0,
-        use_cache=False,
-        return_dict=True,
-    ).logits
+def live_d16_decomposed_coda_gold_control(
+    model, input_ids, attention_mask, h0
+) -> dict:
+    """Prove the decomposed coda against a normal live D16 model forward."""
+    original = model.core_block_forward
+    recurrent_calls = 0
+    pre_ln_f_state = None
+
+    def wrapped(this, state, input_embeds, *args, **kwargs):
+        nonlocal recurrent_calls, pre_ln_f_state
+        recurrent_calls += 1
+        result = original(state, input_embeds, *args, **kwargs)
+        if recurrent_calls == 16:
+            pre_ln_f_state = result[0].detach().clone()
+        elif recurrent_calls > 16:
+            raise RuntimeError("live D16 gold control observed more than 16 core calls")
+        return result
+
+    model.core_block_forward = MethodType(wrapped, model)
+    try:
+        with torch.inference_mode(), torch.autocast(
+            device_type=input_ids.device.type,
+            dtype=torch.bfloat16,
+            enabled=input_ids.device.type == "cuda",
+        ):
+            live = model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                input_states=h0,
+                num_steps=16,
+                use_cache=False,
+                return_dict=True,
+                output_details={
+                    "return_logits": True,
+                    "return_latents": True,
+                    "return_head": False,
+                    "return_stats": False,
+                },
+            )
+    finally:
+        model.core_block_forward = original
+
+    if recurrent_calls != 16 or pre_ln_f_state is None:
+        raise RuntimeError(
+            f"live D16 gold control expected exactly 16 core calls, got {recurrent_calls}"
+        )
+    with torch.inference_mode(), torch.autocast(
+        device_type=input_ids.device.type,
+        dtype=torch.bfloat16,
+        enabled=input_ids.device.type == "cuda",
+    ):
+        once_normalized = model.transformer.ln_f(pre_ln_f_state)
+        decomposed_logits = frozen_coda_logits_from_normalized_state(
+            model, once_normalized, model.freqs_cis[:, : input_ids.shape[1]]
+        )
+
+    latent_exact = torch.equal(live.latent_states, once_normalized)
+    logits_exact = torch.equal(live.logits.float(), decomposed_logits)
+    latent_close = torch.allclose(
+        live.latent_states.float(), once_normalized.float(), rtol=1e-5, atol=1e-5
+    )
+    logits_close = torch.allclose(
+        live.logits.float(), decomposed_logits, rtol=1e-5, atol=1e-5
+    )
+    if not latent_exact:
+        raise RuntimeError("model latent is not exactly the once-normalized D16 state")
+    if not logits_close:
+        raise RuntimeError("decomposed coda does not match normal live D16 logits")
+    return {
+        "recurrent_calls": recurrent_calls,
+        "latent_exact": latent_exact,
+        "latent_tightly_equivalent": latent_close,
+        "latent_max_abs": float(
+            (live.latent_states.float() - once_normalized.float()).abs().max().item()
+        ),
+        "logits_exact": logits_exact,
+        "logits_tightly_equivalent": logits_close,
+        "logit_max_abs": float(
+            (live.logits.float() - decomposed_logits).abs().max().item()
+        ),
+        "initial_pre_coda_ln_f_applications": 1,
+    }
 
 
 def load_example(cache_root: Path, device: torch.device) -> dict:
@@ -154,12 +231,13 @@ def run_gate(cache_root: Path, initialization: Path) -> dict:
         local_files_only=True,
     ).to(device)
     freeze_module(huginn)
+    gold_control = live_d16_decomposed_coda_gold_control(
+        huginn, input_ids, attention_mask, example["h0"].to(torch.bfloat16)
+    )
+    frequencies = huginn.freqs_cis[:, : input_ids.shape[1]]
     with torch.no_grad():
-        teacher_logits = coda_logits(
-            huginn,
-            input_ids,
-            attention_mask,
-            example["h16_teacher"].to(torch.bfloat16),
+        teacher_logits = frozen_coda_logits_from_normalized_state(
+            huginn, example["h16_teacher"].to(torch.bfloat16), frequencies
         ).detach()
         self_kl, _, self_count = functional_kl_loss(
             teacher_logits, teacher_logits, loss_mask
@@ -176,11 +254,8 @@ def run_gate(cache_root: Path, initialization: Path) -> dict:
         baseline_output, _, _ = baseline_model(
             example["h0"], example["x"], token_mask=attention_mask
         )
-        baseline_logits = coda_logits(
-            huginn,
-            input_ids,
-            attention_mask,
-            baseline_output[:, 15].to(torch.bfloat16),
+        baseline_logits = frozen_coda_logits_from_normalized_state(
+            huginn, baseline_output[:, 15].to(torch.bfloat16), frequencies
         )
         baseline_kl, _, baseline_count = functional_kl_loss(
             baseline_logits, teacher_logits, loss_mask
@@ -201,8 +276,8 @@ def run_gate(cache_root: Path, initialization: Path) -> dict:
         output, _, _ = a2(example["h0"], example["x"], token_mask=attention_mask)
         z16 = output[:, 15]
         z16.retain_grad()
-        student_logits = coda_logits(
-            huginn, input_ids, attention_mask, z16.to(torch.bfloat16)
+        student_logits = frozen_coda_logits_from_normalized_state(
+            huginn, z16.to(torch.bfloat16), frequencies
         )
         gradient_loss, _, gradient_count = functional_kl_loss(
             student_logits, teacher_logits, loss_mask
@@ -253,6 +328,11 @@ def run_gate(cache_root: Path, initialization: Path) -> dict:
         "z16_gradient_l2": float(z16.grad.float().norm().item()),
         "teacher_state_requires_grad": bool(example["h16_teacher"].requires_grad),
         "teacher_logits_has_grad_fn": teacher_logits.grad_fn is not None,
+        "authoritative_coda_semantics": (
+            "normalized state -> coda blocks -> final ln_f -> lm_head; "
+            "no extra initial ln_f"
+        ),
+        "live_d16_decomposed_coda_gold_control": gold_control,
     }
 
 

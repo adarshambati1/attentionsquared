@@ -10,8 +10,7 @@ from torch import nn
 from scripts import run_004_phase13_evaluator_controls as phase13
 from src.evaluation.functional_autoregressive import (
     FullPrefixHuginnD16Evaluator,
-    canonical_direct_coda_logits,
-    normalized_state_coda_logits,
+    frozen_coda_logits_from_normalized_state,
 )
 
 
@@ -127,26 +126,24 @@ class CodaModel:
         self.lm_head = nn.Identity()
 
 
-def test_phase12_functional_coda_and_normal_teacher_coda_have_intended_semantics():
+def test_authoritative_coda_accepts_normalized_state_without_double_normalization():
     model = CodaModel()
-    raw_functional_state = torch.tensor([[[1.0], [2.0]]])
-    normalized_teacher_h16 = model.transformer.ln_f(raw_functional_state)
+    raw_recurrent_state = torch.tensor([[[1.0], [2.0]]])
+    normalized_h16 = model.transformer.ln_f(raw_recurrent_state)
     frequencies = torch.zeros(1, 2, 1)
 
-    normal_teacher_logits = normalized_state_coda_logits(
-        model, normalized_teacher_h16, frequencies
+    logits = frozen_coda_logits_from_normalized_state(
+        model, normalized_h16, frequencies
     )
-    functional_logits = canonical_direct_coda_logits(
-        model, raw_functional_state, frequencies
-    )
+    expected = model.transformer.ln_f(normalized_h16 + 3)
+    assert torch.equal(logits, expected)
 
-    assert torch.equal(functional_logits, normal_teacher_logits)
-    # Passing normalized teacher h16 through the functional interface would
-    # incorrectly apply the pre-coda normalization a second time.
-    double_normalized = canonical_direct_coda_logits(
-        model, normalized_teacher_h16, frequencies
+    # This literal regression assertion fails if the helper adds an initial
+    # ln_f to cache-v2's already-normalized h16.
+    double_normalized = model.transformer.ln_f(
+        model.transformer.ln_f(normalized_h16) + 3
     )
-    assert not torch.equal(normal_teacher_logits, double_normalized)
+    assert not torch.equal(logits, double_normalized)
 
 
 def test_phase13_publication_is_atomic_read_only_and_no_replace(tmp_path):
@@ -170,6 +167,11 @@ def test_phase13_publication_is_atomic_read_only_and_no_replace(tmp_path):
     with pytest.raises(FileExistsError):
         phase13.publish_attempt(second, final)
     assert second.exists()
+
+
+def test_phase13_main_is_hard_blocked_pending_corrected_phase11_and_phase12():
+    with pytest.raises(RuntimeError, match="hard-blocked"):
+        phase13.main(phase13.CONFIG, phase13.OUTPUT_ROOT)
 
 
 def test_phase13_runner_persists_no_logits_and_has_no_paid_execution():

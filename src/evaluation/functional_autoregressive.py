@@ -39,14 +39,19 @@ def _prefix_sha256(input_ids: torch.Tensor) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def normalized_state_coda_logits(
+def frozen_coda_logits_from_normalized_state(
     huginn: Any,
     normalized_state: torch.Tensor,
     frequencies: Any,
     *,
     last_only: bool = False,
 ) -> torch.Tensor:
-    """Apply the frozen coda to an already-normalized true Huginn latent."""
+    """Map an already-normalized recurrent state through frozen Huginn's coda.
+
+    Cache-v2 ``h16_teacher`` and Attention² ``z16`` use this interface.  There
+    is deliberately no initial ``ln_f``: the path is coda blocks, final
+    ``ln_f``, then ``lm_head``.
+    """
     state = normalized_state
     block_index = torch.tensor(0, device="cpu", dtype=torch.long)
     for block in huginn.transformer.coda:
@@ -56,25 +61,6 @@ def normalized_state_coda_logits(
     selected = state[:, -1:] if last_only else state
     logits = huginn.lm_head(selected).float()
     return logits[:, 0] if last_only else logits
-
-
-def canonical_direct_coda_logits(
-    huginn: Any,
-    state: torch.Tensor,
-    frequencies: Any,
-    *,
-    last_only: bool = False,
-) -> torch.Tensor:
-    """Apply the exact no-step frozen coda path without a model KV cache.
-
-    ``state`` is treated exactly like ``input_states`` passed to Huginn with
-    ``num_steps=0``: final recurrent normalization is applied before coda.
-    The returned logits are transient and are never stored by this module.
-    """
-    normalized = huginn.transformer.ln_f(state)
-    return normalized_state_coda_logits(
-        huginn, normalized, frequencies, last_only=last_only
-    )
 
 
 class _FullPrefixGreedyEvaluator:
@@ -168,7 +154,7 @@ class FullPrefixAttention2Evaluator(_FullPrefixGreedyEvaluator):
     def _coda_last_logits(
         self, z16: torch.Tensor, frequencies: Any
     ) -> torch.Tensor:
-        return canonical_direct_coda_logits(
+        return frozen_coda_logits_from_normalized_state(
             self.huginn, z16, frequencies, last_only=True
         )
 

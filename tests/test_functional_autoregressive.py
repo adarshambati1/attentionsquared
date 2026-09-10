@@ -87,6 +87,31 @@ def test_generation_recomputes_entire_strictly_growing_prefix_each_step():
     assert result.ended_naturally is False
 
 
+def test_full_prefix_a2_coda_does_not_normalize_already_normalized_z16_twice():
+    class TimesTwo(nn.Module):
+        def forward(self, state):
+            return state * 2
+
+    class AddThree(nn.Module):
+        def forward(self, state, frequencies, block_index, mask, cache):
+            return state + 3
+
+    huginn = FakeHuginn()
+    huginn.transformer.ln_f = TimesTwo()
+    huginn.transformer.coda = [AddThree()]
+    huginn.lm_head = nn.Identity()
+    evaluator = FullPrefixAttention2Evaluator(
+        huginn, RecordingA2(), FakeTokenizer()
+    )
+    normalized_z16 = torch.tensor([[[2.0]]])
+    logits = evaluator._coda_last_logits(
+        normalized_z16, torch.zeros(1, 1, 1)
+    )
+
+    assert torch.equal(logits, torch.tensor([[10.0]]))
+    assert not torch.equal(logits, torch.tensor([[14.0]]))  # double-ln_f result
+
+
 def test_next_token_logits_have_one_vocabulary_vector_not_sequence_logits():
     evaluator = FullPrefixAttention2Evaluator(
         FakeHuginn(), RecordingA2(), FakeTokenizer()

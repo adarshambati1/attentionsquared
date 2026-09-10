@@ -1,5 +1,13 @@
+from types import SimpleNamespace
+
 import torch
 from torch import nn
+
+from scripts.run_004_correctness_gate import (
+    OUTPUT,
+    PROTOCOL,
+    live_d16_decomposed_coda_gold_control,
+)
 
 from src.evaluation.correctness import (
     aligned_answer_logits_and_targets,
@@ -92,6 +100,64 @@ def test_gradient_flow_reaches_a2_and_z16_but_not_frozen_teacher_coda():
     assert z16.grad is not None
     assert torch.isfinite(z16.grad).all()
     assert torch.count_nonzero(z16.grad) > 0
+
+
+class _TimesTwo(nn.Module):
+    def forward(self, state):
+        return state * 2
+
+
+class _AddThree(nn.Module):
+    def forward(self, state, frequencies, block_index, mask, cache):
+        return state + 3
+
+
+class _GoldControlHuginn(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.transformer = SimpleNamespace(ln_f=_TimesTwo(), coda=[_AddThree()])
+        self.lm_head = nn.Identity()
+        self.freqs_cis = torch.zeros(1, 32, 1)
+
+    def core_block_forward(self, state, input_embeds, *args, **kwargs):
+        return state + input_embeds, torch.tensor(0)
+
+    def forward(self, *, input_ids, input_states, num_steps, **kwargs):
+        state = input_states
+        recurrent_input = torch.ones_like(state)
+        for step in range(num_steps):
+            state, _ = self.core_block_forward(
+                state, recurrent_input, None, None, None, torch.tensor(0), step
+            )
+        latent = self.transformer.ln_f(state)
+        coda_state = self.transformer.coda[0](
+            latent, self.freqs_cis[:, : input_ids.shape[1]], torch.tensor(-1), None, None
+        )
+        logits = self.lm_head(self.transformer.ln_f(coda_state)).float()
+        return SimpleNamespace(latent_states=latent, logits=logits)
+
+
+def test_production_gold_control_captures_exactly_d16_and_normalizes_once():
+    model = _GoldControlHuginn()
+    original = model.core_block_forward
+    result = live_d16_decomposed_coda_gold_control(
+        model,
+        torch.tensor([[1, 2, 3]]),
+        torch.ones((1, 3), dtype=torch.bool),
+        torch.zeros((1, 3, 2)),
+    )
+    assert model.core_block_forward == original
+    assert result["recurrent_calls"] == 16
+    assert result["initial_pre_coda_ln_f_applications"] == 1
+    assert result["latent_exact"]
+    assert result["logits_exact"]
+    assert result["latent_max_abs"] == 0
+    assert result["logit_max_abs"] == 0
+
+
+def test_corrected_gate_uses_new_v3_artifact_without_overwriting_v1():
+    assert OUTPUT.name == "correctness_gate_coda_v3.json"
+    assert PROTOCOL == "functional-correctness-gate-coda-v3"
 
 
 def test_teacher_self_kl_is_calculated_and_untrained_baseline_is_nonzero():

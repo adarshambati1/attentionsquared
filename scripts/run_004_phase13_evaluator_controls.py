@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run preregistered Phase 13 frozen-Huginn evaluator controls (no training)."""
+"""Importable Phase 13 control helpers; production main is remediation-blocked."""
 
 from __future__ import annotations
 
@@ -41,8 +41,7 @@ from src.evaluation.correctness import (
 from src.evaluation.functional_autoregressive import (
     HUGINN_D16_FULL_PREFIX_PROTOCOL,
     FullPrefixHuginnD16Evaluator,
-    canonical_direct_coda_logits,
-    normalized_state_coda_logits,
+    frozen_coda_logits_from_normalized_state,
 )
 from src.training.functional_objective import freeze_module
 
@@ -319,7 +318,6 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
     bitwise_equal = bitwise_elements = 0
     kl = TokenKLAggregator()
     records = []
-    functional_coda_passed = True
 
     for example_id in config["cache_control_example_ids"]:
         path = cache_root / config["cache_control_split"] / f"{example_id:05d}.npz"
@@ -351,25 +349,10 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
             live_h16 = live_output.latent_states
             live_logits = live_output.logits.float()
             frequencies = huginn.freqs_cis[:, : ids.shape[1]]
-            cached_logits = normalized_state_coda_logits(
-                huginn, cached_fp16.to(torch.bfloat16), frequencies
-            )
-            # Phase 12's functional state interface must equal Huginn num_steps=0,
-            # while normalized teacher h16 must use the normal coda above (no extra ln_f).
-            functional_model_logits = huginn(
-                input_ids=ids,
-                attention_mask=torch.ones_like(ids, dtype=torch.bool),
-                input_states=cached_fp16.to(torch.bfloat16),
-                num_steps=0,
-                use_cache=False,
-                return_dict=True,
-            ).logits.float()
-            functional_helper_logits = canonical_direct_coda_logits(
+            cached_logits = frozen_coda_logits_from_normalized_state(
                 huginn, cached_fp16.to(torch.bfloat16), frequencies
             )
 
-        functional_exact = torch.equal(functional_model_logits, functional_helper_logits)
-        functional_coda_passed = functional_coda_passed and functional_exact
         live_selected = live_h16[:, positions].float()
         cached_selected = cached_fp16[:, positions].float()
         hidden_diff = live_selected - cached_selected
@@ -420,11 +403,10 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
             "kl_live_to_cached_per_token": _finite(item_kl),
             "next_token_argmax_equal": int(item_argmax.sum().item()),
             "float16_hidden_bitwise_equal_fraction_diagnostic": float(item_bitwise.float().mean().item()),
-            "phase12_functional_coda_exactly_matches_num_steps_0": functional_exact,
+            "cached_coda_input_is_already_normalized": True,
         })
         del (
-            h0, live_output, live_h16, live_logits, cached_logits,
-            functional_model_logits, functional_helper_logits, live_selected,
+            h0, live_output, live_h16, live_logits, cached_logits, live_selected,
             cached_selected, hidden_diff, item_bitwise, live_logit_selected,
             cached_logit_selected, logit_diff, item_argmax,
         )
@@ -452,7 +434,6 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
             aggregate["globally_token_normalized_kl_live_to_cached"] <= tolerances["kl_per_token"]
         ),
         "all_next_token_argmax_equal": argmax_equal == compared_tokens,
-        "phase12_canonical_functional_coda_interface": functional_coda_passed,
     }
     return {
         "passed": all(bounds.values()),
@@ -618,7 +599,11 @@ def publish_attempt(attempt: Path, final: Path) -> None:
 
 
 def main(config_path: Path, output_root: Path) -> dict:
-    if config_path != CONFIG or output_root != OUTPUT_ROOT:
+    raise RuntimeError(
+        "Phase 13 is hard-blocked pending independently reviewed corrected "
+        "Phase 10 and new corrected Phase 11/12 artifacts"
+    )
+    if config_path != CONFIG or output_root != OUTPUT_ROOT:  # pragma: no cover
         raise ValueError("Phase 13 requires exact production paths")
     if output_root.exists() or output_root.is_symlink():
         raise FileExistsError(f"refusing to replace Phase 13 output: {output_root}")

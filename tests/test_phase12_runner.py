@@ -58,7 +58,7 @@ def test_phase12_runner_does_not_use_incremental_generate_or_persist_logits():
     assert ".generate(" not in source.replace("evaluator.generate(", "")
     assert "past_key_values" not in evaluator
     assert '"full_vocabulary_logits_persisted": False' in source
-    assert "canonical_direct_coda_logits" in evaluator
-    assert "normalized = huginn.transformer.ln_f(state)" in evaluator
-    assert "return normalized_state_coda_logits(" in evaluator
+    assert "frozen_coda_logits_from_normalized_state" in evaluator
+    assert "normalized = huginn.transformer.ln_f(state)" not in evaluator
+    assert "return frozen_coda_logits_from_normalized_state(" in evaluator
     assert "logits = huginn.lm_head(selected).float()" in evaluator

@@ -148,7 +148,21 @@ The compact cache is not yet built. All v2 work must follow
   The artifact, builder record, prior validation log, and attestation are all
   regular non-symlink files published read-only; each observed mode is `0444`.
 
-### Phase 10 correctness/unit-test gate — historical mechanics PASS; coda semantics require corrected rerun
+### Phase 10 correctness/unit-test gate — historical mechanics PASS; coda-v3 remediation implemented, pending independent review and rerun
+
+- The active gate now targets the new no-replace artifact
+  `/workspace/functional_protocol/correctness_gate_coda_v3.json`; the historical
+  `correctness_gate.json` and all other v2 artifacts remain untouched.
+- Cache-v2 `h16_teacher` and Attention² `z16` now enter one authoritative frozen
+  coda helper as already-normalized states: coda blocks, final `ln_f`, then
+  `lm_head`, with no extra initial `ln_f`.
+- A production gold control wraps `core_block_forward`, requires exactly 16 live
+  recurrent calls, captures the pre-`ln_f` D16 state, applies `ln_f` exactly
+  once, and requires the model-returned latent and decomposed-coda logits to be
+  exactly equal or tightly numerically equivalent to normal live D16 outputs.
+- Pinned H100 tests passed: 21 focused and 151 full-suite. Pre-run review passed
+  code/science with no Phase 10 scientific blockers. The coda-v3 production
+  gate has not yet been run.
 
 - Literal `prompt | A B C` alignment verifies logits at positions immediately
   preceding A, B, and C predict those answer tokens.
@@ -229,7 +243,13 @@ The compact cache is not yet built. All v2 work must follow
   Both final files and both preserved source files are mode `0444`; final and
   source directories are mode `0555`.
 
-### Phase 12 canonical full-prefix evaluator — engineering PASS/PASS; coda semantics superseded
+### Phase 12 canonical full-prefix evaluator — historical engineering PASS/PASS; output superseded, corrected implementation pending review
+
+- `FullPrefixAttention2Evaluator` now calls the authoritative normalized-state
+  coda helper directly and cannot add a pre-coda `ln_f`. No corrected Phase 12
+  scientific execution is authorized until corrected Phase 11 exists.
+- The preserved v2 Phase 12 output remains historical engineering evidence only;
+  it has not been overwritten or reclassified as corrected evidence.
 
 - `FullPrefixAttention2Evaluator` recomputes Huginn's frozen prelude, paired
   deterministic `h0`, Attention² over the complete prefix, and the frozen coda
@@ -263,7 +283,12 @@ The compact cache is not yet built. All v2 work must follow
   file in a non-symlink mode-`0555` directory, published by same-parent
   `renameat2(RENAME_NOREPLACE)`.
 
-### Phase 13 evaluator controls — PRE-RUN BLOCKED; not executed
+### Phase 13 evaluator controls — BLOCKED; remediation implementation pending independent review
+
+- The Phase 13 runner's `main` is hard-blocked in code pending independently
+  reviewed corrected Phase 10 and new corrected Phase 11/12 artifacts. Helpers
+  remain importable for static/unit testing. No Phase 13 scientific execution
+  is authorized.
 
 - Historical reference: GSM8K train IDs 2250–2499, D16, bfloat16, greedy,
   1024-token cap; base seed 3000/index 0 is prospective because the historical
