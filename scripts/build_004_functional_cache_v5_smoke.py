@@ -53,7 +53,8 @@ def locked_rows(c):
  for row in rows:
   expected_role="gradient_update" if row["example_id"] in range(8) else "checkpoint_selection_validation"
   if row["phase3_role"]!=expected_role or row["dataset_split"]!="train": raise ValueError("smoke ID role differs from locked protocol")
-  if row["source_sha256"]!=c["raw_source_sha256"][str(i)]: raise ValueError(f"raw hash lock differs for ID {i}")
+  example_id=row["example_id"]
+  if row["source_sha256"]!=c["raw_source_sha256"][str(example_id)]: raise ValueError(f"raw hash lock differs for ID {example_id}")
   assert_schedule_bounds(rendered_prompt_tokens=row["answer_start"],sequence_tokens=row["source_sequence_length"],cap=c["generation_cap_tokens"])
  return rows
 def preflight_estimate(c,rows):
