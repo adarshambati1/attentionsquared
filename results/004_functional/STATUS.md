@@ -449,3 +449,11 @@ The compact cache is not yet built. All v2 work must follow
 - All 16 items reproduced live `h0` BF16 bits, `x` FP32 bits, and `h16` FP32 bits exactly. Across all 3,123 represented teacher positions, cached/live frozen-coda logit mean/max error and KL/token were exactly zero, with 3,123/3,123 argmax agreement.
 - Validation artifact SHA-256: `65dd76fca9cba8df435b52c36f282ab8420fb742d8c4d65f61b813904e4af006`.
 - No training occurred before this fidelity gate.
+
+### Phase 10 native cache-v5 correctness gate — PASS
+
+- Corrected no-training Phase 10 used `/workspace/functional_cache_v5_smoke/00000.npz` and the immutable native-cache validation evidence.
+- Exact alignment/mask gates passed; live D16 used 16 recurrent calls and matched the literal once-normalized coda decomposition exactly.
+- Huginn/coda remained frozen with zero Huginn gradients; all 21 Attention² parameters and `z16` received nonzero gradients through the frozen coda. Optimizer steps: zero.
+- Teacher self-KL/token was `-8.744657775672238e-10`; untrained shared-initialization K=4 KL/token was `11.253486633300781` over 88 answer tokens.
+- Artifact SHA-256: `3133d247f30b4a5fc17e785ecab4294ee8d055d11fce1b42c2ec896ceb36a9e4`; runtime attestation SHA-256: `e35072a22e546cc2b557d6a68549c27cc7ae67d1cc36d3d0a90c6c4792a803b2`.

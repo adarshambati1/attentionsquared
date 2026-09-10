@@ -1,0 +1,11 @@
+{
+  "artifact": "/workspace/functional_protocol/correctness_gate_cache_v5_native_v1.json",
+  "artifact_sha256": "3133d247f30b4a5fc17e785ecab4294ee8d055d11fce1b42c2ec896ceb36a9e4",
+  "git_commit": "3d927cba9a9f56b1a4c68a91b39795dc87031729",
+  "is_symlink": false,
+  "lstat_type": "regular-file",
+  "mode": "0444",
+  "optimizer_steps": 0,
+  "protocol": "functional-correctness-gate-cache-v5-native-v1-runtime-attestation-v1",
+  "status": "pass"
+}
