@@ -9,12 +9,15 @@ from scripts import run_004_phase12_full_prefix_evaluation as phase12
 
 def test_phase12_config_locks_slow_full_prefix_semantics():
     root = Path(__file__).resolve().parents[1]
-    config = json.loads((root / "configs/004_functional_v2_phase12.json").read_text())
+    config = json.loads((root / "configs/004_functional_v3_phase12.json").read_text())
     phase12.validate_config(config)
     assert config["example_ids"] == list(range(8))
     assert config["use_cache"] is False
     assert config["attention2_kv_cache"] is False
     assert config["recompute_complete_prefix_every_token"] is True
+    assert config["cache_root"] == "/workspace/functional_cache_v3_smoke"
+    assert config["phase11_model"] == "/workspace/functional_overfit_v3/model.pt"
+    assert config["output"] == "/workspace/functional_phase12_v3"
     for key, value in [
         ("use_cache", True),
         ("attention2_kv_cache", True),
@@ -58,6 +61,7 @@ def test_phase12_runner_does_not_use_incremental_generate_or_persist_logits():
     assert ".generate(" not in source.replace("evaluator.generate(", "")
     assert "past_key_values" not in evaluator
     assert '"full_vocabulary_logits_persisted": False' in source
+    assert '"repetition_detected_count"' in source
     assert "frozen_coda_logits_from_normalized_state" in evaluator
     assert "normalized = huginn.transformer.ln_f(state)" not in evaluator
     assert "return frozen_coda_logits_from_normalized_state(" in evaluator

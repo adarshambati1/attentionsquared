@@ -21,8 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.create_004_a2_initialization import write_json_exclusive_fsync
-from src.data.functional_cache import validate_cache_item, validate_cache_manifest
-from src.evaluation.correctness import score_generation
+from src.data.functional_cache_v3 import validate_item, validate_manifest
+from src.evaluation.correctness import find_repetition_onset, score_generation
 from src.evaluation.functional_autoregressive import (
     FULL_PREFIX_PROTOCOL,
     FullPrefixAttention2Evaluator,
@@ -30,11 +30,11 @@ from src.evaluation.functional_autoregressive import (
 )
 from src.training.functional_objective import freeze_module
 from src.training.functional_protocol import Attention2Architecture
-from src.training.overfit_gate import OVERFIT_PROTOCOL
 
 
-CONFIG = Path("configs/004_functional_v2_phase12.json")
-OUTPUT_ROOT = Path("/workspace/functional_phase12_v2")
+CONFIG = Path("configs/004_functional_v3_phase12.json")
+OUTPUT_ROOT = Path("/workspace/functional_phase12_v3")
+EXPECTED_PHASE11_PROTOCOL = "functional-eight-example-overfit-cache-v3-coda-v4-teacher-relative-v2"
 MODEL_ID = "tomg-group-umd/huginn-0125"
 MODEL_REVISION = "bb6621b65e90b6a4b9b29ef88dc83866d450470c"
 
@@ -69,12 +69,12 @@ def clean_git_commit() -> str:
 def validate_config(config: dict) -> None:
     expected = {
         "protocol": FULL_PREFIX_PROTOCOL,
-        "phase11_model": "/workspace/functional_overfit_v2/model.pt",
-        "phase11_model_sha256": "036a6578774d4352dd778a29a6c6214d1474ffb3b1e2d5e2db92e8267777777a",
-        "phase11_result": "/workspace/functional_overfit_v2/result.json",
-        "phase11_result_sha256": "0d84ac8353ca412c9e4b557d3fc42805e65585e4ec4e1f06b987f20340dbcd91",
-        "cache_root": "/workspace/functional_cache_v2",
-        "cache_freeze_sha256": "94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0",
+        "phase11_model": "/workspace/functional_overfit_v3/model.pt",
+        "phase11_model_sha256": "fc1a0099d2efd4fa233570a77ea6ed94e6ebb32bd948862ccdbb679362685c5a",
+        "phase11_result": "/workspace/functional_overfit_v3/result.json",
+        "phase11_result_sha256": "4860014dcadc6899ef9e212a49e0c995e4e28ad6fc60f64f5154417787fbba4d",
+        "cache_root": "/workspace/functional_cache_v3_smoke",
+        "cache_manifest_sha256": "d56e79c291e238ec6f694070a6f4623c34d7ef72d92740b45bd25a76d42e64f4",
         "example_ids": list(range(8)),
         "K": 4,
         "h0_base_seed": 3000,
@@ -96,8 +96,10 @@ def load_attention2(path: Path, expected_hash: str, device: torch.device):
     checkpoint = torch.load(path, map_location="cpu", weights_only=True)
     if (
         set(checkpoint) != {"protocol", "state_dict", "metadata"}
-        or checkpoint["protocol"] != OVERFIT_PROTOCOL
+        or checkpoint["protocol"] != EXPECTED_PHASE11_PROTOCOL
         or checkpoint["metadata"].get("status") != "pending_scientific_review"
+        or not all(checkpoint["metadata"].get("quantitative_checks", {}).values())
+        or not all(checkpoint["metadata"].get("generation_mechanical_checks", {}).values())
         or checkpoint["metadata"].get("full_vocabulary_logits_persisted") is not False
     ):
         raise ValueError("unexpected Phase 11 checkpoint schema or provenance")
@@ -108,11 +110,11 @@ def load_attention2(path: Path, expected_hash: str, device: torch.device):
 
 def load_inputs(cache_root: Path, device: torch.device) -> list[dict]:
     manifest = json.loads((cache_root / "manifest.json").read_text())
-    validate_cache_manifest(manifest)
+    validate_manifest(manifest)
     examples = []
     for example_id in range(8):
-        path = cache_root / "train" / f"{example_id:05d}.npz"
-        validate_cache_item(path, manifest)
+        path = cache_root / f"{example_id:05d}.npz"
+        validate_item(path, manifest)
         with np.load(path, allow_pickle=False) as archive:
             ids = torch.from_numpy(archive["input_ids"].astype(np.int64))[None].to(device)
             start = int(archive["answer_start"])
@@ -165,8 +167,8 @@ def run(config: dict, commit: str) -> dict:
     cache_root = Path(config["cache_root"])
     if sha256_file(prior_result_path) != config["phase11_result_sha256"]:
         raise ValueError("Phase 11 result identity mismatch")
-    if sha256_file(cache_root / "FROZEN.json") != config["cache_freeze_sha256"]:
-        raise ValueError("cache freeze identity mismatch")
+    if sha256_file(cache_root / "manifest.json") != config["cache_manifest_sha256"]:
+        raise ValueError("cache-v3 manifest identity mismatch")
     prior = json.loads(prior_result_path.read_text())
     prior_by_id = {item["example_id"]: item for item in prior["generations"]}
 
@@ -225,6 +227,9 @@ def run(config: dict, commit: str) -> dict:
                 "teacher_answer": score.gold_answer,
                 "generated_answer": score.predicted_answer,
                 "teacher_answer_match": score.correct,
+                "repetition_onset": find_repetition_onset(
+                    list(generated.token_ids), chunk_size=8, repetitions=3
+                ),
                 "text": generated.text,
                 "teacher_text": teacher_text,
                 "phase11_text_exact_match": generated.text == prior_item["text"],
@@ -249,7 +254,7 @@ def run(config: dict, commit: str) -> dict:
         "recompute_complete_prefix_every_token": True,
         "phase11_model_sha256": config["phase11_model_sha256"],
         "phase11_result_sha256": config["phase11_result_sha256"],
-        "cache_freeze_sha256": config["cache_freeze_sha256"],
+        "cache_manifest_sha256": config["cache_manifest_sha256"],
         "all_strict_full_prefix_growth": True,
         "phase11_text_exact_match_count": sum(
             item["phase11_text_exact_match"] for item in generations
@@ -259,6 +264,9 @@ def run(config: dict, commit: str) -> dict:
         ),
         "natural_stop_count": sum(item["ended_naturally"] for item in generations),
         "cap_hit_count": sum(item["hit_max_new_tokens"] for item in generations),
+        "repetition_detected_count": sum(
+            item["repetition_onset"] is not None for item in generations
+        ),
         "full_vocabulary_logits_persisted": False,
         "generations": generations,
     }

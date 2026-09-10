@@ -269,39 +269,26 @@ The compact cache is not yet built. All v2 work must follow
   the authoritative gate artifact and attestation are regular, non-symlink,
   mode-`0444` files on the durable volume.
 
-### Phase 11 v3 corrected eight-example functional-overfit gate — BLOCKED before training by `h0` prefix-instability finding
+### Phase 11 v3 corrected eight-example functional-overfit gate — PASS
 
-- The phase-scoped v3 runner and preflight are implemented but have not been
-  executed. Training and generation remain blocked pending independent review.
-- The rerun is locked to cache-v2 train examples 0–7, seed index 0, K=4, the
-  exact shared initialization SHA-256
-  `92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747`,
-  and the unchanged ordering, optimizer, KL objective, 300-update ceiling,
-  quantitative criteria, generation criteria, and 384-token cap.
-- Corrected Phase 10 artifact SHA-256
-  `a83561b945f88607554087ce79f4b690e79f6094afd3b05d25c07c5c1c539788`
-  and runtime-attestation SHA-256
-  `3c80f8d27d96542f50ef221d7ff35e06d9a9ebb2b9d08ad611de9a42a2e424be`
-  are mandatory prerequisites.
-- Cached `h16_teacher` and Attention² `z16` are treated as already-normalized
-  coda inputs. Teacher and student logits use the single authoritative
-  normalized-state coda helper, with no extra initial `ln_f`.
-- Generation uses `FullPrefixAttention2Evaluator`; no recurrence patch or
-  `transformer.ln_f(output[:,15])` return path remains in the v3 runner.
-- The new protocol writes only by atomic no-replace publication to
-  `/workspace/functional_overfit_v3`. It does not target or mutate any v2
-  model, result, or attempt, and no full-vocabulary logits are persisted.
-- A no-training audit found that rematerializing equal-seed `h0` at prompt shape
-  was float16-prefix exact for IDs 0, 1, 4, and 6, but differed radically for
-  IDs 2, 3, 5, and 7 (mean absolute error about `0.706`). Those are exactly the
-  four prior semantic-loop IDs; this is a strong diagnostic coincidence, not
-  causal proof. Prelude `x` also showed sequence-shape numerical differences
-  (mean absolute error about `7e-4`, maximum about `0.1`).
-- No optimizer step or v3 output occurred. The v3 runner and preflight are now
-  hard-blocked pending a reviewed eight-example cache-v3 smoke using one
-  transient fixed `[1,2048,H]` `h0` schedule per example/seed and exact prefix
-  slices. Cache v2 and all prior artifacts remain unchanged.
-- Pinned H100 tests: 28 focused passed; 156 full-suite passed.
+- The first cache-v3 run remains preserved as a formal failure under the
+  mis-specified absolute `mean_first_target_probability >= 0.5` criterion.
+  Diagnostic evidence showed Huginn itself averaged only `0.4795518257`.
+  Science review `4e271d7c` approved the prospective teacher-relative
+  replacement; no other model, objective, optimizer, data, initialization,
+  seed, update, or generation setting changed.
+- The one clean amended rerun used cache-v3 IDs 0–7, K=4, and shared
+  initialization SHA-256 `92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747`.
+  It passed at update 60: KL/token `11.0844558173 -> 0.0105378922`, first-token
+  KL `9.4341504574 -> 0.0481354306`, student target probability `0.4800678715`
+  versus teacher `0.4795518257`, and first-token argmax agreement `8/8`.
+- Generation passed all gates: 8/8 final-answer matches, 8/8 natural stops,
+  zero cap hits, mean first-32 teacher-token match `0.96484375`, and 0/8
+  detected loops, including IDs 2, 3, 5, and 7.
+- The model/result are read-only under `/workspace/functional_overfit_v3`.
+  Model SHA-256: `fc1a0099d2efd4fa233570a77ea6ed94e6ebb32bd948862ccdbb679362685c5a`;
+  result SHA-256: `4860014dcadc6899ef9e212a49e0c995e4e28ad6fc60f64f5154417787fbba4d`.
+  No full-vocabulary logits were persisted.
 
 ### Phase 11 eight-example functional-overfit gate — surrogate-path quantitative PASS; live-Huginn equivalence not established
 
