@@ -225,9 +225,12 @@ per-example scoring disagreement.
 ### 13B — New evaluator versus live Huginn
 
 On identical examples and complete growing prefixes, run normal live Huginn D16
-and the new full-prefix Huginn route with identical `h0`, seed, and greedy
-decoding. Require exact equality of generated token IDs, stop reason, cap flag,
-extracted answer, and correctness. Any categorical disagreement fails Phase 13.
+and the new full-prefix Huginn route with the same materialized deterministic
+`h0` tensor reused by both routes at each corresponding prefix, plus the same
+seed and greedy decoding. Do not independently call a random initializer in the
+two routes. Require exact equality of generated token IDs, stop reason, cap
+flag, extracted answer, and correctness. Any categorical disagreement fails
+Phase 13.
 
 ### 13C — Cached `h16` versus live `h16`
 
@@ -254,8 +257,9 @@ validated Attention² KV cache exists.
 
 Match Experiment 1 stop strings, cap handling, historical fallback behavior,
 authoritative corrected fallback behavior, and answer extraction. Persist no
-full-vocabulary logits. Do not proceed if 13B or 13C disagrees, or if 13A falls
-outside its broad anomaly band without a resolved audit.
+full-vocabulary logits. Do not proceed if 13B fails, if 13C violates a
+preregistered bound, or if 13A falls outside its broad anomaly band without a
+resolved audit.
 
 ## Phase 14 — Correct trajectory-checkpoint reevaluation
 
