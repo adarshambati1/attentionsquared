@@ -121,8 +121,10 @@ def test_teacher_student_and_generation_share_single_authoritative_coda_helper(m
 
     # Correct full-prefix generation resolves the same module-level helper.
     monkeypatch.setattr(autoregressive, "frozen_coda_logits_from_normalized_state", spy)
+    monkeypatch.setattr(autoregressive, "schedule_prefix", lambda schedule, length: schedule[:, :length])
     evaluator = runner.FullPrefixAttention2Evaluator(huginn, ConstantA2(), SimpleNamespace())
-    generation_logits = evaluator.next_token_logits(torch.tensor([[1, 2]]), example_id=0)
+    schedule = torch.zeros((1, 2048, 1), dtype=torch.bfloat16)
+    generation_logits = evaluator.next_token_logits(torch.tensor([[1, 2]]), h0_schedule=schedule)
     assert torch.equal(generation_logits, torch.tensor([[10.0]]))
     assert [last_only for _, last_only in calls] == [False, False, True]
 

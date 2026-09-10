@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build only the immutable eight-item Phase 9R prefix-stable cache-v3 smoke."""
 from __future__ import annotations
-import argparse, ctypes, gc, hashlib, json, os, sys, uuid
+import argparse, ctypes, errno, gc, hashlib, json, os, sys, tempfile, uuid
 from pathlib import Path
 from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,6 +57,41 @@ def locked_rows(c):
 def preflight_estimate(c,rows):
  tokens=sum(r["source_sequence_length"] for r in rows); payload=tokens*(3*c["hidden_size"]*2+5)
  return {"item_count":8,"total_tokens":tokens,"estimated_uncompressed_item_bytes":payload,"largest_transient_schedule_bytes":2048*c["hidden_size"]*2,"minimum_free_bytes_with_2x_margin":payload*2}
+
+def storage_preflight(output:Path,minimum_free_bytes:int)->dict[str,Any]:
+ """Fail closed on durable writes and Linux no-replace rename in output's filesystem."""
+ parent=output.parent
+ if parent.is_symlink() or not parent.is_dir(): raise RuntimeError(f"output parent must be an existing real directory: {parent}")
+ stats=os.statvfs(parent);free=int(stats.f_bavail)*int(stats.f_frsize)
+ if free<minimum_free_bytes: raise OSError(errno.ENOSPC,f"free bytes {free} below frozen 2x requirement {minimum_free_bytes}",str(parent))
+ probe=Path(tempfile.mkdtemp(prefix=f".{output.name}.preflight-",dir=parent));source=probe/"source";target=probe/"target"
+ try:
+  with source.open("xb") as stream:
+   stream.write(b"phase9r-source");stream.flush();os.fsync(stream.fileno())
+  with target.open("xb") as stream:
+   stream.write(b"phase9r-preserve");stream.flush();os.fsync(stream.fileno())
+  if source.stat().st_dev!=parent.stat().st_dev or target.stat().st_dev!=parent.stat().st_dev: raise RuntimeError("storage probes are not on output filesystem")
+  fd=os.open(probe,os.O_RDONLY)
+  try:os.fsync(fd)
+  finally:os.close(fd)
+  fn=getattr(ctypes.CDLL(None,use_errno=True),"renameat2",None)
+  if fn is None: raise RuntimeError("Linux renameat2 is required")
+  ctypes.set_errno(0);rc=fn(-100,os.fsencode(source),-100,os.fsencode(target),1);observed=ctypes.get_errno()
+  if rc==0 or observed!=errno.EEXIST: raise RuntimeError(f"RENAME_NOREPLACE existing-target probe failed: rc={rc} errno={observed}")
+  if source.read_bytes()!=b"phase9r-source" or target.read_bytes()!=b"phase9r-preserve": raise RuntimeError("RENAME_NOREPLACE did not preserve existing target and source")
+  fd=os.open(probe,os.O_RDONLY)
+  try:os.fsync(fd)
+  finally:os.close(fd)
+  return {"free_bytes":free,"write_flush_fsync":True,"directory_fsync":True,"same_filesystem":True,"renameat2_noreplace_existing_preserved":True}
+ finally:
+  for path in (source,target):
+   try:path.unlink()
+   except FileNotFoundError:pass
+  probe.rmdir()
+  fd=os.open(parent,os.O_RDONLY)
+  try:os.fsync(fd)
+  finally:os.close(fd)
+
 def publish_directory_no_replace(attempt,output):
  if output.exists() or output.is_symlink(): raise FileExistsError(f"refusing to replace immutable cache: {output}")
  fn=getattr(ctypes.CDLL(None,use_errno=True),"renameat2",None)
@@ -66,7 +101,8 @@ def publish_directory_no_replace(attempt,output):
  fd=os.open(output.parent,os.O_RDONLY); os.fsync(fd); os.close(fd)
 def main(config_path:Path,preflight_only=False):
  c=json.loads((ROOT/config_path).read_text()); validate_config(c); rows=locked_rows(c); estimate=preflight_estimate(c,rows)
- print(json.dumps({"protocol":"functional-cache-v3-smoke-preflight-v1",**estimate},sort_keys=True))
+ storage=storage_preflight(OUTPUT,estimate["minimum_free_bytes_with_2x_margin"])
+ print(json.dumps({"protocol":"functional-cache-v3-smoke-preflight-v2",**estimate,"storage":storage},sort_keys=True))
  if preflight_only:return
  if OUTPUT.exists() or OUTPUT.is_symlink(): raise FileExistsError(f"refusing to replace immutable cache: {OUTPUT}")
  if not torch.cuda.is_available(): raise RuntimeError("CUDA required")

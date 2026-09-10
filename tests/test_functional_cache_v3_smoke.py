@@ -1,4 +1,4 @@
-import copy, json
+import copy, json, sys
 from pathlib import Path
 from types import SimpleNamespace
 import numpy as np
@@ -24,6 +24,19 @@ def test_config_locks_v2_manifest_freeze_sidecar_split_and_raw_ids():
 def test_preflight_estimates_only_eight_compact_items():
  c=json.loads((ROOT/"configs/004_functional_cache_v3_smoke.json").read_text());rows=[{"source_sequence_length":n} for n in (155,118,270,434,147,300,194,311)]
  p=builder.preflight_estimate(c,rows);assert p["item_count"]==8 and p["largest_transient_schedule_bytes"]==2048*5280*2 and p["minimum_free_bytes_with_2x_margin"]==2*p["estimated_uncompressed_item_bytes"]
+
+def test_storage_preflight_fails_closed_below_frozen_2x_estimate(tmp_path,monkeypatch):
+ class Stats:f_bavail=4;f_frsize=1024
+ monkeypatch.setattr(builder.os,"statvfs",lambda path:Stats())
+ with pytest.raises(OSError,match="below frozen 2x requirement"):
+  builder.storage_preflight(tmp_path/"cache",4097)
+ assert list(tmp_path.iterdir())==[]
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"),reason="production requires Linux renameat2")
+def test_storage_preflight_fsyncs_and_noreplace_preserves_then_cleans(tmp_path):
+ result=builder.storage_preflight(tmp_path/"cache",1)
+ assert result=={"free_bytes":result["free_bytes"],"write_flush_fsync":True,"directory_fsync":True,"same_filesystem":True,"renameat2_noreplace_existing_preserved":True}
+ assert list(tmp_path.iterdir())==[]
 def test_schema_has_exact_replay_coda_semantics_and_no_logits_or_full_schedule(tmp_path):
  m=manifest();a=arrays(m);path=tmp_path/"00000.npz";assert write_item_atomic(path,a,m)=="created";meta=validate_item(path,m)
  assert meta["sequence_length"]<FIXED_H0_SCHEDULE_LENGTH
@@ -49,8 +62,10 @@ def test_final_directory_publication_refuses_replacement_before_rename(tmp_path)
 def test_validator_rejects_k_directories_and_logits(tmp_path):
  root=tmp_path/"cache";root.mkdir();(root/"manifest.json").touch()
  for i in range(8):(root/f"{i:05d}.npz").touch()
- (root/"K4").mkdir()
- with pytest.raises(ValueError,match="no K directories"):validator.validate_file_set(root)
+ (root/"K4").mkdir();root.chmod(0o555)
+ try:
+  with pytest.raises(ValueError,match="no K directories"):validator.validate_file_set(root)
+ finally:root.chmod(0o755)
 
 class FakeHuginn:
  def parameters(self):return iter(())
@@ -64,6 +79,17 @@ def test_builder_has_no_dynamic_prefix_initializer_call():
  source=(ROOT/"scripts/build_004_functional_cache_v3_smoke.py").read_text()
  assert ".initialize_state(" not in source
  assert "fixed_huginn_h0_schedule(model,template" in source
+
+def test_validator_is_independent_and_contains_literal_replay_invariants():
+ source=(ROOT/"scripts/validate_004_functional_cache_v3_smoke.py").read_text()
+ assert "build_004_functional_cache_v3_smoke" not in source
+ assert "functional_extraction_v3" not in source
+ assert "fixed_huginn_h0_schedule" not in source
+ assert "torch.random.fork_rng" in source and "model.initialize_state(template" in source
+ assert 'calls != 16' in source and 'model.transformer.ln_f(captured["pre_ln"])' in source
+ assert "build_chat_prompt" in source and "tokenize_prompt" in source
+ assert "globally_token_normalized_kl" in source and "top1_agreement" in source
+ assert 'diagnostics["logit_mean_abs"]' in source and 'diagnostics["logit_max_abs"]' in source
 
 def test_extraction_injects_explicit_slice_and_never_persists_logits():
  model=FakeHuginn();h0=torch.zeros((1,3,4),dtype=torch.bfloat16);ids=torch.arange(3)[None];states=capture_scheduled_huginn_states(model,ids,torch.ones_like(ids,dtype=torch.bool),h0)

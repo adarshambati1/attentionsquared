@@ -219,8 +219,10 @@ def compare_live_routes(
     route_mismatch = False
     stops = {int(x) for x in stop_token_ids(tokenizer) if x is not None and int(x) >= 0}
 
+    h0_schedule = evaluator.materialize_generation_schedule(prompt, example_id=example_id)
+    derived_seed = per_example_seed(evaluator.base_seed, example_id, seed_index=evaluator.seed_index)
     for step in range(max_new_tokens):
-        h0, derived_seed = evaluator.materialize_h0(current, example_id=example_id)
+        h0 = h0_schedule[:, : current.shape[1]]
         # These are deliberately two independent forwards receiving the exact same object/value.
         trusted_logits = trusted_live_next_token_logits(huginn, current, h0)
         evaluator_logits = evaluator.next_token_logits_with_h0(current, h0)
@@ -332,7 +334,9 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
         if position_count <= 0:
             raise RuntimeError("cache control has no represented teacher-prefix prediction positions")
 
-        h0, derived_seed = evaluator.materialize_h0(ids, example_id=example_id)
+        h0_schedule = evaluator.materialize_generation_schedule(ids, example_id=example_id)
+        h0 = h0_schedule[:, : ids.shape[1]]
+        derived_seed = per_example_seed(evaluator.base_seed, example_id, seed_index=evaluator.seed_index)
         with torch.inference_mode(), torch.autocast(device_type="cuda", dtype=torch.bfloat16):
             live_output = huginn(
                 input_ids=ids,

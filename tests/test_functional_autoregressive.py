@@ -45,7 +45,7 @@ class FakeHuginn(nn.Module):
             coda=[self.coda],
             ln_f=nn.Identity(),
         )
-        self.lm_head = nn.Linear(4, 10, bias=False)
+        self.lm_head = nn.Linear(4, 10, bias=False).to(torch.bfloat16)
         nn.init.zeros_(self.lm_head.weight)
         self.freqs_cis = torch.zeros(1, 64, 2)
 
@@ -67,7 +67,13 @@ class RecordingA2(nn.Module):
         return state, [], []
 
 
-def test_generation_recomputes_entire_strictly_growing_prefix_each_step():
+def test_generation_recomputes_entire_strictly_growing_prefix_each_step(monkeypatch):
+    import src.evaluation.functional_autoregressive as route
+    calls = []
+    def fixed(model, template, **kwargs):
+        calls.append(tuple(template.shape)); return torch.zeros_like(template), 1
+    monkeypatch.setattr(route, "fixed_huginn_h0_schedule", fixed)
+    monkeypatch.setattr(route, "schedule_prefix", lambda schedule, length: schedule[:, :length])
     huginn = FakeHuginn()
     a2 = RecordingA2()
     evaluator = FullPrefixAttention2Evaluator(
@@ -82,6 +88,7 @@ def test_generation_recomputes_entire_strictly_growing_prefix_each_step():
     assert a2.lengths == [2, 3, 4]
     assert huginn.prelude.lengths == [2, 3, 4]
     assert huginn.coda.lengths == [2, 3, 4]
+    assert calls == [(1, 2048, 4)]  # one fixed schedule for the whole generation
     assert len(result.token_ids) == 3
     assert result.hit_max_new_tokens is True
     assert result.ended_naturally is False
@@ -112,20 +119,26 @@ def test_full_prefix_a2_coda_does_not_normalize_already_normalized_z16_twice():
     assert not torch.equal(logits, torch.tensor([[14.0]]))  # double-ln_f result
 
 
-def test_next_token_logits_have_one_vocabulary_vector_not_sequence_logits():
-    evaluator = FullPrefixAttention2Evaluator(
-        FakeHuginn(), RecordingA2(), FakeTokenizer()
-    )
-    logits = evaluator.next_token_logits(torch.tensor([[1, 2, 3, 4]]), example_id=0)
+def test_next_token_logits_requires_explicit_fixed_schedule(monkeypatch):
+    import src.evaluation.functional_autoregressive as route
+    monkeypatch.setattr(route, "schedule_prefix", lambda schedule, length: schedule[:, :length])
+    evaluator = FullPrefixAttention2Evaluator(FakeHuginn(), RecordingA2(), FakeTokenizer())
+    ids = torch.tensor([[1, 2, 3, 4]])
+    with pytest.raises(TypeError):
+        evaluator.next_token_logits(ids, example_id=0)
+    logits = evaluator.next_token_logits(ids, h0_schedule=torch.zeros((1, 2048, 4), dtype=torch.bfloat16))
     assert logits.shape == (1, 10)
 
 
-def test_full_prefix_validation_rejects_empty_or_non_singleton_batch():
+def test_full_prefix_validation_rejects_empty_or_non_singleton_batch(monkeypatch):
+    import src.evaluation.functional_autoregressive as route
+    monkeypatch.setattr(route, "schedule_prefix", lambda schedule, length: schedule[:, :length])
+    monkeypatch.setattr(route, "fixed_huginn_h0_schedule", lambda model, template, **kwargs: (torch.zeros_like(template), 1))
     evaluator = FullPrefixAttention2Evaluator(
         FakeHuginn(), RecordingA2(), FakeTokenizer()
     )
     with pytest.raises(ValueError):
-        evaluator.next_token_logits(torch.empty((1, 0), dtype=torch.long), example_id=0)
+        evaluator.next_token_logits(torch.empty((1, 0), dtype=torch.long), h0_schedule=torch.zeros((1,2048,4),dtype=torch.bfloat16))
     with pytest.raises(ValueError):
         evaluator.generate(torch.ones((2, 3), dtype=torch.long), example_id=0, max_new_tokens=2)
     with pytest.raises(ValueError):

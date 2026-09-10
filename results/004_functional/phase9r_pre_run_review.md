@@ -27,5 +27,8 @@ Review job: `08c1b7ef`
    shape-dependent `h0`; it cannot by itself prove behavioral repair.
 
 All findings must be remediated and independently reviewed before cache
-construction. Cache v2, raw continuations, and all prior artifacts remain
+construction. Remediation is frozen to these six concrete blockers; add no new
+controls unless review identifies a specific correctness flaw that would
+invalidate the smoke. After PASS/PASS, execute the eight-example smoke
+immediately. Cache v2, raw continuations, and all prior artifacts remain
 unchanged.

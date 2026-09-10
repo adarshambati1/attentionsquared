@@ -148,7 +148,7 @@ The compact cache is not yet built. All v2 work must follow
   The artifact, builder record, prior validation log, and attestation are all
   regular non-symlink files published read-only; each observed mode is `0444`.
 
-### Phase 9R prefix-stable cache-v3 smoke — PRE-RUN BLOCKED; remediation in progress
+### Phase 9R prefix-stable cache-v3 smoke — PRE-RUN PASS/PASS; build authorized
 
 - Phase-scoped code/config now targets only immutable raw teacher train IDs 0–7
   and the new atomic no-replace output
@@ -165,23 +165,43 @@ The compact cache is not yet built. All v2 work must follow
   and answer bounds, exact normalized-pre-coda semantics, schedule protocol and
   length, derived seed, transient full-schedule SHA-256, and provenance. No
   logits or complete 2,048-position schedule are persisted.
-- A static byte-estimate preflight and validator are implemented. Validation
-  requires every represented prefix to match the transient schedule
-  bit-for-bit, independent prompt/full request schedule hashes and overlap, RNG
-  restoration, exactly one initializer call per request, live D16 replay,
-  normal-live versus decomposed-coda equivalence, exact file/schema checks, no
-  K directories, and no logits.
-- Pinned H100 tests passed: 27 focused and 169 full-suite. Static production
-  preflight passed for exactly 8 items / 1,929 tokens, estimating 61,120,365
-  uncompressed item bytes, a 21,626,880-byte largest transient schedule, and a
-  122,240,730-byte two-times safety requirement.
-- Independent pre-run review `08c1b7ef` returned code FAIL / science FAIL.
-  Required remediation: real storage preflight; independent prompt/full
-  schedule rematerialization and D16 decomposition; pinned-dataset prompt and
-  boundary reconstruction; fixed-schedule use in active autoregressive routes;
-  and propagated prefix/full `x`, `h16`, logit, KL, and argmax diagnostics.
-- **No cache builder, Huginn extraction, or production validator execution has
-  occurred.** Phases 10–13 were not executed by this phase.
+- The production validator independently parses and locks config, raw NPZs,
+  reviewed boundaries, and the pinned GSM8K dataset; reconstructs each native
+  chat prompt; rematerializes two schedules per example without builder
+  schedule/extraction helpers; checks every represented prefix bit-for-bit; and
+  runs separate normal-live and locally decomposed D16/coda forwards. It also
+  enforces the exact immutable file/schema/provenance set and no persisted
+  logits or full schedule. Prefix/full diagnostics cover `x`, `h16`, and logit
+  mean/max absolute differences, global KL/token, and top-1 agreement.
+- The builder now fails closed on actual `statvfs` free space, same-filesystem
+  write/flush/fsync and directory-fsync probes, and a Linux `renameat2`
+  `RENAME_NOREPLACE` collision that must preserve both source and existing
+  target. The successful H100 storage preflight observed 249,318,764,183,552
+  free bytes against the frozen 122,240,730-byte 2x requirement; evidence
+  SHA-256: `3339ce43248adf92159605fd51c21eaf3a506e0fb5720df335e34a1db6655010`.
+- Both active full-prefix evaluators now materialize one fixed BF16 CUDA
+  `[1,2048,H]` schedule per generation and accept only explicit schedule slices
+  for standalone next-token calls. No active autoregressive route uses
+  dynamic-prefix initialization.
+- Pinned H100 tests pass: 42 focused and 172 full-suite. An independent
+  all-eight pre-build numerical audit reconstructed exact prompts, restored RNG
+  twice per item, obtained equal complete schedule hashes and bitwise-equal
+  represented prefixes, observed 16 D16 calls per route, and matched normal
+  logits to a literal coda decomposition exactly. Prefix-vs-full diagnostics
+  were recorded without an acceptance threshold: 664 prompt tokens,
+  KL/token `0.0001880115442292159`, top-1 agreement
+  `0.9954819277108434`, per-example logit mean absolute differences from `0`
+  to `0.016039127483963966`, and maxima from `0` to `0.3125`; corrected v3
+  evidence SHA-256:
+  `874397fd65ab0fe59ae14f218a7dfd5cd80cfe680260e2e3d26155c19b71d2a1`.
+- Review `08c1b7ef` remains preserved as the original pre-remediation
+  FAIL/FAIL. Re-review `12f7fee2` returned code PASS and science FAIL solely
+  because its v2 audit omitted descriptive logit mean/max fields. After the
+  non-overwriting v3 audit added them, delta re-review `838c172` returned
+  science PASS. Final authorization is PASS/PASS for only the
+  eight-example smoke build.
+- **At authorization time, no cache construction, production validator,
+  optimizer step, or Phase 10–13 rerun had occurred.**
 
 ### Phase 10 correctness/unit-test gate — corrected coda-v3 PASS/PASS
 

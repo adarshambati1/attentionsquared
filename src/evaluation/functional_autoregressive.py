@@ -9,7 +9,11 @@ from typing import Any, Sequence
 import torch
 
 from src.evaluation.correctness import generation_status, stop_token_ids
-from src.training.functional_protocol import paired_huginn_h0
+from src.training.functional_protocol import (
+    FIXED_H0_SCHEDULE_LENGTH,
+    fixed_huginn_h0_schedule,
+    schedule_prefix,
+)
 
 
 FULL_PREFIX_PROTOCOL = "attention2-full-prefix-autoregressive-v1"
@@ -77,8 +81,11 @@ class _FullPrefixGreedyEvaluator:
             raise ValueError("max_new_tokens must be positive")
         if prompt_ids.ndim != 2 or prompt_ids.shape[0] != 1:
             raise ValueError("prompt_ids must have shape [1,T]")
-        current = prompt_ids.clone()
+        if prompt_ids.shape[1] + max_new_tokens > FIXED_H0_SCHEDULE_LENGTH:
+            raise ValueError("prompt plus generation exceeds fixed 2048-position schedule")
+        h0_schedule = self.materialize_generation_schedule(prompt_ids, example_id=example_id)
         generated: list[int] = []
+        current = prompt_ids.clone()
         lengths: list[int] = []
         traces: list[PrefixTrace] = []
         stop_ids = stop_token_ids(self.tokenizer)
@@ -90,7 +97,7 @@ class _FullPrefixGreedyEvaluator:
         for step in range(max_new_tokens):
             lengths.append(int(current.shape[1]))
             traces.append(PrefixTrace(step, int(current.shape[1]), _prefix_sha256(current)))
-            logits = self.next_token_logits(current, example_id=example_id)
+            logits = self.next_token_logits(current, h0_schedule=h0_schedule)
             next_token = int(logits[0].argmax().item())
             del logits
             generated.append(next_token)
@@ -110,6 +117,7 @@ class _FullPrefixGreedyEvaluator:
             max_new_tokens=max_new_tokens,
             stop_token_ids=stop_ids,
         )
+        del h0_schedule
         return FullPrefixGeneration(
             token_ids=tuple(generated),
             text=self.tokenizer.decode(generated, skip_special_tokens=False),
@@ -158,32 +166,37 @@ class FullPrefixAttention2Evaluator(_FullPrefixGreedyEvaluator):
             self.huginn, z16, frequencies, last_only=True
         )
 
-    def next_token_logits(
-        self, full_prefix_ids: torch.Tensor, *, example_id: int
+    def materialize_generation_schedule(
+        self, prompt_ids: torch.Tensor, *, example_id: int
     ) -> torch.Tensor:
-        """Return next-token logits after recomputing the complete prefix."""
+        hidden = int(self.huginn.transformer.wte.weight.shape[1])
+        template = torch.empty(
+            (1, FIXED_H0_SCHEDULE_LENGTH, hidden), device=prompt_ids.device,
+            dtype=torch.bfloat16,
+        )
+        schedule, _ = fixed_huginn_h0_schedule(
+            self.huginn, template, base_seed=self.base_seed, example_id=example_id,
+            seed_index=self.seed_index,
+        )
+        return schedule
+
+    def next_token_logits(
+        self, full_prefix_ids: torch.Tensor, *, h0_schedule: torch.Tensor
+    ) -> torch.Tensor:
+        """Recompute a prefix using an explicitly supplied fixed-2048 schedule."""
         if full_prefix_ids.shape[1] < 1:
             raise ValueError("full prefix must contain at least one token")
+        h0 = schedule_prefix(h0_schedule, int(full_prefix_ids.shape[1]))
         with torch.inference_mode(), torch.autocast(
             device_type=full_prefix_ids.device.type,
             dtype=torch.bfloat16,
             enabled=full_prefix_ids.device.type == "cuda",
         ):
             x, frequencies, _ = self._prelude(full_prefix_ids)
-            h0, _ = paired_huginn_h0(
-                self.huginn,
-                x,
-                base_seed=self.base_seed,
-                example_id=example_id,
-                seed_index=self.seed_index,
-                step=0,
-            )
             token_mask = torch.ones(
                 full_prefix_ids.shape, dtype=torch.bool, device=full_prefix_ids.device
             )
-            z, _, _ = self.attention2(
-                h0.float(), x.float(), token_mask=token_mask
-            )
+            z, _, _ = self.attention2(h0.float(), x.float(), token_mask=token_mask)
             return self._coda_last_logits(z[:, 15].to(h0.dtype), frequencies)
 
 
@@ -216,28 +229,19 @@ class FullPrefixHuginnD16Evaluator(_FullPrefixGreedyEvaluator):
             x = block(x, frequencies, block_index, None, None)
         return x, frequencies
 
-    def materialize_h0(
-        self, full_prefix_ids: torch.Tensor, *, example_id: int
-    ) -> tuple[torch.Tensor, int]:
-        """Materialize the one deterministic h0 for a corresponding full prefix."""
-        if full_prefix_ids.ndim != 2 or full_prefix_ids.shape[0] != 1:
-            raise ValueError("full_prefix_ids must have shape [1,T]")
-        if full_prefix_ids.shape[1] < 1:
-            raise ValueError("full prefix must contain at least one token")
-        with torch.inference_mode(), torch.autocast(
-            device_type=full_prefix_ids.device.type,
+    def materialize_generation_schedule(
+        self, prompt_ids: torch.Tensor, *, example_id: int
+    ) -> torch.Tensor:
+        hidden = int(self.huginn.transformer.wte.weight.shape[1])
+        template = torch.empty(
+            (1, FIXED_H0_SCHEDULE_LENGTH, hidden), device=prompt_ids.device,
             dtype=torch.bfloat16,
-            enabled=full_prefix_ids.device.type == "cuda",
-        ):
-            x, _ = self._prelude(full_prefix_ids)
-            return paired_huginn_h0(
-                self.huginn,
-                x,
-                base_seed=self.base_seed,
-                example_id=example_id,
-                seed_index=self.seed_index,
-                step=0,
-            )
+        )
+        schedule, _ = fixed_huginn_h0_schedule(
+            self.huginn, template, base_seed=self.base_seed, example_id=example_id,
+            seed_index=self.seed_index,
+        )
+        return schedule
 
     def full_prefix_logits_with_h0(
         self, full_prefix_ids: torch.Tensor, h0: torch.Tensor
@@ -273,17 +277,19 @@ class FullPrefixHuginnD16Evaluator(_FullPrefixGreedyEvaluator):
         return last
 
     def full_prefix_logits(
-        self, full_prefix_ids: torch.Tensor, *, example_id: int
+        self, full_prefix_ids: torch.Tensor, *, h0_schedule: torch.Tensor
     ) -> torch.Tensor:
-        """Return transient D16 logits after a fresh deterministic full-prefix pass."""
-        h0, _ = self.materialize_h0(full_prefix_ids, example_id=example_id)
+        """Run D16 using an explicitly supplied fixed-2048 schedule."""
+        h0 = schedule_prefix(h0_schedule, int(full_prefix_ids.shape[1]))
         return self.full_prefix_logits_with_h0(full_prefix_ids, h0)
 
     def next_token_logits(
-        self, full_prefix_ids: torch.Tensor, *, example_id: int
+        self, full_prefix_ids: torch.Tensor, *, h0_schedule: torch.Tensor
     ) -> torch.Tensor:
-        h0, _ = self.materialize_h0(full_prefix_ids, example_id=example_id)
-        return self.next_token_logits_with_h0(full_prefix_ids, h0)
+        logits = self.full_prefix_logits(full_prefix_ids, h0_schedule=h0_schedule)
+        last = logits[:, -1].clone()
+        del logits
+        return last
 
 
 def strictly_growing_full_prefix_lengths(

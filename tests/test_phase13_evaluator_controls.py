@@ -73,7 +73,15 @@ def test_phase13_config_locks_preregistered_ids_seed_bounds_and_roles():
             phase13.validate_config(changed)
 
 
-def test_13b_literally_reuses_one_h0_object_in_both_independent_forwards():
+def test_13b_literally_reuses_one_h0_object_in_both_independent_forwards(monkeypatch):
+    import src.evaluation.functional_autoregressive as route
+
+    monkeypatch.setattr(
+        route,
+        "fixed_huginn_h0_schedule",
+        lambda model, template, **kwargs: (torch.zeros_like(template), 1),
+    )
+    monkeypatch.setattr(route, "schedule_prefix", lambda schedule, length: schedule[:, :length])
     model = RecordingHuginn()
     tokenizer = FakeTokenizer()
     evaluator = FullPrefixHuginnD16Evaluator(
