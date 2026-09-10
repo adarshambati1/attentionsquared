@@ -60,6 +60,7 @@ def test_phase13_config_locks_preregistered_ids_seed_bounds_and_roles():
         "h0_bfloat16_bits", "x_float32_bits", "h16_float32_bits",
         "coda_logits", "next_token_argmax",
     ]
+    assert config["native_cache_kl_absolute_tolerance"] == 1e-8
     assert config["closure_audit_sha256"] == "80d692c9d583d0bb522fe653ae799c7d179f4bdc6b3343e1052942f52fe5e800"
     for key, value in [
         ("dataset_split", "test"),
@@ -202,6 +203,7 @@ def test_phase13_runner_persists_no_logits_and_has_no_paid_execution():
     assert '"x_float32_bits_exact"' in source
     assert '"h16_float32_bits_exact"' in source
     assert '"coda_logits_exact"' in source
+    assert 'abs(kl.mean) <= config["native_cache_kl_absolute_tolerance"]' in source
     assert "TokenKLAggregator" in source
     assert "independent_decomposed_next_token_logits" in source
     assert "for step in range(16)" in source

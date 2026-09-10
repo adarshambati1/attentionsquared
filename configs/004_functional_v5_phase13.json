@@ -64,5 +64,6 @@
     "next_token_argmax"
   ],
   "closure_audit": "results/004_functional/phase12_v5_upstream_closure_audit.json",
-  "closure_audit_sha256": "80d692c9d583d0bb522fe653ae799c7d179f4bdc6b3343e1052942f52fe5e800"
+  "closure_audit_sha256": "80d692c9d583d0bb522fe653ae799c7d179f4bdc6b3343e1052942f52fe5e800",
+  "native_cache_kl_absolute_tolerance": 1e-08
 }

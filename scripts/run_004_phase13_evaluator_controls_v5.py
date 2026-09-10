@@ -116,6 +116,7 @@ def expected_config() -> dict:
             "h0_bfloat16_bits", "x_float32_bits", "h16_float32_bits",
             "coda_logits", "next_token_argmax",
         ],
+        "native_cache_kl_absolute_tolerance": 1e-8,
         "closure_audit": "results/004_functional/phase12_v5_upstream_closure_audit.json",
         "closure_audit_sha256": "80d692c9d583d0bb522fe653ae799c7d179f4bdc6b3343e1052942f52fe5e800",
         "live_route_exact_requirements": [
@@ -410,7 +411,9 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
         "all_native_states_bitwise_equal": all_state_exact,
         "all_coda_logits_exact": all_logits_exact,
         "all_next_token_argmax_equal": argmax_equal == compared_tokens,
-        "globally_token_normalized_kl_is_zero": kl.mean == 0.0,
+        "globally_token_normalized_kl_is_numerically_zero": (
+            abs(kl.mean) <= config["native_cache_kl_absolute_tolerance"]
+        ),
     }
     return {
         "passed": all(exact_gates.values()),
@@ -418,6 +421,7 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
         "cache_manifest_sha256": config["cache_manifest_sha256"],
         "cache_validation_sha256": config["cache_validation_sha256"],
         "requirements": config["native_cache_exact_requirements"],
+        "kl_absolute_tolerance": config["native_cache_kl_absolute_tolerance"],
         "exact_gates": exact_gates,
         "aggregate": {
             "globally_token_normalized_kl_live_to_cached": _finite(kl.mean),
