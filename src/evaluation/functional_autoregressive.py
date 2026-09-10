@@ -197,7 +197,7 @@ class FullPrefixAttention2Evaluator(_FullPrefixGreedyEvaluator):
                 full_prefix_ids.shape, dtype=torch.bool, device=full_prefix_ids.device
             )
             z, _, _ = self.attention2(h0.float(), x.float(), token_mask=token_mask)
-            return self._coda_last_logits(z[:, 15].to(h0.dtype), frequencies)
+            return self._coda_last_logits(z[:, 15], frequencies)
 
 
 class FullPrefixHuginnD16Evaluator(_FullPrefixGreedyEvaluator):

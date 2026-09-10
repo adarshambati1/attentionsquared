@@ -457,3 +457,10 @@ The compact cache is not yet built. All v2 work must follow
 - Huginn/coda remained frozen with zero Huginn gradients; all 21 Attention² parameters and `z16` received nonzero gradients through the frozen coda. Optimizer steps: zero.
 - Teacher self-KL/token was `-8.744657775672238e-10`; untrained shared-initialization K=4 KL/token was `11.253486633300781` over 88 answer tokens.
 - Artifact SHA-256: `3133d247f30b4a5fc17e785ecab4294ee8d055d11fce1b42c2ec896ceb36a9e4`; runtime attestation SHA-256: `e35072a22e546cc2b557d6a68549c27cc7ae67d1cc36d3d0a90c6c4792a803b2`.
+
+### First Phase-11 cache-v5 attempt — preserved, non-authoritative
+
+- The first native-cache training attempt completed 50 updates and passed its quantitative and generation gates, but post-run inspection found that the shared full-prefix evaluator still cast A² `z16` to BF16 immediately before coda while training supplied native FP32 `z16`.
+- This violates the required train/eval execution-equivalence closure item. The published attempt remains immutable at `/workspace/functional_overfit_v5_native` and is not the authoritative Phase-11 checkpoint.
+- Preserved result SHA-256: `3cca8a2c9cc8bcc6abc33def85a783fb3a2ddfc0d05703c60fa443326c772007`; model SHA-256: `7998974443598bc5cb6ac72c61cb7c661887941ec1d2310362bb72deba4066d7`; log SHA-256: `88c455ffd2f78f8c5c95b16f7f401cf7d63e40721affee00e0f4743178b12ca5`.
+- The evaluator cast is removed prospectively. A new run starts from the unchanged shared initialization and publishes only to `/workspace/functional_overfit_v5_native_v2`.

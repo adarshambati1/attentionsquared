@@ -45,7 +45,7 @@ class FakeHuginn(nn.Module):
             coda=[self.coda],
             ln_f=nn.Identity(),
         )
-        self.lm_head = nn.Linear(4, 10, bias=False).to(torch.bfloat16)
+        self.lm_head = nn.Linear(4, 10, bias=False)
         nn.init.zeros_(self.lm_head.weight)
         self.freqs_cis = torch.zeros(1, 64, 2)
 
