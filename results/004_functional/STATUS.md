@@ -199,6 +199,30 @@ The compact cache is not yet built. All v2 work must follow
   the authoritative gate artifact and attestation are regular, non-symlink,
   mode-`0444` files on the durable volume.
 
+### Phase 11 v3 corrected eight-example functional-overfit gate — pre-run PASS/PASS; execution pending
+
+- The phase-scoped v3 runner and preflight are implemented but have not been
+  executed. Training and generation remain blocked pending independent review.
+- The rerun is locked to cache-v2 train examples 0–7, seed index 0, K=4, the
+  exact shared initialization SHA-256
+  `92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747`,
+  and the unchanged ordering, optimizer, KL objective, 300-update ceiling,
+  quantitative criteria, generation criteria, and 384-token cap.
+- Corrected Phase 10 artifact SHA-256
+  `a83561b945f88607554087ce79f4b690e79f6094afd3b05d25c07c5c1c539788`
+  and runtime-attestation SHA-256
+  `3c80f8d27d96542f50ef221d7ff35e06d9a9ebb2b9d08ad611de9a42a2e424be`
+  are mandatory prerequisites.
+- Cached `h16_teacher` and Attention² `z16` are treated as already-normalized
+  coda inputs. Teacher and student logits use the single authoritative
+  normalized-state coda helper, with no extra initial `ln_f`.
+- Generation uses `FullPrefixAttention2Evaluator`; no recurrence patch or
+  `transformer.ln_f(output[:,15])` return path remains in the v3 runner.
+- The new protocol writes only by atomic no-replace publication to
+  `/workspace/functional_overfit_v3`. It does not target or mutate any v2
+  model, result, or attempt, and no full-vocabulary logits are persisted.
+- Pinned H100 tests: 28 focused passed; 156 full-suite passed.
+
 ### Phase 11 eight-example functional-overfit gate — surrogate-path quantitative PASS; live-Huginn equivalence not established
 
 - Uses frozen training-side examples 0–7, one deterministic cached `h0` seed

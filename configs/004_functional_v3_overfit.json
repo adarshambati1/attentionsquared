@@ -1,0 +1,49 @@
+{
+  "protocol": "functional-eight-example-overfit-coda-v3",
+  "training_protocol": "functional-paired-randomness-v1",
+  "cache_freeze_sha256": "94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0",
+  "initialization_sha256": "92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747",
+  "phase10_artifact_sha256": "a83561b945f88607554087ce79f4b690e79f6094afd3b05d25c07c5c1c539788",
+  "phase10_attestation_sha256": "3c80f8d27d96542f50ef221d7ff35e06d9a9ebb2b9d08ad611de9a42a2e424be",
+  "example_ids": [0, 1, 2, 3, 4, 5, 6, 7],
+  "K": 4,
+  "h0_seed_indices": [0],
+  "trajectory_loss_weight": 0.0,
+  "objective": "global-teacher-to-student-KL-per-valid-answer-token",
+  "optimizer": {
+    "name": "AdamW",
+    "learning_rate": 0.0001,
+    "betas": [0.9, 0.999],
+    "epsilon": 1e-8,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 1.0
+  },
+  "training": {
+    "minimum_updates": 50,
+    "maximum_updates": 300,
+    "evaluate_every_updates": 10,
+    "data_order_seed": 9100
+  },
+  "pass_criteria": {
+    "maximum_final_over_initial_kl_ratio": 0.2,
+    "maximum_final_kl_per_token": 0.5,
+    "maximum_first_token_distribution_kl_ratio": 0.5,
+    "maximum_final_first_token_distribution_kl": 0.5,
+    "minimum_final_mean_first_target_probability": 0.5,
+    "minimum_final_first_target_top1_count": 6,
+    "require_first_target_probability_increase": true,
+    "require_first_target_top1_count_increase": true
+  },
+  "generation": {
+    "maximum_new_tokens": 384,
+    "full_prefix_recomputation": true,
+    "use_cache": false,
+    "greedy": true,
+    "minimum_natural_stop_count": 6,
+    "minimum_mean_first_32_teacher_token_match_fraction": 0.5,
+    "minimum_teacher_answer_match_count": 6,
+    "require_all_nonempty": true,
+    "require_no_detected_repetitive_degeneration": true
+  },
+  "output": "/workspace/functional_overfit_v3"
+}
