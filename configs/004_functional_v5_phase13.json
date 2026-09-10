@@ -1,0 +1,68 @@
+{
+  "protocol": "huginn-d16-phase13-evaluator-controls-native-v5",
+  "model_id": "tomg-group-umd/huginn-0125",
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "dataset_id": "openai/gsm8k",
+  "dataset_config": "main",
+  "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "dataset_split": "train",
+  "example_id_range_inclusive": [
+    2250,
+    2499
+  ],
+  "depth": 16,
+  "dtype": "bfloat16",
+  "h0_base_seed": 3000,
+  "h0_seed_index": 0,
+  "seed_provenance": "prospective deterministic reproduction seed; historical 40.4% RNG provenance unknown",
+  "max_new_tokens": 1024,
+  "greedy": true,
+  "use_cache": false,
+  "recompute_complete_prefix_every_token": true,
+  "system_instruction": "You are a helpful assistant that can assist users with mathematical reasoning.",
+  "historical_reference_correct": 101,
+  "historical_reference_total": 250,
+  "accuracy_anomaly_band": [
+    0.34,
+    0.47
+  ],
+  "accuracy_band_role": "broad anomaly check only; not deterministic route equivalence",
+  "report_historical_emulation_and_corrected_scores": true,
+  "phase12_evaluation": "/workspace/functional_phase12_v5_native/evaluation.json",
+  "phase12_evaluation_sha256": "c0009a81d932772039b0c4b4c90905a838836c99298f8d36924e6edfbadfa33a",
+  "cache_root": "/workspace/functional_cache_v5_smoke",
+  "cache_manifest_sha256": "55a5cc5cc77bf969ef200b49dae7d50d63ef97a88e608978902c6e50f5040583",
+  "cache_validation_sha256": "65dd76fca9cba8df435b52c36f282ab8420fb742d8c4d65f61b813904e4af006",
+  "cache_control_example_ids": [
+    2277,
+    2473,
+    2452,
+    2485,
+    2415,
+    2264,
+    2317,
+    2439
+  ],
+  "live_route_exact_requirements": [
+    "generated_token_ids",
+    "stop_reason",
+    "hit_max_new_tokens",
+    "extracted_answer",
+    "correctness"
+  ],
+  "cache_equivalence_scope": "eight preregistered length-stratified teacher-continuation items with exact native BF16/FP32 state storage",
+  "persist_logits": false,
+  "training": false,
+  "attention2_generation": false,
+  "timing_or_speed_claims": false,
+  "output": "/workspace/functional_phase13_controls_v5_native",
+  "native_cache_exact_requirements": [
+    "h0_bfloat16_bits",
+    "x_float32_bits",
+    "h16_float32_bits",
+    "coda_logits",
+    "next_token_argmax"
+  ],
+  "closure_audit": "results/004_functional/phase12_v5_upstream_closure_audit.json",
+  "closure_audit_sha256": "80d692c9d583d0bb522fe653ae799c7d179f4bdc6b3343e1052942f52fe5e800"
+}

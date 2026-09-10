@@ -473,3 +473,10 @@ The compact cache is not yet built. All v2 work must follow
 - All eight generations were nonempty and stopped naturally, with zero cap hits and no detected repetition on any item, including IDs 2, 3, 5, and 7. Strict scorer teacher-answer matches were 7/8, above the unchanged preregistered minimum of 6; ID 1 stated the correct `$60` but ended by repeating `50 minutes`, so last-number extraction returned 50.
 - Independent science review `958ad611` returned PASS with no protocol deviations or additional controls.
 - Immutable output: `/workspace/functional_overfit_v5_native_v2`; result SHA-256 `522d8ea2de814393f443f8b50fed84d4cd0ff9f44254d556a620adbdfd89a8a0`; model SHA-256 `caf5cd7d56a6491660ccdd7a0722407c2175ba5641faf7f462fac0cde2446731`; run-log SHA-256 `e2dcb3612ac4d66c34fa341cfee2060caa5f8916bcee90e9ab68d16b0cf9e643`.
+
+### Phase 12 native cache-v5 full-prefix evaluation — PASS; upstream closure complete
+
+- Immutable Phase-11 v5-native-v2 checkpoint was reevaluated through the shared full-prefix route with native FP32 `z16` entering the correct frozen coda and one fixed 2,048-position BF16 schedule sliced at every step.
+- Phase-12 text reproduced Phase 11 exactly for 8/8 examples; all 8 used strict growing prefixes, stopped naturally, had zero cap hits, and had no detected repetition, including IDs 2, 3, 5, and 7. Strict extracted-answer matches remained 7/8.
+- Evaluation SHA-256: `c0009a81d932772039b0c4b4c90905a838836c99298f8d36924e6edfbadfa33a`; run-log SHA-256: `4cc859a2b50e7f0174513f37a6b53b29d72bf96392582fab58855691788c69a0`.
+- `phase12_v5_upstream_closure_audit.json` closes cache fidelity, coda semantics, prefix-stable h0, alignment, masks, seeds, and train/eval semantics. Phase 13 remains blocked pending final independent code/science review.

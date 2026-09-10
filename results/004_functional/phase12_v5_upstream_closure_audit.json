@@ -1,0 +1,74 @@
+{
+  "protocol": "functional-upstream-closure-audit-native-v5-v1",
+  "status": "pass",
+  "phase13_authorized_before_review": false,
+  "closed_invariants": {
+    "cache_fidelity": {
+      "status": "closed",
+      "evidence": "results/004_functional/cache_v5_smoke_validation_v1.json",
+      "evidence_sha256": "65dd76fca9cba8df435b52c36f282ab8420fb742d8c4d65f61b813904e4af006",
+      "state_bitwise_equal": true,
+      "coda_logit_mean_abs": 0.0,
+      "coda_logit_max_abs": 0.0,
+      "coda_kl_per_token": 0.0,
+      "coda_argmax": "3123/3123"
+    },
+    "coda_semantics": {
+      "status": "closed",
+      "evidence": "results/004_functional/correctness_gate_cache_v5_native_v1.json",
+      "evidence_sha256": "3133d247f30b4a5fc17e785ecab4294ee8d055d11fce1b42c2ec896ceb36a9e4",
+      "convention": "normalized state enters coda directly; coda then final ln_f then lm_head; live pre-ln state receives exactly one initial ln_f",
+      "live_decomposition_recurrent_calls": 16,
+      "live_decomposition_latent_exact": true,
+      "live_decomposition_logits_exact": true
+    },
+    "prefix_stable_h0": {
+      "status": "closed",
+      "schedule": "one BF16 CUDA [1,2048,H] schedule per example/generation, sliced for every prefix",
+      "cache_all_prefix_overlap_bitwise": true,
+      "phase12_strict_growth": "8/8"
+    },
+    "alignment": {
+      "status": "closed",
+      "mapping": "logit at t-1 predicts token t",
+      "phase10_literal_control": true
+    },
+    "masks": {
+      "status": "closed",
+      "causal_padding_and_loss_masks": true,
+      "prompt_loss_positions": 0,
+      "post_valid_end_loss_positions": 0,
+      "padding_loss_positions": 0
+    },
+    "seeds": {
+      "status": "closed",
+      "seed_protocol": "injective-packed-coordinates-v3",
+      "base_seed": 3000,
+      "seed_index": 0,
+      "shared_initialization_sha256": "92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747"
+    },
+    "train_eval_semantics": {
+      "status": "closed",
+      "training_and_generation_coda_input": "native FP32 normalized A2 z16 with no dtype cast",
+      "generation_route": "complete actual generated prefix with one fixed schedule slice",
+      "phase12_exact_phase11_text_reproduction": "8/8",
+      "phase12_natural_stops": "8/8",
+      "phase12_cap_hits": 0,
+      "phase12_repetition_count": 0
+    }
+  },
+  "phase11": {
+    "result_sha256": "522d8ea2de814393f443f8b50fed84d4cd0ff9f44254d556a620adbdfd89a8a0",
+    "model_sha256": "caf5cd7d56a6491660ccdd7a0722407c2175ba5641faf7f462fac0cde2446731",
+    "science_review": "958ad611 PASS"
+  },
+  "phase12": {
+    "evaluation_sha256": "c0009a81d932772039b0c4b4c90905a838836c99298f8d36924e6edfbadfa33a",
+    "git_commit": "346bbfccd68e70148ff38cef6053da0d85b933c4",
+    "teacher_answer_matches": "7/8",
+    "historical_loop_ids_2_3_5_7_repetition": "none"
+  },
+  "no_full_vocabulary_logits_persisted": true,
+  "no_new_architecture_or_training_setting": true,
+  "closure_rule": "No Phase 13 review may introduce another prerequisite from this closed upstream list without identifying a concrete correctness defect."
+}
