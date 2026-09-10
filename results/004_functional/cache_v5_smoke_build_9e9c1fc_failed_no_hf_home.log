@@ -1,0 +1,42 @@
+{"estimated_uncompressed_item_bytes": 235035055, "item_count": 16, "largest_transient_schedule_bytes": 21626880, "minimum_free_bytes_with_2x_margin": 470070110, "protocol": "functional-cache-v5-smoke-preflight-v2", "storage": {"directory_fsync": true, "free_bytes": 244862559387648, "renameat2_noreplace_existing_preserved": true, "same_filesystem": true, "write_flush_fsync": true}, "total_tokens": 4451}
+Traceback (most recent call last):
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/transformers/utils/hub.py", line 402, in cached_file
+    resolved_file = hf_hub_download(
+                    ^^^^^^^^^^^^^^^^
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1014, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1121, in _hf_hub_download_to_cache_dir
+    _raise_on_head_call_error(head_call_error, force_download, local_files_only)
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1653, in _raise_on_head_call_error
+    raise LocalEntryNotFoundError(
+huggingface_hub.errors.LocalEntryNotFoundError: Cannot find the requested files in the disk cache and outgoing traffic has been disabled. To enable hf.co look-ups and downloads online, set 'local_files_only' to False.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/attentionsquared/scripts/build_004_functional_cache_v5_smoke.py", line 135, in <module>
+    p=argparse.ArgumentParser();p.add_argument("--config",type=Path,default=CONFIG);p.add_argument("--preflight-only",action="store_true");a=p.parse_args();main(a.config,a.preflight_only)
+                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/attentionsquared/scripts/build_004_functional_cache_v5_smoke.py", line 114, in main
+    tok=AutoTokenizer.from_pretrained(c["model_id"],revision=c["model_revision"],local_files_only=True)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/transformers/models/auto/tokenization_auto.py", line 854, in from_pretrained
+    config = AutoConfig.from_pretrained(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/transformers/models/auto/configuration_auto.py", line 976, in from_pretrained
+    config_dict, unused_kwargs = PretrainedConfig.get_config_dict(pretrained_model_name_or_path, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/transformers/configuration_utils.py", line 632, in get_config_dict
+    config_dict, kwargs = cls._get_config_dict(pretrained_model_name_or_path, **kwargs)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/transformers/configuration_utils.py", line 689, in _get_config_dict
+    resolved_config_file = cached_file(
+                           ^^^^^^^^^^^^
+  File "/workspace/miniconda/envs/attentionsquared/lib/python3.12/site-packages/transformers/utils/hub.py", line 445, in cached_file
+    raise EnvironmentError(
+OSError: We couldn't connect to 'https://huggingface.co' to load this file, couldn't find it in the cached files and it looks like tomg-group-umd/huginn-0125 is not the path to a directory containing a file named config.json.
+Checkout your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.
