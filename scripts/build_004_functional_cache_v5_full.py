@@ -135,6 +135,15 @@ def main(config_path:Path,preflight_only=False):
   write_item_atomic(item_path,arrays,manifest); validate_item(item_path,manifest)
   print(f"item={item_index}/2500 id={row['example_id']} status=validated",flush=True)
   del template,schedule,prefix,states,arrays,ids,mask; torch.cuda.empty_cache();gc.collect()
+ quarantine=attempt/"quarantine"
+ if quarantine.exists():
+  evidence_root=OUTPUT.parent/f"{OUTPUT.name}_quarantine_records"
+  evidence_root.mkdir(exist_ok=True)
+  evidence=evidence_root/f"build-{uuid.uuid4().hex}"
+  os.replace(quarantine,evidence)
+  for directory in (evidence_root,attempt):
+   fd=os.open(directory,os.O_RDONLY);os.fsync(fd);os.close(fd)
+  print(f"quarantine evidence preserved outside cache: {evidence}",flush=True)
  if {p.name for p in attempt.iterdir()}!={"manifest.json",".functional-cache-v5.lock",*(f"{i:05d}.npz" for i in FULL_EXAMPLE_IDS)}: raise RuntimeError("non-exact staging file set")
  os.chmod(attempt/".functional-cache-v5.lock",0o444)
  freeze_cache_directory(attempt); publish_directory_no_replace(attempt,OUTPUT)

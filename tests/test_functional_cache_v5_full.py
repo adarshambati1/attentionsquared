@@ -102,6 +102,7 @@ def test_build_is_resumable_and_finalization_hashes_complete_tree():
     assert 'f".{OUTPUT.name}.building"' in source
     assert "status=validated_existing" in source
     assert "publish_directory_no_replace" in source
+    assert "quarantine evidence preserved outside cache" in source
     validator = (ROOT / "scripts/validate_004_functional_cache_v5_full.py").read_text()
     assert "all_items_readable_and_schema_exact" in validator
     assert "coda_logits_exact" in validator
