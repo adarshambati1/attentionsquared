@@ -228,3 +228,20 @@ The compact cache is not yet built. All v2 work must follow
   `dae6e1586b9cdfa5ba7c67410c5c0aaf715e5e71ae297a1ffde136ad7ec1ecda`.
   Both final files and both preserved source files are mode `0444`; final and
   source directories are mode `0555`.
+
+### Phase 12 canonical full-prefix evaluator — implemented, pending pre-run review
+
+- `FullPrefixAttention2Evaluator` recomputes Huginn's frozen prelude, paired
+  deterministic `h0`, Attention² over the complete prefix, and the frozen coda
+  for every generated token.
+- Each step receives `prompt + all generated tokens`; no newest-token-only path,
+  Huginn cache, or Attention² KV cache exists in this evaluator.
+- Only the final-position vocabulary vector is materialized transiently for
+  greedy selection; no logits are persisted.
+- The Phase 12 runner is locked to the published Phase 11 model/result hashes,
+  frozen cache, examples 0–7, K=4, seed index 0, and 384-token cap. It preserves
+  exact generated token IDs, every prefix length, decoded text, stop/cap status,
+  and comparison to the Phase 11 text.
+- Output uses unique same-parent staging and atomic no-replace publication.
+- Focused Pod suite: 6 passed; full Pod suite: 141 passed. Phase 12 generation
+  has not run, and no Phase 13 controls have begun.

@@ -1,0 +1,19 @@
+{
+  "protocol": "attention2-full-prefix-autoregressive-v1",
+  "phase11_model": "/workspace/functional_overfit_v2/model.pt",
+  "phase11_model_sha256": "036a6578774d4352dd778a29a6c6214d1474ffb3b1e2d5e2db92e8267777777a",
+  "phase11_result": "/workspace/functional_overfit_v2/result.json",
+  "phase11_result_sha256": "0d84ac8353ca412c9e4b557d3fc42805e65585e4ec4e1f06b987f20340dbcd91",
+  "cache_root": "/workspace/functional_cache_v2",
+  "cache_freeze_sha256": "94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0",
+  "example_ids": [0, 1, 2, 3, 4, 5, 6, 7],
+  "K": 4,
+  "h0_base_seed": 3000,
+  "h0_seed_index": 0,
+  "max_new_tokens": 384,
+  "greedy": true,
+  "use_cache": false,
+  "attention2_kv_cache": false,
+  "recompute_complete_prefix_every_token": true,
+  "output": "/workspace/functional_phase12_v2"
+}
