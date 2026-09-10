@@ -464,3 +464,12 @@ The compact cache is not yet built. All v2 work must follow
 - This violates the required train/eval execution-equivalence closure item. The published attempt remains immutable at `/workspace/functional_overfit_v5_native` and is not the authoritative Phase-11 checkpoint.
 - Preserved result SHA-256: `3cca8a2c9cc8bcc6abc33def85a783fb3a2ddfc0d05703c60fa443326c772007`; model SHA-256: `7998974443598bc5cb6ac72c61cb7c661887941ec1d2310362bb72deba4066d7`; log SHA-256: `88c455ffd2f78f8c5c95b16f7f401cf7d63e40721affee00e0f4743178b12ca5`.
 - The evaluator cast is removed prospectively. A new run starts from the unchanged shared initialization and publishes only to `/workspace/functional_overfit_v5_native_v2`.
+
+### Authoritative Phase 11 native cache-v5 v2 — PASS
+
+- After prospectively removing the final train/eval `z16` dtype mismatch, one clean run started from unchanged shared initialization SHA-256 `92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747` and stopped at update 50.
+- KL/token fell from `11.0845774051229` to `0.019788683827215502`; first-token KL fell from `9.42530632019043` to `0.08677438134327531`.
+- Mean student first-target probability `0.5004427433013916` exceeded teacher `0.48250776529312134`; first-token argmax agreement was 7/8.
+- All eight generations were nonempty and stopped naturally, with zero cap hits and no detected repetition on any item, including IDs 2, 3, 5, and 7. Strict scorer teacher-answer matches were 7/8, above the unchanged preregistered minimum of 6; ID 1 stated the correct `$60` but ended by repeating `50 minutes`, so last-number extraction returned 50.
+- Independent science review `958ad611` returned PASS with no protocol deviations or additional controls.
+- Immutable output: `/workspace/functional_overfit_v5_native_v2`; result SHA-256 `522d8ea2de814393f443f8b50fed84d4cd0ff9f44254d556a620adbdfd89a8a0`; model SHA-256 `caf5cd7d56a6491660ccdd7a0722407c2175ba5641faf7f462fac0cde2446731`; run-log SHA-256 `e2dcb3612ac4d66c34fa341cfee2060caa5f8916bcee90e9ab68d16b0cf9e643`.
