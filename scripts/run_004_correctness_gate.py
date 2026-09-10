@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.create_004_a2_initialization import write_json_exclusive_fsync
-from src.data.functional_cache import validate_cache_item, validate_cache_manifest
+from src.data.functional_cache_v3 import validate_item, validate_manifest
 from src.evaluation.correctness import (
     aligned_answer_logits_and_targets,
     answer_bounds,
@@ -39,12 +39,15 @@ from src.training.functional_protocol import (
 )
 
 
-CACHE_ROOT = Path("/workspace/functional_cache_v2")
+CACHE_ROOT = Path("/workspace/functional_cache_v3_smoke")
 INITIALIZATION = Path("/workspace/functional_protocol/a2_init_seed_0.pt")
-OUTPUT = Path("/workspace/functional_protocol/correctness_gate_coda_v3.json")
+OUTPUT = Path("/workspace/functional_protocol/correctness_gate_cache_v3_coda_v4.json")
+CACHE_VALIDATION = ROOT / "results/004_functional/phase9r_cache_v3_smoke_validation_v3.json"
+EXPECTED_CACHE_MANIFEST_SHA256 = "d56e79c291e238ec6f694070a6f4623c34d7ef72d92740b45bd25a76d42e64f4"
+EXPECTED_CACHE_VALIDATION_SHA256 = "e578b111d87babe6a22cab6338ac46e103f0319d34877ca2962ef06974961db4"
 MODEL_ID = "tomg-group-umd/huginn-0125"
 MODEL_REVISION = "bb6621b65e90b6a4b9b29ef88dc83866d450470c"
-PROTOCOL = "functional-correctness-gate-coda-v3"
+PROTOCOL = "functional-correctness-gate-cache-v3-coda-v4"
 EXAMPLE_ID = 0
 
 
@@ -181,9 +184,9 @@ def live_d16_decomposed_coda_gold_control(
 
 def load_example(cache_root: Path, device: torch.device) -> dict:
     manifest = json.loads((cache_root / "manifest.json").read_text())
-    validate_cache_manifest(manifest)
-    path = cache_root / "train" / f"{EXAMPLE_ID:05d}.npz"
-    metadata = validate_cache_item(path, manifest)
+    validate_manifest(manifest)
+    path = cache_root / f"{EXAMPLE_ID:05d}.npz"
+    metadata = validate_item(path, manifest)
     with np.load(path, allow_pickle=False) as archive:
         arrays = {key: archive[key] for key in archive.files}
     return {
@@ -191,13 +194,12 @@ def load_example(cache_root: Path, device: torch.device) -> dict:
         "metadata": metadata,
         "input_ids": torch.from_numpy(arrays["input_ids"].astype(np.int64))[None].to(device),
         "attention_mask": torch.from_numpy(arrays["attention_mask"])[None].to(device),
-        "h0": torch.from_numpy(arrays["h0_full"].astype(np.float32))[None].to(device),
-        "x": torch.from_numpy(arrays["x_full"].astype(np.float32))[None].to(device),
-        "h16_teacher": torch.from_numpy(
-            arrays["h16_teacher"].astype(np.float32)
-        )[None].to(device),
+        "h0": torch.from_numpy(arrays["h0"].astype(np.float32))[None].to(device),
+        "x": torch.from_numpy(arrays["x"].astype(np.float32))[None].to(device),
+        "h16_teacher": torch.from_numpy(arrays["h16"].astype(np.float32))[None].to(device),
         "answer_start": int(arrays["answer_start"]),
         "valid_end": int(arrays["valid_end"]),
+        "full_schedule_sha256": str(arrays["full_schedule_sha256"]),
     }
 
 
@@ -298,6 +300,7 @@ def run_gate(cache_root: Path, initialization: Path) -> dict:
         "status": "pass",
         "example_id": EXAMPLE_ID,
         "cache_item": str(example["path"]),
+        "cache_item_full_schedule_sha256": example["full_schedule_sha256"],
         "sequence_length": int(input_ids.shape[1]),
         "answer_start": example["answer_start"],
         "valid_end": example["valid_end"],
@@ -342,12 +345,19 @@ def main(cache_root: Path, initialization: Path, output: Path) -> dict:
     if output.exists() or output.is_symlink():
         raise FileExistsError(f"refusing to overwrite correctness gate: {output}")
     commit = clean_git_commit()
+    cache_manifest_sha256 = sha256_file(cache_root / "manifest.json")
+    cache_validation_sha256 = sha256_file(CACHE_VALIDATION)
+    if cache_manifest_sha256 != EXPECTED_CACHE_MANIFEST_SHA256:
+        raise RuntimeError("cache-v3 smoke manifest identity changed")
+    if cache_validation_sha256 != EXPECTED_CACHE_VALIDATION_SHA256:
+        raise RuntimeError("cache-v3 independent validation identity changed")
     result = run_gate(cache_root, initialization)
     result.update(
         {
             "git_commit": commit,
             "initialization_sha256": sha256_file(initialization),
-            "cache_freeze_sha256": sha256_file(cache_root / "FROZEN.json"),
+            "cache_manifest_sha256": cache_manifest_sha256,
+            "cache_validation_sha256": cache_validation_sha256,
             "literal_alignment_control": literal_alignment_control(),
             "padding_influence_control": "tests/test_attention2_padding.py",
         }

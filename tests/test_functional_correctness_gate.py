@@ -1,9 +1,15 @@
+from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import torch
 from torch import nn
 
+from scripts import run_004_correctness_gate as gate
 from scripts.run_004_correctness_gate import (
+    CACHE_ROOT,
+    EXPECTED_CACHE_MANIFEST_SHA256,
+    EXPECTED_CACHE_VALIDATION_SHA256,
     OUTPUT,
     PROTOCOL,
     live_d16_decomposed_coda_gold_control,
@@ -155,9 +161,33 @@ def test_production_gold_control_captures_exactly_d16_and_normalizes_once():
     assert result["logit_max_abs"] == 0
 
 
-def test_corrected_gate_uses_new_v3_artifact_without_overwriting_v1():
-    assert OUTPUT.name == "correctness_gate_coda_v3.json"
-    assert PROTOCOL == "functional-correctness-gate-coda-v3"
+def test_corrected_gate_uses_cache_v3_and_new_v4_artifact_without_overwriting_prior_gates():
+    assert CACHE_ROOT == Path("/workspace/functional_cache_v3_smoke")
+    assert OUTPUT.name == "correctness_gate_cache_v3_coda_v4.json"
+    assert PROTOCOL == "functional-correctness-gate-cache-v3-coda-v4"
+    assert len(EXPECTED_CACHE_MANIFEST_SHA256) == 64
+    assert len(EXPECTED_CACHE_VALIDATION_SHA256) == 64
+
+
+def test_cache_v3_loader_uses_flat_item_and_h0_x_h16_names(tmp_path, monkeypatch):
+    (tmp_path / "manifest.json").write_text("{}")
+    np.savez(
+        tmp_path / "00000.npz",
+        input_ids=np.array([1, 2, 3], dtype=np.int32),
+        attention_mask=np.ones(3, dtype=np.bool_),
+        h0=np.zeros((3, 2), dtype=np.float16),
+        x=np.ones((3, 2), dtype=np.float16),
+        h16=np.full((3, 2), 2, dtype=np.float16),
+        answer_start=np.array(1, dtype=np.int32),
+        valid_end=np.array(3, dtype=np.int32),
+        full_schedule_sha256=np.array("a" * 64),
+    )
+    monkeypatch.setattr(gate, "validate_manifest", lambda manifest: None)
+    monkeypatch.setattr(gate, "validate_item", lambda path, manifest: {})
+    loaded = gate.load_example(tmp_path, torch.device("cpu"))
+    assert loaded["path"] == tmp_path / "00000.npz"
+    assert loaded["h0"].shape == loaded["x"].shape == loaded["h16_teacher"].shape == (1, 3, 2)
+    assert loaded["full_schedule_sha256"] == "a" * 64
 
 
 def test_teacher_self_kl_is_calculated_and_untrained_baseline_is_nonzero():

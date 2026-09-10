@@ -26,6 +26,7 @@ MODEL_REVISION = "bb6621b65e90b6a4b9b29ef88dc83866d450470c"
 DATASET_REVISION = "740312add88f781978c0658806c59bc2815b9866"
 SYSTEM_INSTRUCTION = "You are a helpful assistant that can assist users with mathematical reasoning."
 IDS = tuple(range(8))
+EXPECTED_BUILDER_COMMIT = "c8ba78263be3319c5366ac760e0b5e1ab9ebcbc7"
 LOCKED_HASHES = {
     "split_manifest_sha256": "afdbc0c55196104e276df0d65c8df24664836874a87b623cd5f3dd8331d1a5d8",
     "valid_end_manifest_sha256": "25188506cb7afe426e42beb5fa96455fe8ac0cff6c0ae47b72363a3fa7af187f",
@@ -192,9 +193,8 @@ def validate_static(root: Path = CACHE_ROOT):
     for key in ("tokenizer_template_sha256",):
         if not isinstance(manifest.get(key), str) or len(manifest[key]) != 64:
             raise ValueError(f"manifest digest failed: {key}")
-    for key in ("git_commit",):
-        if not isinstance(manifest.get(key), str) or len(manifest[key]) != 40:
-            raise ValueError(f"manifest commit failed: {key}")
+    if manifest["git_commit"] != EXPECTED_BUILDER_COMMIT:
+        raise ValueError("cache was not built from the authorized Phase 9R commit")
     manifest_digest = hashlib.sha256(
         json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
@@ -423,7 +423,7 @@ def replay(config, rows, manifest, values):
 def main():
     config, rows, manifest, values = validate_static()
     result = replay(config, rows, manifest, values)
-    print(json.dumps({"protocol":"functional-cache-v3-smoke-independent-validation-v2","status":"pass","h0_exactness_hard_gate":True,"full_schedule_persisted":False,"logits_persisted":False,**result}, indent=2, sort_keys=True))
+    print(json.dumps({"protocol":"functional-cache-v3-smoke-independent-validation-v3","status":"pass","cache_builder_git_commit":manifest["git_commit"],"h0_exactness_hard_gate":True,"full_schedule_persisted":False,"logits_persisted":False,**result}, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

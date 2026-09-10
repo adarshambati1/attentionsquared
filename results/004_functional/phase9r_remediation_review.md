@@ -6,3 +6,9 @@
 - Final authorization: **code PASS / science PASS** for only the eight-example cache-v3 smoke build.
 - H100 verification before authorization: 42 focused tests and 172 full-suite tests passed.
 - No cache construction or training occurred before final authorization.
+
+## Completion review
+
+- Completion review `b4fd1c1e`: science PASS; code FAIL only because the first retained production-validation JSON did not record and strictly require the authorized builder commit.
+- The validator now requires exact builder commit `c8ba78263be3319c5366ac760e0b5e1ab9ebcbc7` and records it. The non-overwriting v3 validation passed 8/8; SHA-256 `e578b111d87babe6a22cab6338ac46e103f0319d34877ca2962ef06974961db4`.
+- Completion code delta re-review `c2036120`: **CODE PASS**. Phase 9R completion is therefore PASS/PASS and corrected Phase 10 may proceed against cache v3.

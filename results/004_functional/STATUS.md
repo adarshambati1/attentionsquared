@@ -148,7 +148,7 @@ The compact cache is not yet built. All v2 work must follow
   The artifact, builder record, prior validation log, and attestation are all
   regular non-symlink files published read-only; each observed mode is `0444`.
 
-### Phase 9R prefix-stable cache-v3 smoke — PRE-RUN PASS/PASS; build authorized
+### Phase 9R prefix-stable cache-v3 smoke — COMPLETE PASS/PASS
 
 - Phase-scoped code/config now targets only immutable raw teacher train IDs 0–7
   and the new atomic no-replace output
@@ -200,12 +200,25 @@ The compact cache is not yet built. All v2 work must follow
   non-overwriting v3 audit added them, delta re-review `838c172` returned
   science PASS. Final authorization is PASS/PASS for only the
   eight-example smoke build.
-- **At authorization time, no cache construction, production validator,
-  optimizer step, or Phase 10–13 rerun had occurred.**
+- The smoke was built at commit `c8ba78263be3319c5366ac760e0b5e1ab9ebcbc7`
+  and frozen mode `0555` with eight mode-`0444` items plus manifest. The
+  independent production validator passed 8/8; after it was tightened to lock
+  and record the exact builder commit, its non-overwriting v3 artifact SHA-256
+  was `e578b111d87babe6a22cab6338ac46e103f0319d34877ca2962ef06974961db4`.
+  Completion review `b4fd1c1e` returned science PASS; delta code re-review
+  `c2036120` returned PASS. No optimizer step or Phase 10–13 rerun occurred
+  during Phase 9R.
 
-### Phase 10 correctness/unit-test gate — corrected coda-v3 PASS/PASS
+### Phase 10 correctness/unit-test gate — historical coda-v3 PASS/PASS; cache-v3 rerun pending
 
-- The active gate now targets the new no-replace artifact
+- The prepared cache-v3 rerun targets only smoke item `00000.npz`, locks the
+  cache manifest and independent v3 validation hashes, maps the v3 `h0/x/h16`
+  schema, and writes a new no-replace
+  `/workspace/functional_protocol/correctness_gate_cache_v3_coda_v4.json`.
+  It preserves the corrected normalized-state coda semantics, shared A²
+  initialization, mask/alignment controls, frozen-Huginn gradient gate, and
+  exact live D16 decomposition. H100 suite: 173 passed. It has not executed.
+- The historical gate targeted the new no-replace artifact
   `/workspace/functional_protocol/correctness_gate_coda_v3.json`; the historical
   `correctness_gate.json` and all other v2 artifacts remain untouched.
 - Cache-v2 `h16_teacher` and Attention² `z16` now enter one authoritative frozen

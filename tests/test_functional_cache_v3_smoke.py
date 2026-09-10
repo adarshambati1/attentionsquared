@@ -90,6 +90,8 @@ def test_validator_is_independent_and_contains_literal_replay_invariants():
  assert "build_chat_prompt" in source and "tokenize_prompt" in source
  assert "globally_token_normalized_kl" in source and "top1_agreement" in source
  assert 'diagnostics["logit_mean_abs"]' in source and 'diagnostics["logit_max_abs"]' in source
+ assert 'EXPECTED_BUILDER_COMMIT = "c8ba78263be3319c5366ac760e0b5e1ab9ebcbc7"' in source
+ assert '"cache_builder_git_commit":manifest["git_commit"]' in source
 
 def test_extraction_injects_explicit_slice_and_never_persists_logits():
  model=FakeHuginn();h0=torch.zeros((1,3,4),dtype=torch.bfloat16);ids=torch.arange(3)[None];states=capture_scheduled_huginn_states(model,ids,torch.ones_like(ids,dtype=torch.bool),h0)
