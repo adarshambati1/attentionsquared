@@ -439,3 +439,13 @@ The compact cache is not yet built. All v2 work must follow
 - Failed build-log SHA-256: `87b224e183fd65c2a409dff5acd2f84347af1ed8d8a4ce343795a64c8ed0fe3b`.
 - Independent canonical dtype verification across IDs 0, 2, and 7 confirmed native `h0` BF16 and native `x`/core outputs/normalized `h16` FP32. Evidence SHA-256: `de735cefcc7b51b2d33257bcd91662e433262f2d3806dbd3fef933756dce7bac`.
 - Cache-v5 is a new native-dtype object: raw BF16 bits for `h0`, exact FP32 for `x` and `h16`.
+
+### Native-dtype cache-v5 smoke and immediate fidelity gate — PASS
+
+- A new immutable 16-item cache was built at `/workspace/functional_cache_v5_smoke`: Phase-11 IDs 0–7 plus preregistered Phase-13C IDs 2277, 2473, 2452, 2485, 2415, 2264, 2317, and 2439.
+- Native storage is lossless: `h0` uses raw BF16 `uint16` bits; `x` and normalized pre-coda `h16` use exact FP32. No vocabulary logits are stored. Cache-v3 and failed cache-v4 evidence remain untouched.
+- Builder commit: `9e9c1fc322f61a23f9f902785de66fba1504cccf`; manifest SHA-256: `55a5cc5cc77bf969ef200b49dae7d50d63ef97a88e608978902c6e50f5040583`.
+- Independent validator commit: `2db74ed36c452e1136c5ca3492d741b337131e55`; H100 focused/full tests before validation: 13/13 and 186/186 passed.
+- All 16 items reproduced live `h0` BF16 bits, `x` FP32 bits, and `h16` FP32 bits exactly. Across all 3,123 represented teacher positions, cached/live frozen-coda logit mean/max error and KL/token were exactly zero, with 3,123/3,123 argmax agreement.
+- Validation artifact SHA-256: `65dd76fca9cba8df435b52c36f282ab8420fb742d8c4d65f61b813904e4af006`.
+- No training occurred before this fidelity gate.
