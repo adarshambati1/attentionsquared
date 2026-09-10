@@ -204,14 +204,58 @@ not speed.
 
 ## Phase 13 — Evaluator controls
 
-Before evaluating Attention²:
+Freeze these criteria before execution. They validate evaluator and cache
+plumbing; they do not change Attention², K, training data, loss, teacher, or the
+Phase 12 generation procedure.
 
-1. Run frozen Huginn D16 through the shared evaluator and recover approximately
-   the known 40.4% same-split teacher result.
-2. Verify true cached `h16` agrees with normal teacher behavior.
-3. Match Exp1 stop strings, cap handling, fallback rules, and answer extraction.
+### 13A — Historical-control provenance
 
-Do not proceed if these controls disagree.
+Run frozen Huginn D16 on the historical same-split control: GSM8K train IDs
+2250–2499, pinned model and dataset revisions, bfloat16, greedy decoding,
+1024-token cap, native chat template, and the shared `<|end_text|>` /
+`<|end_turn|>` stop policy. Use base seed 3000, seed index 0, and label it
+`prospective deterministic reproduction seed; historical 40.4% RNG provenance
+unknown`. Preserve every derived per-example seed.
+
+Report both historical-emulation and authoritative corrected scores. The known
+101/250 (40.4%) is a reference, not an exact deterministic gate. `[0.34, 0.47]`
+is only a broad anomaly band, not evidence of route equivalence. Audit every
+per-example scoring disagreement.
+
+### 13B — New evaluator versus live Huginn
+
+On identical examples and complete growing prefixes, run normal live Huginn D16
+and the new full-prefix Huginn route with identical `h0`, seed, and greedy
+decoding. Require exact equality of generated token IDs, stop reason, cap flag,
+extracted answer, and correctness. Any categorical disagreement fails Phase 13.
+
+### 13C — Cached `h16` versus live `h16`
+
+Compare only cached teacher-continuation prefixes. Freeze these quantization-aware
+bounds, based on measurements made before Phase 13:
+
+- hidden-state maximum absolute error `<= 0.003`, with cosine and relative-L2
+  reported;
+- mean absolute logit error `<= 0.005`;
+- maximum absolute logit error `<= 0.06`;
+- KL per compared token `<= 5e-4`;
+- 100% next-token argmax agreement.
+
+Also report bitwise `live_h16.to(float16) == cached_h16` as a diagnostic, not a
+hard scientific gate. Investigate rather than loosen these bounds if cache-v2
+statistics fall outside the preregistered envelope.
+
+### 13D — Scope of equivalence
+
+Cached/live equivalence covers only represented teacher prefixes. It does not
+establish equivalence on arbitrary student branches. The full-prefix live route
+remains authoritative for autoregressive evaluation until a separately
+validated Attention² KV cache exists.
+
+Match Experiment 1 stop strings, cap handling, historical fallback behavior,
+authoritative corrected fallback behavior, and answer extraction. Persist no
+full-vocabulary logits. Do not proceed if 13B or 13C disagrees, or if 13A falls
+outside its broad anomaly band without a resolved audit.
 
 ## Phase 14 — Correct trajectory-checkpoint reevaluation
 

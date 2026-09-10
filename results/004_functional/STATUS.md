@@ -262,3 +262,19 @@ The compact cache is not yet built. All v2 work must follow
   It records the authoritative evaluation as a regular non-symlink mode-`0444`
   file in a non-symlink mode-`0555` directory, published by same-parent
   `renameat2(RENAME_NOREPLACE)`.
+
+### Phase 13 evaluator controls — preregistered, not executed
+
+- Historical reference: GSM8K train IDs 2250–2499, D16, bfloat16, greedy,
+  1024-token cap; base seed 3000/index 0 is prospective because the historical
+  40.4% run's realized RNG provenance is unknown.
+- Report historical-emulation and corrected scores separately. The 40.4% result
+  is a reference and `[0.34, 0.47]` is only a broad anomaly band.
+- Live-reference versus new full-prefix Huginn generation requires exact token,
+  stop/cap, extracted-answer, and correctness agreement.
+- Cached/live teacher-prefix bounds are frozen before execution: hidden maximum
+  absolute error `<=0.003`, logit mean/max absolute error `<=0.005`/`<=0.06`,
+  KL/token `<=5e-4`, and 100% next-token argmax agreement. Float16 bitwise
+  identity is diagnostic rather than a hard gate.
+- Cache equivalence claims are limited to represented teacher prefixes. No
+  Phase 13 execution or Phase 14 work has begun.
