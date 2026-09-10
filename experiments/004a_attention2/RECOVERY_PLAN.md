@@ -22,6 +22,11 @@ in [`../../results/TRUST_STATUS.md`](../../results/TRUST_STATUS.md).
 - Do not modify topology, QKV, x-injection, or objective while repairing the
   baseline.
 - Stop at a failed gate rather than changing protocol silently.
+- AI code/sc/science review is necessary but never sufficient. Before and
+  after each runtime phase, run independent numerical checks on the pinned H100
+  that exercise actual tensors and compare against a distinct reference path,
+  not merely the same helper twice. Preserve counts, errors, hashes, and
+  categorical agreement. Any unexplained numerical mismatch blocks transition.
 
 ## Phase 1 — Freeze the scientific record
 
