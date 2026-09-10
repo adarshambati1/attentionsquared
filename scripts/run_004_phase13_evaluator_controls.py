@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.create_004_a2_initialization import write_json_exclusive_fsync
-from src.data.functional_cache import validate_cache_item, validate_cache_manifest
+from src.data.functional_cache_v3 import validate_item, validate_manifest
 from src.evaluation.correctness import (
     SCORER_PROTOCOL,
     SEED_PROTOCOL,
@@ -46,9 +46,10 @@ from src.evaluation.functional_autoregressive import (
 from src.training.functional_objective import freeze_module
 
 
-CONFIG = Path("configs/004_functional_v2_phase13.json")
-OUTPUT_ROOT = Path("/workspace/functional_phase13_controls_v2")
-PROTOCOL = "huginn-d16-phase13-evaluator-controls-v2"
+CONFIG = Path("configs/004_functional_v3_phase13.json")
+OUTPUT_ROOT = Path("/workspace/functional_phase13_controls_v3")
+PROTOCOL = "huginn-d16-phase13-evaluator-controls-v3"
+CACHE_VALIDATION = ROOT / "results/004_functional/phase9r_cache_v3_smoke_validation_v3.json"
 MODEL_ID = "tomg-group-umd/huginn-0125"
 MODEL_REVISION = "bb6621b65e90b6a4b9b29ef88dc83866d450470c"
 DATASET_REVISION = "740312add88f781978c0658806c59bc2815b9866"
@@ -103,11 +104,12 @@ def expected_config() -> dict:
         "accuracy_anomaly_band": [0.34, 0.47],
         "accuracy_band_role": "broad anomaly check only; not deterministic route equivalence",
         "report_historical_emulation_and_corrected_scores": True,
-        "cache_root": "/workspace/functional_cache_v2",
-        "cache_freeze_sha256": "94417eab65fd04a5827bdef9aadc9a5b8b66c266700b6cfc7ab56d39f949d3f0",
-        "cache_manifest_sha256": "32db951f6cfbf76220b1c7126e23149f087eba58934ab691b588aeb3a43535bf",
-        "cache_control_split": "validation",
-        "cache_control_example_ids": list(range(2250, 2258)),
+        "phase12_evaluation": "/workspace/functional_phase12_v3/evaluation.json",
+        "phase12_evaluation_sha256": "9becefd0db28b841620bfeb4441c8e06475f690d861d0d2bf6276b38b18be94d",
+        "cache_root": "/workspace/functional_cache_v3_smoke",
+        "cache_manifest_sha256": "d56e79c291e238ec6f694070a6f4623c34d7ef72d92740b45bd25a76d42e64f4",
+        "cache_validation_sha256": "e578b111d87babe6a22cab6338ac46e103f0319d34877ca2962ef06974961db4",
+        "cache_control_example_ids": list(range(8)),
         "cached_live_tolerances": {
             "hidden_max_abs": 0.003,
             "logit_mean_abs": 0.005,
@@ -120,7 +122,7 @@ def expected_config() -> dict:
             "generated_token_ids", "stop_reason", "hit_max_new_tokens",
             "extracted_answer", "correctness",
         ],
-        "cache_equivalence_scope": "represented teacher-continuation prefixes only",
+        "cache_equivalence_scope": "census of all eight cache-v3 smoke items at represented teacher-continuation prediction positions",
         "persist_logits": False,
         "training": False,
         "attention2_generation": False,
@@ -179,21 +181,34 @@ def scorer_golden_controls() -> dict:
     }
 
 
-def trusted_live_next_token_logits(huginn, prefix: torch.Tensor, h0: torch.Tensor) -> torch.Tensor:
-    """Independent trusted model-forward reference; the caller owns h0."""
+def independent_decomposed_next_token_logits(
+    huginn, prefix: torch.Tensor, h0: torch.Tensor
+) -> torch.Tensor:
+    """Literal prelude + 16 core calls + normalized-state coda reference."""
     with torch.inference_mode(), torch.autocast(
         device_type=prefix.device.type, dtype=torch.bfloat16,
         enabled=prefix.device.type == "cuda",
     ):
-        output = huginn(
-            input_ids=prefix,
-            attention_mask=torch.ones_like(prefix, dtype=torch.bool),
-            input_states=h0,
-            num_steps=16,
-            use_cache=False,
-            return_dict=True,
+        frequencies = huginn.freqs_cis[:, : prefix.shape[1]]
+        recurrent_input = huginn.transformer.wte(prefix)
+        if huginn.emb_scale != 1:
+            recurrent_input = recurrent_input * huginn.emb_scale
+        block_index = torch.tensor(-1, device="cpu", dtype=torch.long)
+        for block in huginn.transformer.prelude:
+            block_index += 1
+            recurrent_input = block(
+                recurrent_input, frequencies, block_index, None, None
+            )
+        state = h0
+        for step in range(16):
+            state, block_index = huginn.core_block_forward(
+                state, recurrent_input, frequencies, None, None, block_index, step
+            )
+        normalized = huginn.transformer.ln_f(state)
+        logits = frozen_coda_logits_from_normalized_state(
+            huginn, normalized, frequencies, last_only=True
         )
-        return output.logits[:, -1].float().clone()
+        return logits.clone()
 
 
 def _stop_reason(token_ids: list[int], tokenizer, cap: int, *, route_mismatch: bool) -> tuple[str, bool]:
@@ -224,7 +239,9 @@ def compare_live_routes(
     for step in range(max_new_tokens):
         h0 = h0_schedule[:, : current.shape[1]]
         # These are deliberately two independent forwards receiving the exact same object/value.
-        trusted_logits = trusted_live_next_token_logits(huginn, current, h0)
+        trusted_logits = independent_decomposed_next_token_logits(
+            huginn, current, h0
+        )
         evaluator_logits = evaluator.next_token_logits_with_h0(current, h0)
         trusted_token = int(trusted_logits[0].argmax().item())
         evaluator_token = int(evaluator_logits[0].argmax().item())
@@ -299,15 +316,15 @@ def _finite(value: float) -> float:
 
 
 def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) -> dict:
-    """Compare every valid teacher-prefix prediction position for IDs 2250--2257."""
+    """Census every represented prediction position in cache-v3 smoke."""
     del tokenizer
     cache_root = Path(config["cache_root"])
-    if sha256_file(cache_root / "FROZEN.json") != config["cache_freeze_sha256"]:
-        raise ValueError("cache freeze identity mismatch")
     if sha256_file(cache_root / "manifest.json") != config["cache_manifest_sha256"]:
         raise ValueError("cache manifest file identity mismatch")
+    if sha256_file(CACHE_VALIDATION) != config["cache_validation_sha256"]:
+        raise ValueError("cache independent-validation identity mismatch")
     manifest = json.loads((cache_root / "manifest.json").read_text())
-    validate_cache_manifest(manifest)
+    validate_manifest(manifest)
     evaluator = FullPrefixHuginnD16Evaluator(
         huginn, None, base_seed=manifest["base_seed"], seed_index=0
     )
@@ -322,11 +339,11 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
     records = []
 
     for example_id in config["cache_control_example_ids"]:
-        path = cache_root / config["cache_control_split"] / f"{example_id:05d}.npz"
-        metadata = validate_cache_item(path, manifest)
+        path = cache_root / f"{example_id:05d}.npz"
+        metadata = validate_item(path, manifest)
         with np.load(path, allow_pickle=False) as archive:
             ids = torch.from_numpy(archive["input_ids"].astype(np.int64))[None].to(device)
-            cached_fp16 = torch.from_numpy(archive["h16_teacher"].copy())[None].to(device)
+            cached_fp16 = torch.from_numpy(archive["h16"].copy())[None].to(device)
         start = metadata["answer_start"] - 1
         end = metadata["valid_end"] - 1
         positions = slice(start, end)
@@ -443,7 +460,7 @@ def run_cache_controls(config: dict, huginn, tokenizer, device: torch.device) ->
         "passed": all(bounds.values()),
         "scope": config["cache_equivalence_scope"],
         "cache_manifest_sha256": config["cache_manifest_sha256"],
-        "cache_freeze_sha256": config["cache_freeze_sha256"],
+        "cache_validation_sha256": config["cache_validation_sha256"],
         "tolerances": tolerances,
         "bounds_passed": bounds,
         "float16_hidden_bitwise_identity_is_diagnostic_only": True,
@@ -458,6 +475,17 @@ def run(config: dict, commit: str) -> dict:
 
     if not torch.cuda.is_available():
         raise RuntimeError("Phase 13 canonical controls require CUDA")
+    phase12_path = Path(config["phase12_evaluation"])
+    if sha256_file(phase12_path) != config["phase12_evaluation_sha256"]:
+        raise ValueError("corrected Phase 12 identity mismatch")
+    phase12 = json.loads(phase12_path.read_text())
+    if (
+        phase12.get("status") != "pass"
+        or phase12.get("phase11_model_sha256")
+        != "fc1a0099d2efd4fa233570a77ea6ed94e6ebb32bd948862ccdbb679362685c5a"
+        or phase12.get("repetition_detected_count") != 0
+    ):
+        raise ValueError("corrected Phase 12 is not authoritative")
     device = torch.device("cuda")
     tokenizer = AutoTokenizer.from_pretrained(
         config["model_id"], revision=config["model_revision"], local_files_only=True
@@ -568,6 +596,11 @@ def run(config: dict, commit: str) -> dict:
         "phase13A_historical_control": historical_control,
         "phase13B_live_route_control": route_control,
         "phase13C_cache_control": cache_controls,
+        "phase13D_inference_limit": {
+            "cache_scope": config["cache_equivalence_scope"],
+            "attention2_judgment_route": "live fixed-2048-schedule full-prefix evaluation",
+            "claim": "cache equivalence is limited to represented cached teacher positions and does not establish equivalence for arbitrary generated prefixes",
+        },
         "full_vocabulary_logits_persisted": False,
         "training_performed": False,
         "attention2_generation_performed": False,
@@ -603,11 +636,7 @@ def publish_attempt(attempt: Path, final: Path) -> None:
 
 
 def main(config_path: Path, output_root: Path) -> dict:
-    raise RuntimeError(
-        "Phase 13 is hard-blocked pending independently reviewed corrected "
-        "Phase 10 and new corrected Phase 11/12 artifacts"
-    )
-    if config_path != CONFIG or output_root != OUTPUT_ROOT:  # pragma: no cover
+    if config_path != CONFIG or output_root != OUTPUT_ROOT:
         raise ValueError("Phase 13 requires exact production paths")
     if output_root.exists() or output_root.is_symlink():
         raise FileExistsError(f"refusing to replace Phase 13 output: {output_root}")

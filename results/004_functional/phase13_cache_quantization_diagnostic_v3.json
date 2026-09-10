@@ -1,0 +1,208 @@
+{
+  "attention2_used": false,
+  "global_max_logit_error": {
+    "answer_prediction_offset": 0,
+    "example_id": 0,
+    "prediction_position": 66,
+    "value": 0.125,
+    "vocabulary_token_id": 1401
+  },
+  "global_max_occurs_at_argmax_mismatch_position": false,
+  "length_strata_equal_count_sorted_by_sequence_length": [
+    {
+      "argmax_agreement": 1.0,
+      "example_ids": [
+        1,
+        4,
+        0
+      ],
+      "kl_live_to_cached_per_token": 7.376336383030695e-05,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005621310041732147,
+      "sequence_lengths": [
+        118,
+        147,
+        155
+      ],
+      "stratum": "shortest_3"
+    },
+    {
+      "argmax_agreement": 0.996551724137931,
+      "example_ids": [
+        6,
+        2
+      ],
+      "kl_live_to_cached_per_token": 4.943087697029114e-05,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005616261630222715,
+      "sequence_lengths": [
+        194,
+        270
+      ],
+      "stratum": "middle_2"
+    },
+    {
+      "argmax_agreement": 1.0,
+      "example_ids": [
+        5,
+        7,
+        3
+      ],
+      "kl_live_to_cached_per_token": 7.294875340917864e-05,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.0056136242408441886,
+      "sequence_lengths": [
+        300,
+        311,
+        434
+      ],
+      "stratum": "longest_3"
+    }
+  ],
+  "mismatch_count": 1,
+  "mismatches": [
+    {
+      "answer_prediction_offset": 90,
+      "cached_top1_probability": 0.2297632396221161,
+      "cached_top1_token_id": 2127,
+      "example_id": 2,
+      "hidden_max_abs_at_position": 0.0019450187683105469,
+      "hidden_mean_abs_at_position": 0.00021855320665054023,
+      "kl_live_to_cached_at_position": 0.0013984832912683487,
+      "live_top1_minus_top2_logit_margin": 0.0,
+      "live_top1_minus_top2_probability_margin": 0.0,
+      "live_top1_probability": 0.2081362009048462,
+      "live_top1_token_id": 661,
+      "live_top2_probability": 0.2081362009048462,
+      "live_top2_token_id": 2127,
+      "logit_max_abs_at_position": 0.125,
+      "logit_mean_abs_at_position": 0.005274131428450346,
+      "prediction_position": 180,
+      "sequence_length": 270,
+      "target_token_id": 661
+    }
+  ],
+  "per_example": [
+    {
+      "argmax_equal": 88,
+      "argmax_total": 88,
+      "compared_tokens": 88,
+      "example_id": 0,
+      "hidden_max_abs": 0.0019516944885253906,
+      "hidden_mean_abs": 0.00021680672944057733,
+      "kl_live_to_cached_per_token": 5.888339001103304e-05,
+      "live_bfloat16_to_float16_equals_cached_float16": true,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005590228829532862,
+      "lossless_bfloat16_state_replay_logits_exact": true,
+      "sequence_length": 155
+    },
+    {
+      "argmax_equal": 57,
+      "argmax_total": 57,
+      "compared_tokens": 57,
+      "example_id": 1,
+      "hidden_max_abs": 0.001953125,
+      "hidden_mean_abs": 0.00021653609292116016,
+      "kl_live_to_cached_per_token": 6.0218037106096745e-05,
+      "live_bfloat16_to_float16_equals_cached_float16": true,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005664864555001259,
+      "lossless_bfloat16_state_replay_logits_exact": true,
+      "sequence_length": 118
+    },
+    {
+      "argmax_equal": 178,
+      "argmax_total": 179,
+      "compared_tokens": 179,
+      "example_id": 2,
+      "hidden_max_abs": 0.001953125,
+      "hidden_mean_abs": 0.00021653198928106576,
+      "kl_live_to_cached_per_token": 3.38278005074244e-05,
+      "live_bfloat16_to_float16_equals_cached_float16": true,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005641859956085682,
+      "lossless_bfloat16_state_replay_logits_exact": true,
+      "sequence_length": 270
+    },
+    {
+      "argmax_equal": 350,
+      "argmax_total": 350,
+      "compared_tokens": 350,
+      "example_id": 3,
+      "hidden_max_abs": 0.001953125,
+      "hidden_mean_abs": 0.0002167434577131644,
+      "kl_live_to_cached_per_token": 5.561015859711915e-05,
+      "live_bfloat16_to_float16_equals_cached_float16": true,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005605436861515045,
+      "lossless_bfloat16_state_replay_logits_exact": true,
+      "sequence_length": 434
+    },
+    {
+      "argmax_equal": 93,
+      "argmax_total": 93,
+      "compared_tokens": 93,
+      "example_id": 4,
+      "hidden_max_abs": 0.001953125,
+      "hidden_mean_abs": 0.00021666726388502866,
+      "kl_live_to_cached_per_token": 9.614531882107258e-05,
+      "live_bfloat16_to_float16_equals_cached_float16": true,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005624025594443083,
+      "lossless_bfloat16_state_replay_logits_exact": true,
+      "sequence_length": 147
+    },
+    {
+      "argmax_equal": 207,
+      "argmax_total": 207,
+      "compared_tokens": 207,
+      "example_id": 5,
+      "hidden_max_abs": 0.001953125,
+      "hidden_mean_abs": 0.00021657995239365846,
+      "kl_live_to_cached_per_token": 7.6308824645821e-05,
+      "live_bfloat16_to_float16_equals_cached_float16": true,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.00568795669823885,
+      "lossless_bfloat16_state_replay_logits_exact": true,
+      "sequence_length": 300
+    },
+    {
+      "argmax_equal": 111,
+      "argmax_total": 111,
+      "compared_tokens": 111,
+      "example_id": 6,
+      "hidden_max_abs": 0.0024013519287109375,
+      "hidden_mean_abs": 0.00021677750919479877,
+      "kl_live_to_cached_per_token": 7.459259359166026e-05,
+      "live_bfloat16_to_float16_equals_cached_float16": true,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005574981682002544,
+      "lossless_bfloat16_state_replay_logits_exact": true,
+      "sequence_length": 194
+    },
+    {
+      "argmax_equal": 180,
+      "argmax_total": 180,
+      "compared_tokens": 180,
+      "example_id": 7,
+      "hidden_max_abs": 0.001953125,
+      "hidden_mean_abs": 0.00021704303799197078,
+      "kl_live_to_cached_per_token": 0.00010279859998263419,
+      "live_bfloat16_to_float16_equals_cached_float16": true,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005544062238186598,
+      "lossless_bfloat16_state_replay_logits_exact": true,
+      "sequence_length": 311
+    }
+  ],
+  "phase13_executed": false,
+  "protocol": "phase13-cache-quantization-diagnostic-v3",
+  "quantization_confirmation": {
+    "all_live_bfloat16_to_float16_equal_cached_float16": true,
+    "all_lossless_bfloat16_state_replay_logits_exact": true,
+    "interpretation": "cached fp16 is the rounded live bf16 state; losslessly preserving bf16 state bits restores live coda logits exactly"
+  },
+  "status": "diagnostic_complete",
+  "thresholds_changed": false
+}

@@ -421,3 +421,12 @@ The compact cache is not yet built. All v2 work must follow
   authoritative evidence about live-Huginn-equivalent model behavior.
 - Remediation will use new v3 outputs and preserve all v2 artifacts. No Phase 13
   execution or Phase 14 work has begun.
+
+### Phase 13 pre-run cache-fidelity diagnosis — STOP; cache-v3 retained as lossy evidence
+
+- The independent live whole-model versus literal D16/coda route passed, so the corrected evaluator and coda semantics remain supported.
+- Cache-v3 failed the unchanged Phase 13C cache/live gate: mean logit error `0.005615674883951783`, maximum logit error `0.125`, and argmax agreement `1264/1265`.
+- The frozen diagnostic proves cache-v3 stores the live BF16 states rounded to FP16 and that losslessly replaying the original BF16 states restores live coda logits exactly for all eight items.
+- Cache-v3 remains immutable and must not be overwritten. It is prefix-stable but numerically lossy for exact teacher equivalence. Phase 13 was not executed and Attention² was not tested by this failure.
+- Frozen diagnosis: `cache_v3_lossy_diagnosis.md`; final diagnostic SHA-256 `dcf283c53c87813a9bbfc797d01e5c6b5ce726f709912e83c0afa57f92f10ae9`.
+- Remediation creates a separate eight-item `/workspace/functional_cache_v4_smoke` preserving raw BF16 bits for `h0`, `x`, and normalized pre-coda `h16`; no logits are persisted and cache-v3 remains untouched.

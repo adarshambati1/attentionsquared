@@ -1,0 +1,309 @@
+{
+  "cache_control": {
+    "aggregate": {
+      "compared_tokens": 1265,
+      "float16_hidden_bitwise_equal": 6679200,
+      "float16_hidden_bitwise_equal_fraction_diagnostic": 1.0,
+      "float16_hidden_elements": 6679200,
+      "globally_token_normalized_kl_live_to_cached": 6.771036184470173e-05,
+      "hidden_cosine": 1.0000000078423759,
+      "hidden_max_abs": 0.0024013519287109375,
+      "hidden_relative_l2": 0.0002068878242526725,
+      "logit_max_abs": 0.125,
+      "logit_mean_abs": 0.005615674883951783,
+      "next_token_argmax_agreement": 0.9992094861660079,
+      "next_token_argmax_equal": 1264
+    },
+    "bounds_passed": {
+      "all_next_token_argmax_equal": false,
+      "globally_token_normalized_kl": true,
+      "hidden_max_abs": true,
+      "logit_max_abs": false,
+      "logit_mean_abs": false
+    },
+    "cache_manifest_sha256": "d56e79c291e238ec6f694070a6f4623c34d7ef72d92740b45bd25a76d42e64f4",
+    "cache_validation_sha256": "e578b111d87babe6a22cab6338ac46e103f0319d34877ca2962ef06974961db4",
+    "float16_hidden_bitwise_identity_is_diagnostic_only": true,
+    "passed": false,
+    "records": [
+      {
+        "cached_coda_input_is_already_normalized": true,
+        "compared_tokens": 88,
+        "derived_h0_seed": 1649267441664000,
+        "example_id": 0,
+        "float16_hidden_bitwise_equal_fraction_diagnostic": 1.0,
+        "hidden_cosine": 0.9999998872533546,
+        "hidden_max_abs": 0.0019516944885253906,
+        "hidden_relative_l2": 0.0002071536248644094,
+        "kl_live_to_cached_per_token": 5.888828673050739e-05,
+        "logit_max_abs": 0.125,
+        "logit_mean_abs": 0.005590228829532862,
+        "next_token_argmax_equal": 88,
+        "prediction_position_end_exclusive": 154,
+        "prediction_position_start_inclusive": 66
+      },
+      {
+        "cached_coda_input_is_already_normalized": true,
+        "compared_tokens": 57,
+        "derived_h0_seed": 1649267441696768,
+        "example_id": 1,
+        "float16_hidden_bitwise_equal_fraction_diagnostic": 1.0,
+        "hidden_cosine": 0.9999999129589766,
+        "hidden_max_abs": 0.001953125,
+        "hidden_relative_l2": 0.00020677430822319977,
+        "kl_live_to_cached_per_token": 6.0216261772438884e-05,
+        "logit_max_abs": 0.125,
+        "logit_mean_abs": 0.005664864555001259,
+        "next_token_argmax_equal": 57,
+        "prediction_position_end_exclusive": 117,
+        "prediction_position_start_inclusive": 60
+      },
+      {
+        "cached_coda_input_is_already_normalized": true,
+        "compared_tokens": 179,
+        "derived_h0_seed": 1649267441729536,
+        "example_id": 2,
+        "float16_hidden_bitwise_equal_fraction_diagnostic": 1.0,
+        "hidden_cosine": 0.9999999445684801,
+        "hidden_max_abs": 0.001953125,
+        "hidden_relative_l2": 0.00020677679713277088,
+        "kl_live_to_cached_per_token": 3.382609429536387e-05,
+        "logit_max_abs": 0.125,
+        "logit_mean_abs": 0.005641859956085682,
+        "next_token_argmax_equal": 178,
+        "prediction_position_end_exclusive": 269,
+        "prediction_position_start_inclusive": 90
+      },
+      {
+        "cached_coda_input_is_already_normalized": true,
+        "compared_tokens": 350,
+        "derived_h0_seed": 1649267441762304,
+        "example_id": 3,
+        "float16_hidden_bitwise_equal_fraction_diagnostic": 1.0,
+        "hidden_cosine": 1.000000113391123,
+        "hidden_max_abs": 0.001953125,
+        "hidden_relative_l2": 0.00020688347454737892,
+        "kl_live_to_cached_per_token": 5.560903809964657e-05,
+        "logit_max_abs": 0.125,
+        "logit_mean_abs": 0.005605436861515045,
+        "next_token_argmax_equal": 350,
+        "prediction_position_end_exclusive": 433,
+        "prediction_position_start_inclusive": 83
+      },
+      {
+        "cached_coda_input_is_already_normalized": true,
+        "compared_tokens": 93,
+        "derived_h0_seed": 1649267441795072,
+        "example_id": 4,
+        "float16_hidden_bitwise_equal_fraction_diagnostic": 1.0,
+        "hidden_cosine": 1.0000000000000058,
+        "hidden_max_abs": 0.001953125,
+        "hidden_relative_l2": 0.00020671405292666754,
+        "kl_live_to_cached_per_token": 9.614344162400812e-05,
+        "logit_max_abs": 0.125,
+        "logit_mean_abs": 0.005624025594443083,
+        "next_token_argmax_equal": 93,
+        "prediction_position_end_exclusive": 146,
+        "prediction_position_start_inclusive": 53
+      },
+      {
+        "cached_coda_input_is_already_normalized": true,
+        "compared_tokens": 207,
+        "derived_h0_seed": 1649267441827840,
+        "example_id": 5,
+        "float16_hidden_bitwise_equal_fraction_diagnostic": 1.0,
+        "hidden_cosine": 0.9999999520945175,
+        "hidden_max_abs": 0.001953125,
+        "hidden_relative_l2": 0.00020664438199325053,
+        "kl_live_to_cached_per_token": 7.631187327206135e-05,
+        "logit_max_abs": 0.125,
+        "logit_mean_abs": 0.00568795669823885,
+        "next_token_argmax_equal": 207,
+        "prediction_position_end_exclusive": 299,
+        "prediction_position_start_inclusive": 92
+      },
+      {
+        "cached_coda_input_is_already_normalized": true,
+        "compared_tokens": 111,
+        "derived_h0_seed": 1649267441860608,
+        "example_id": 6,
+        "float16_hidden_bitwise_equal_fraction_diagnostic": 1.0,
+        "hidden_cosine": 0.999999955312027,
+        "hidden_max_abs": 0.0024013519287109375,
+        "hidden_relative_l2": 0.0002070467991621394,
+        "kl_live_to_cached_per_token": 7.459347398253158e-05,
+        "logit_max_abs": 0.125,
+        "logit_mean_abs": 0.005574981682002544,
+        "next_token_argmax_equal": 111,
+        "prediction_position_end_exclusive": 193,
+        "prediction_position_start_inclusive": 82
+      },
+      {
+        "cached_coda_input_is_already_normalized": true,
+        "compared_tokens": 180,
+        "derived_h0_seed": 1649267441893376,
+        "example_id": 7,
+        "float16_hidden_bitwise_equal_fraction_diagnostic": 0.9999999403953552,
+        "hidden_cosine": 1.0000000551161983,
+        "hidden_max_abs": 0.001953125,
+        "hidden_relative_l2": 0.00020718395283353175,
+        "kl_live_to_cached_per_token": 0.00010279613343300298,
+        "logit_max_abs": 0.125,
+        "logit_mean_abs": 0.005544062238186598,
+        "next_token_argmax_equal": 180,
+        "prediction_position_end_exclusive": 310,
+        "prediction_position_start_inclusive": 130
+      }
+    ],
+    "scope": "census of all eight cache-v3 smoke items at represented teacher-continuation prediction positions",
+    "tolerances": {
+      "hidden_max_abs": 0.003,
+      "kl_per_token": 0.0005,
+      "logit_max_abs": 0.06,
+      "logit_mean_abs": 0.005,
+      "require_all_next_token_argmax_equal": true
+    }
+  },
+  "eight_token_route_control": {
+    "categorical_agreement": {
+      "correctness": true,
+      "extracted_answer": true,
+      "generated_token_ids": true,
+      "hit_max_new_tokens": true,
+      "stop_reason": true
+    },
+    "example_id": 2250,
+    "full_prefix_huginn_evaluator": {
+      "authoritative_corrected_scoring": {
+        "correct": false,
+        "fallback_allowed": false,
+        "gold_answer": "8",
+        "hit_max_new_tokens": true,
+        "predicted_answer": null
+      },
+      "generated_token_ids": [
+        1401,
+        2952,
+        1097,
+        1523,
+        20999,
+        286,
+        15124,
+        414
+      ],
+      "generated_tokens": 8,
+      "historical_cap_fallback_emulation": {
+        "correct": false,
+        "fallback_allowed": true,
+        "gold_answer": "8",
+        "hit_max_new_tokens": true,
+        "predicted_answer": null
+      },
+      "hit_max_new_tokens": true,
+      "stop_reason": "max_new_tokens",
+      "text": "To determine how many cans of chickpe"
+    },
+    "passed": true,
+    "prefixes": [
+      {
+        "derived_h0_seed": 1649267515392000,
+        "next_token_equal": true,
+        "prefix_length": 116,
+        "prefix_token_ids_sha256": "ce5058f72f3878a0bfbb4fb8e50df8af8ac8e8032c3ec8d4f79da70d5b84ba74",
+        "same_materialized_h0_object_and_value_reused": true,
+        "step": 0
+      },
+      {
+        "derived_h0_seed": 1649267515392000,
+        "next_token_equal": true,
+        "prefix_length": 117,
+        "prefix_token_ids_sha256": "a1784fc6bcf2b8b8133a2da110f24534652507d0c38d473fd72925129e71ed73",
+        "same_materialized_h0_object_and_value_reused": true,
+        "step": 1
+      },
+      {
+        "derived_h0_seed": 1649267515392000,
+        "next_token_equal": true,
+        "prefix_length": 118,
+        "prefix_token_ids_sha256": "e0a056ec16433eb617297d44433714a74d03a0b4deb040ba321129c5e08469b5",
+        "same_materialized_h0_object_and_value_reused": true,
+        "step": 2
+      },
+      {
+        "derived_h0_seed": 1649267515392000,
+        "next_token_equal": true,
+        "prefix_length": 119,
+        "prefix_token_ids_sha256": "e33043b768b5ae0f006a3260d940b975bf3d4179f25d1873f0518da8c4323f1c",
+        "same_materialized_h0_object_and_value_reused": true,
+        "step": 3
+      },
+      {
+        "derived_h0_seed": 1649267515392000,
+        "next_token_equal": true,
+        "prefix_length": 120,
+        "prefix_token_ids_sha256": "e0b5be3db1326d8968aa446d8a1de56a1b84a789158f7f37f8a1f8380d034604",
+        "same_materialized_h0_object_and_value_reused": true,
+        "step": 4
+      },
+      {
+        "derived_h0_seed": 1649267515392000,
+        "next_token_equal": true,
+        "prefix_length": 121,
+        "prefix_token_ids_sha256": "36dd1617c1999da0323d189bf8d39b7844cda9366fef85b545cf9a02fdd3985a",
+        "same_materialized_h0_object_and_value_reused": true,
+        "step": 5
+      },
+      {
+        "derived_h0_seed": 1649267515392000,
+        "next_token_equal": true,
+        "prefix_length": 122,
+        "prefix_token_ids_sha256": "0de6455498c6f121de17ce054e6c63c819fd24ba20316691d108d797b92a0c92",
+        "same_materialized_h0_object_and_value_reused": true,
+        "step": 6
+      },
+      {
+        "derived_h0_seed": 1649267515392000,
+        "next_token_equal": true,
+        "prefix_length": 123,
+        "prefix_token_ids_sha256": "4d5af9c237951a3703a25e2cd8de0da70c2820865360d946925e44cb45fcb8ba",
+        "same_materialized_h0_object_and_value_reused": true,
+        "step": 7
+      }
+    ],
+    "prompt_tokens": 116,
+    "trusted_live_model_forward": {
+      "authoritative_corrected_scoring": {
+        "correct": false,
+        "fallback_allowed": false,
+        "gold_answer": "8",
+        "hit_max_new_tokens": true,
+        "predicted_answer": null
+      },
+      "generated_token_ids": [
+        1401,
+        2952,
+        1097,
+        1523,
+        20999,
+        286,
+        15124,
+        414
+      ],
+      "generated_tokens": 8,
+      "historical_cap_fallback_emulation": {
+        "correct": false,
+        "fallback_allowed": true,
+        "gold_answer": "8",
+        "hit_max_new_tokens": true,
+        "predicted_answer": null
+      },
+      "hit_max_new_tokens": true,
+      "stop_reason": "max_new_tokens",
+      "text": "To determine how many cans of chickpe"
+    }
+  },
+  "optimizer_steps": 0,
+  "phase13_output_absent": true,
+  "protocol": "phase13-prerun-zero-training-numerical-v1",
+  "status": "fail"
+}

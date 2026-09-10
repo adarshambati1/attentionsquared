@@ -47,13 +47,15 @@ class RecordingHuginn(nn.Module):
 
 def test_phase13_config_locks_preregistered_ids_seed_bounds_and_roles():
     root = Path(__file__).resolve().parents[1]
-    config = json.loads((root / "configs/004_functional_v2_phase13.json").read_text())
+    config = json.loads((root / "configs/004_functional_v3_phase13.json").read_text())
     phase13.validate_config(config)
     assert config["dataset_split"] == "train"
     assert config["example_id_range_inclusive"] == [2250, 2499]
     assert config["h0_base_seed"] == 3000
     assert config["h0_seed_index"] == 0
-    assert config["cache_control_example_ids"] == list(range(2250, 2258))
+    assert config["cache_control_example_ids"] == list(range(8))
+    assert config["cache_root"] == "/workspace/functional_cache_v3_smoke"
+    assert config["phase12_evaluation"] == "/workspace/functional_phase12_v3/evaluation.json"
     assert config["cached_live_tolerances"] == {
         "hidden_max_abs": 0.003,
         "logit_mean_abs": 0.005,
@@ -65,7 +67,7 @@ def test_phase13_config_locks_preregistered_ids_seed_bounds_and_roles():
         ("dataset_split", "test"),
         ("example_id_range_inclusive", [0, 249]),
         ("h0_base_seed", 0),
-        ("cache_control_example_ids", list(range(8))),
+        ("cache_control_example_ids", list(range(1, 8))),
     ]:
         changed = copy.deepcopy(config)
         changed[key] = value
@@ -82,6 +84,13 @@ def test_13b_literally_reuses_one_h0_object_in_both_independent_forwards(monkeyp
         lambda model, template, **kwargs: (torch.zeros_like(template), 1),
     )
     monkeypatch.setattr(route, "schedule_prefix", lambda schedule, length: schedule[:, :length])
+    monkeypatch.setattr(
+        phase13,
+        "independent_decomposed_next_token_logits",
+        lambda model, prefix, h0: model(
+            input_ids=prefix, input_states=h0
+        ).logits[:, -1].float(),
+    )
     model = RecordingHuginn()
     tokenizer = FakeTokenizer()
     evaluator = FullPrefixHuginnD16Evaluator(
@@ -147,7 +156,7 @@ def test_authoritative_coda_accepts_normalized_state_without_double_normalizatio
     assert torch.equal(logits, expected)
 
     # This literal regression assertion fails if the helper adds an initial
-    # ln_f to cache-v2's already-normalized h16.
+    # ln_f to cache-v3's already-normalized h16.
     double_normalized = model.transformer.ln_f(
         model.transformer.ln_f(normalized_h16) + 3
     )
@@ -177,9 +186,11 @@ def test_phase13_publication_is_atomic_read_only_and_no_replace(tmp_path):
     assert second.exists()
 
 
-def test_phase13_main_is_hard_blocked_pending_corrected_phase11_and_phase12():
-    with pytest.raises(RuntimeError, match="hard-blocked"):
-        phase13.main(phase13.CONFIG, phase13.OUTPUT_ROOT)
+def test_phase13_main_is_unblocked_but_rejects_nonproduction_paths():
+    source = Path("scripts/run_004_phase13_evaluator_controls.py").read_text()
+    assert "hard-blocked pending" not in source
+    with pytest.raises(ValueError, match="exact production paths"):
+        phase13.main(Path("wrong.json"), phase13.OUTPUT_ROOT)
 
 
 def test_phase13_runner_persists_no_logits_and_has_no_paid_execution():
@@ -191,3 +202,6 @@ def test_phase13_runner_persists_no_logits_and_has_no_paid_execution():
     assert "teacher_prefix_answer_offsets" not in source
     assert 'positions = slice(start, end)' in source
     assert "TokenKLAggregator" in source
+    assert "independent_decomposed_next_token_logits" in source
+    assert "for step in range(16)" in source
+    assert '"phase13D_inference_limit"' in source
