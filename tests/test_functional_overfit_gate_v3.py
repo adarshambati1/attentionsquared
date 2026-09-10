@@ -25,6 +25,10 @@ def test_v3_config_preserves_overfit_protocol_and_locks_phase10():
     assert config["generation"]["maximum_new_tokens"] == 384
     assert config["phase10_artifact_sha256"] == runner.PHASE10_ARTIFACT_SHA256
     assert config["phase10_attestation_sha256"] == runner.PHASE10_ATTESTATION_SHA256
+    assert config["pass_criteria"][
+        "require_final_mean_first_target_probability_at_least_teacher"
+    ] is True
+    assert "minimum_final_mean_first_target_probability" not in config["pass_criteria"]
 
     changed = copy.deepcopy(config)
     changed["output"] = "/workspace/functional_overfit_v2"

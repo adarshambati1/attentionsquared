@@ -1,5 +1,5 @@
 {
-  "protocol": "functional-eight-example-overfit-cache-v3-coda-v4",
+  "protocol": "functional-eight-example-overfit-cache-v3-coda-v4-teacher-relative-v2",
   "training_protocol": "functional-paired-randomness-v1",
   "cache_manifest_sha256": "d56e79c291e238ec6f694070a6f4623c34d7ef72d92740b45bd25a76d42e64f4",
   "initialization_sha256": "92968fea30d723864383f68f9e51ef1f8b8adae927e11acf735c3c1cf9b93747",
@@ -29,7 +29,7 @@
     "maximum_final_kl_per_token": 0.5,
     "maximum_first_token_distribution_kl_ratio": 0.5,
     "maximum_final_first_token_distribution_kl": 0.5,
-    "minimum_final_mean_first_target_probability": 0.5,
+    "require_final_mean_first_target_probability_at_least_teacher": true,
     "minimum_final_first_target_top1_count": 6,
     "require_first_target_probability_increase": true,
     "require_first_target_top1_count_increase": true

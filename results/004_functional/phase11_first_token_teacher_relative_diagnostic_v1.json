@@ -1,0 +1,106 @@
+{
+  "absolute_point_five_gate_was_met": false,
+  "example_count": 8,
+  "mean_student_minus_teacher_target_probability": 0.0037215910851955414,
+  "mean_student_target_probability": 0.4832734167575836,
+  "mean_teacher_first_distribution_to_student_kl": 0.01387028954923153,
+  "mean_teacher_target_probability": 0.4795518256723881,
+  "model_sha256": "5fb7d0d467cb322a235c1293af0f9e9bd65249d32820fb0086e914b5e49307f0",
+  "optimizer_steps": 0,
+  "per_example": [
+    {
+      "example_id": 0,
+      "student_argmax_token_id": 8368,
+      "student_minus_teacher_target_probability": -0.08841794729232788,
+      "student_target_probability": 0.40706291794776917,
+      "target_token_id": 8368,
+      "teacher_argmax_token_id": 8368,
+      "teacher_first_distribution_to_student_kl": 0.024072207510471344,
+      "teacher_student_argmax_equal": true,
+      "teacher_target_probability": 0.49548086524009705
+    },
+    {
+      "example_id": 1,
+      "student_argmax_token_id": 1401,
+      "student_minus_teacher_target_probability": 0.055330246686935425,
+      "student_target_probability": 0.4015599489212036,
+      "target_token_id": 1401,
+      "teacher_argmax_token_id": 1401,
+      "teacher_first_distribution_to_student_kl": 0.02090827375650406,
+      "teacher_student_argmax_equal": true,
+      "teacher_target_probability": 0.3462297022342682
+    },
+    {
+      "example_id": 2,
+      "student_argmax_token_id": 4612,
+      "student_minus_teacher_target_probability": -0.0004918575286865234,
+      "student_target_probability": 0.4965692460536957,
+      "target_token_id": 4612,
+      "teacher_argmax_token_id": 4612,
+      "teacher_first_distribution_to_student_kl": 0.011486111208796501,
+      "teacher_student_argmax_equal": true,
+      "teacher_target_probability": 0.4970611035823822
+    },
+    {
+      "example_id": 3,
+      "student_argmax_token_id": 1401,
+      "student_minus_teacher_target_probability": 0.029856085777282715,
+      "student_target_probability": 0.3104398250579834,
+      "target_token_id": 1401,
+      "teacher_argmax_token_id": 1401,
+      "teacher_first_distribution_to_student_kl": 0.008318031206727028,
+      "teacher_student_argmax_equal": true,
+      "teacher_target_probability": 0.2805837392807007
+    },
+    {
+      "example_id": 4,
+      "student_argmax_token_id": 1401,
+      "student_minus_teacher_target_probability": 0.01640075445175171,
+      "student_target_probability": 0.7600978016853333,
+      "target_token_id": 1401,
+      "teacher_argmax_token_id": 1401,
+      "teacher_first_distribution_to_student_kl": 0.00441616028547287,
+      "teacher_student_argmax_equal": true,
+      "teacher_target_probability": 0.7436970472335815
+    },
+    {
+      "example_id": 5,
+      "student_argmax_token_id": 4612,
+      "student_minus_teacher_target_probability": -0.01873767375946045,
+      "student_target_probability": 0.659155547618866,
+      "target_token_id": 4612,
+      "teacher_argmax_token_id": 4612,
+      "teacher_first_distribution_to_student_kl": 0.0072335414588451385,
+      "teacher_student_argmax_equal": true,
+      "teacher_target_probability": 0.6778932213783264
+    },
+    {
+      "example_id": 6,
+      "student_argmax_token_id": 1401,
+      "student_minus_teacher_target_probability": 0.0820462703704834,
+      "student_target_probability": 0.5606767535209656,
+      "target_token_id": 1401,
+      "teacher_argmax_token_id": 1401,
+      "teacher_first_distribution_to_student_kl": 0.01880527287721634,
+      "teacher_student_argmax_equal": true,
+      "teacher_target_probability": 0.4786304831504822
+    },
+    {
+      "example_id": 7,
+      "student_argmax_token_id": 1401,
+      "student_minus_teacher_target_probability": -0.04621315002441406,
+      "student_target_probability": 0.2706252932548523,
+      "target_token_id": 4612,
+      "teacher_argmax_token_id": 4612,
+      "teacher_first_distribution_to_student_kl": 0.015722718089818954,
+      "teacher_student_argmax_equal": false,
+      "teacher_target_probability": 0.31683844327926636
+    }
+  ],
+  "protocol": "phase11-first-token-teacher-relative-diagnostic-v1",
+  "source_attempt": "/workspace/.functional_overfit_v3.attempt-a8055cc452af48e1b5741ff06e0e1674",
+  "status": "diagnostic_complete",
+  "student_target_top1_count": 7,
+  "teacher_student_argmax_agreement_count": 7,
+  "teacher_target_top1_count": 8
+}

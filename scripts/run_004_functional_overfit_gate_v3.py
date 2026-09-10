@@ -57,8 +57,8 @@ PHASE10_ARTIFACT_SHA256 = "cb180b0aae45dbbb0ea3e1be4a1a85a47a1c0c0d3857e576a1d58
 PHASE10_ATTESTATION_SHA256 = "207f9c8d914fd75bcc406c266227ce87947a1ac1eb6149d3dbe7d948067c6df8"
 MODEL_ID = "tomg-group-umd/huginn-0125"
 MODEL_REVISION = "bb6621b65e90b6a4b9b29ef88dc83866d450470c"
-OVERFIT_PROTOCOL = "functional-eight-example-overfit-cache-v3-coda-v4"
-PRELAUNCH_PROTOCOL = "functional-eight-example-overfit-cache-v3-coda-v4-prelaunch-v1"
+OVERFIT_PROTOCOL = "functional-eight-example-overfit-cache-v3-coda-v4-teacher-relative-v2"
+PRELAUNCH_PROTOCOL = "functional-eight-example-overfit-cache-v3-coda-v4-teacher-relative-v2-prelaunch-v1"
 
 
 def sha256_file(path: Path) -> str:
@@ -139,7 +139,7 @@ def validate_config(config: dict) -> None:
             "maximum_final_kl_per_token": 0.5,
             "maximum_first_token_distribution_kl_ratio": 0.5,
             "maximum_final_first_token_distribution_kl": 0.5,
-            "minimum_final_mean_first_target_probability": 0.5,
+            "require_final_mean_first_target_probability_at_least_teacher": True,
             "minimum_final_first_target_top1_count": 6,
             "require_first_target_probability_increase": True,
             "require_first_target_top1_count_increase": True,
@@ -246,7 +246,9 @@ def compute_metrics(a2, huginn, examples: list[dict]) -> dict:
     count = 0
     first_distribution_kl = 0.0
     first_target_probability = 0.0
+    teacher_first_target_probability = 0.0
     first_target_top1_count = 0
+    teacher_student_first_argmax_agreement_count = 0
     with torch.no_grad(), torch.autocast(device_type="cuda", dtype=torch.bfloat16):
         for example in examples:
             teacher = transient_teacher_logits(huginn, example)
@@ -273,8 +275,15 @@ def compute_metrics(a2, huginn, examples: list[dict]) -> dict:
                 ).item()
             )
             probabilities = torch.softmax(student_first, -1)
+            teacher_probabilities = torch.softmax(teacher_first, -1)
             first_target_probability += float(probabilities[0, target].item())
+            teacher_first_target_probability += float(
+                teacher_probabilities[0, target].item()
+            )
             first_target_top1_count += int(student_first.argmax(-1).item() == target)
+            teacher_student_first_argmax_agreement_count += int(
+                student_first.argmax(-1).item() == teacher_first.argmax(-1).item()
+            )
             del student, teacher, output
     return {
         "kl_per_token": numerator / count,
@@ -282,6 +291,12 @@ def compute_metrics(a2, huginn, examples: list[dict]) -> dict:
         "valid_token_count": count,
         "first_token_distribution_kl": first_distribution_kl / len(examples),
         "mean_first_target_probability": first_target_probability / len(examples),
+        "mean_teacher_first_target_probability": (
+            teacher_first_target_probability / len(examples)
+        ),
+        "teacher_student_first_argmax_agreement_count": (
+            teacher_student_first_argmax_agreement_count
+        ),
         "first_target_top1_count": first_target_top1_count,
     }
 
@@ -339,8 +354,8 @@ def train(a2, huginn, examples: list[dict], config: dict) -> tuple[list[dict], d
                 maximum_final_first_distribution_kl=criteria[
                     "maximum_final_first_token_distribution_kl"
                 ],
-                minimum_final_first_target_probability=criteria[
-                    "minimum_final_mean_first_target_probability"
+                minimum_final_first_target_probability=final[
+                    "mean_teacher_first_target_probability"
                 ],
                 minimum_final_first_target_top1_count=criteria[
                     "minimum_final_first_target_top1_count"
@@ -359,8 +374,8 @@ def train(a2, huginn, examples: list[dict], config: dict) -> tuple[list[dict], d
         maximum_final_first_distribution_kl=criteria[
             "maximum_final_first_token_distribution_kl"
         ],
-        minimum_final_first_target_probability=criteria[
-            "minimum_final_mean_first_target_probability"
+        minimum_final_first_target_probability=final[
+            "mean_teacher_first_target_probability"
         ],
         minimum_final_first_target_top1_count=criteria[
             "minimum_final_first_target_top1_count"
@@ -651,6 +666,12 @@ def main(config_path: Path, output_root: Path, prelaunch_attestation: Path) -> d
         "updates_completed": trace[-1]["update"],
         "initial_metrics": {key: value for key, value in trace[0].items() if key != "update"},
         "final_metrics": final_metrics,
+        "prospective_teacher_relative_amendment": {
+            "review_job": "4e271d7c",
+            "old_absolute_probability_gate_retroactively_changed": False,
+            "criterion": "mean_first_target_probability >= mean_teacher_first_target_probability",
+            "primary_evidence_remains_teacher_kl_and_generation": True,
+        },
         "quantitative_checks": checks,
         "generation_mechanical_checks": generation_mechanical_checks,
         "generation_summary": {

@@ -1,0 +1,26 @@
+{
+  "all_huginn_parameters_frozen": true,
+  "example_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "initial_metrics": {
+    "first_target_top1_count": 0,
+    "first_token_distribution_kl": 9.434150457382202,
+    "kl_numerator": 14021.836608886719,
+    "kl_per_token": 11.084455817301754,
+    "mean_first_target_probability": 1.3170247484595166e-05,
+    "valid_token_count": 1265
+  },
+  "optimizer_steps": 0,
+  "output_absent": true,
+  "protocol": "phase11-cache-v3-zero-step-wiring-v1",
+  "status": "pass",
+  "valid_tokens": 1265
+}
