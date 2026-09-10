@@ -1,0 +1,16 @@
+{
+  "artifact": "/workspace/functional_phase12_v2/evaluation.json",
+  "artifact_bytes": 47058,
+  "artifact_is_symlink": false,
+  "artifact_mode": "0444",
+  "artifact_sha256": "464827d502ff66dae9dc73029b4ac14acf77b7368ed274fed524ede8039b2e9f",
+  "artifact_type": "regular-file",
+  "evaluation_git_commit": "db9df8296fce0b19beb7bcca213c23c38ba2dfa3",
+  "output_directory": "/workspace/functional_phase12_v2",
+  "output_directory_is_symlink": false,
+  "output_directory_mode": "0555",
+  "output_directory_type": "directory",
+  "protocol": "phase12-full-prefix-publication-attestation-v1",
+  "publication": "same-parent-renameat2-RENAME_NOREPLACE",
+  "status": "pass"
+}

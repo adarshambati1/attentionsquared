@@ -229,7 +229,7 @@ The compact cache is not yet built. All v2 work must follow
   Both final files and both preserved source files are mode `0444`; final and
   source directories are mode `0555`.
 
-### Phase 12 canonical full-prefix evaluator — implemented, pending pre-run review
+### Phase 12 canonical full-prefix evaluator — PASS/PASS
 
 - `FullPrefixAttention2Evaluator` recomputes Huginn's frozen prelude, paired
   deterministic `h0`, Attention² over the complete prefix, and the frozen coda
@@ -243,5 +243,22 @@ The compact cache is not yet built. All v2 work must follow
   exact generated token IDs, every prefix length, decoded text, stop/cap status,
   and comparison to the Phase 11 text.
 - Output uses unique same-parent staging and atomic no-replace publication.
-- Focused Pod suite: 6 passed; full Pod suite: 141 passed. Phase 12 generation
-  has not run, and no Phase 13 controls have begun.
+- Focused Pod suite: 6 passed; full Pod suite: 141 passed.
+- Canonical evaluation commit:
+  `db9df8296fce0b19beb7bcca213c23c38ba2dfa3`; evaluation SHA-256:
+  `464827d502ff66dae9dc73029b4ac14acf77b7368ed274fed524ede8039b2e9f`.
+- Every generated step for all eight examples recorded strict growth from the
+  complete prompt through every generated prefix. All eight stopped naturally,
+  none hit the 384-token cap, and no full-vocabulary logits were persisted.
+- The canonical evaluator matched 3/8 Phase 11 texts exactly and matched 6/8
+  teacher extracted answers. The semantic loops/off-topic prefixes on IDs 2,
+  3, 5, and 7 persisted under canonical full-prefix recomputation.
+- Phase 12 establishes that rebuilding the evaluator did not remove the
+  qualitative behavior. Exact differences from five patched Phase 11 outputs
+  remain evidence for Phase 13 equivalence controls; no causal attribution is
+  made here, and Phase 13 has not begun.
+- Runtime publication attestation SHA-256:
+  `855cd779ab9f5d4ec4926df71f8ef185c9663743eb53cf744c9a8f7c999b62d1`.
+  It records the authoritative evaluation as a regular non-symlink mode-`0444`
+  file in a non-symlink mode-`0555` directory, published by same-parent
+  `renameat2(RENAME_NOREPLACE)`.
