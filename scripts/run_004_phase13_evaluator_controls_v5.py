@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Importable Phase 13 control helpers; production main is remediation-blocked."""
+"""Final native-state Phase 13 evaluator and cache-equivalence controls."""
 
 from __future__ import annotations
 
@@ -304,8 +304,8 @@ def compare_live_routes(
         "example_id": example_id,
         "prompt_tokens": int(prompt.shape[1]),
         "prefixes": prefix_records,
-        "trusted_live_model_forward": trusted,
-        "full_prefix_huginn_evaluator": evaluated,
+        "route_A_normal_whole_model": evaluated,
+        "route_B_independent_decomposed": trusted,
         "categorical_agreement": categorical,
         "passed": all(categorical.values()),
     }
@@ -494,11 +494,11 @@ def run(config: dict, commit: str) -> dict:
         route_records.append(record)
         print(
             f"example={example_id} route_pass={record['passed']} "
-            f"correct={record['full_prefix_huginn_evaluator']['authoritative_corrected_scoring']['correct']}",
+            f"correct={record['route_A_normal_whole_model']['authoritative_corrected_scoring']['correct']}",
             flush=True,
         )
 
-    generations = [record["full_prefix_huginn_evaluator"] for record in route_records]
+    generations = [record["route_A_normal_whole_model"] for record in route_records]
     historical_correct = sum(x["historical_cap_fallback_emulation"]["correct"] for x in generations)
     corrected_correct = sum(x["authoritative_corrected_scoring"]["correct"] for x in generations)
     total = len(generations)
@@ -507,16 +507,16 @@ def run(config: dict, commit: str) -> dict:
     disagreements = [
         {
             "example_id": record["example_id"],
-            "generated_token_ids": record["full_prefix_huginn_evaluator"]["generated_token_ids"],
-            "text": record["full_prefix_huginn_evaluator"]["text"],
-            "stop_reason": record["full_prefix_huginn_evaluator"]["stop_reason"],
-            "hit_max_new_tokens": record["full_prefix_huginn_evaluator"]["hit_max_new_tokens"],
-            "historical_cap_fallback_emulation": record["full_prefix_huginn_evaluator"]["historical_cap_fallback_emulation"],
-            "authoritative_corrected_scoring": record["full_prefix_huginn_evaluator"]["authoritative_corrected_scoring"],
+            "generated_token_ids": record["route_A_normal_whole_model"]["generated_token_ids"],
+            "text": record["route_A_normal_whole_model"]["text"],
+            "stop_reason": record["route_A_normal_whole_model"]["stop_reason"],
+            "hit_max_new_tokens": record["route_A_normal_whole_model"]["hit_max_new_tokens"],
+            "historical_cap_fallback_emulation": record["route_A_normal_whole_model"]["historical_cap_fallback_emulation"],
+            "authoritative_corrected_scoring": record["route_A_normal_whole_model"]["authoritative_corrected_scoring"],
         }
         for record in route_records
-        if record["full_prefix_huginn_evaluator"]["historical_cap_fallback_emulation"]
-        != record["full_prefix_huginn_evaluator"]["authoritative_corrected_scoring"]
+        if record["route_A_normal_whole_model"]["historical_cap_fallback_emulation"]
+        != record["route_A_normal_whole_model"]["authoritative_corrected_scoring"]
     ]
     low, high = config["accuracy_anomaly_band"]
     historical_control = {
@@ -549,6 +549,7 @@ def run(config: dict, commit: str) -> dict:
         "13A_historical_broad_anomaly": historical_control["passed_broad_anomaly_check"],
         "13B_exact_live_route_equivalence": route_control["passed"],
         "13C_native_cache_exact_equivalence": cache_controls["passed"],
+        "13D_scope_limit_recorded": True,
     }
     return {
         "protocol": PROTOCOL,

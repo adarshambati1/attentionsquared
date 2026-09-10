@@ -105,10 +105,10 @@ def test_13b_literally_reuses_one_h0_object_in_both_independent_forwards(monkeyp
         max_new_tokens=4,
     )
     assert result["passed"]
-    assert result["trusted_live_model_forward"]["generated_token_ids"] == [9]
-    assert result["full_prefix_huginn_evaluator"]["generated_token_ids"] == [9]
+    assert result["route_B_independent_decomposed"]["generated_token_ids"] == [9]
+    assert result["route_A_normal_whole_model"]["generated_token_ids"] == [9]
     assert result["categorical_agreement"]["generated_text"] is True
-    assert result["trusted_live_model_forward"]["text"] == result["full_prefix_huginn_evaluator"]["text"]
+    assert result["route_B_independent_decomposed"]["text"] == result["route_A_normal_whole_model"]["text"]
     assert len(model.received_h0) == 2
     assert model.received_h0[0] is model.received_h0[1]
     assert result["prefixes"][0]["same_materialized_h0_object_and_value_reused"] is True
@@ -210,4 +210,5 @@ def test_phase13_runner_persists_no_logits_and_has_no_paid_execution():
     assert "TokenKLAggregator" in source
     assert "independent_decomposed_next_token_logits" in source
     assert "for step in range(16)" in source
+    assert '"13D_scope_limit_recorded": True' in source
     assert '"phase13D_inference_limit"' in source
