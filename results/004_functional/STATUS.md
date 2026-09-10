@@ -430,3 +430,12 @@ The compact cache is not yet built. All v2 work must follow
 - Cache-v3 remains immutable and must not be overwritten. It is prefix-stable but numerically lossy for exact teacher equivalence. Phase 13 was not executed and Attention² was not tested by this failure.
 - Frozen diagnosis: `cache_v3_lossy_diagnosis.md`; final diagnostic SHA-256 `dcf283c53c87813a9bbfc797d01e5c6b5ce726f709912e83c0afa57f92f10ae9`.
 - Remediation creates a separate eight-item `/workspace/functional_cache_v4_smoke` preserving raw BF16 bits for `h0`, `x`, and normalized pre-coda `h16`; no logits are persisted and cache-v3 remains untouched.
+
+### Cache-v4 BF16-only smoke attempt — FAILED AND FROZEN
+
+- Builder commit `057a3955388676de3fa61ad21acd843d6253fcf3` attempted a separate no-replace BF16-bit cache; cache-v3 was untouched.
+- The first item failed before publication because the hard dtype gate observed canonical `x` and normalized `h16` as FP32, not BF16. No final `/workspace/functional_cache_v4_smoke` exists and no training occurred.
+- Failed staging evidence is frozen at `/workspace/.functional_cache_v4_smoke.attempt-86c562b0557c4d79b4eb69fe3c09f065` (mode `0555`, manifest and lock mode `0444`).
+- Failed build-log SHA-256: `87b224e183fd65c2a409dff5acd2f84347af1ed8d8a4ce343795a64c8ed0fe3b`.
+- Independent canonical dtype verification across IDs 0, 2, and 7 confirmed native `h0` BF16 and native `x`/core outputs/normalized `h16` FP32. Evidence SHA-256: `de735cefcc7b51b2d33257bcd91662e433262f2d3806dbd3fef933756dce7bac`.
+- Cache-v5 is a new native-dtype object: raw BF16 bits for `h0`, exact FP32 for `x` and `h16`.

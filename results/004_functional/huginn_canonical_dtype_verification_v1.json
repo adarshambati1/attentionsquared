@@ -1,0 +1,56 @@
+{
+  "examples": [
+    {
+      "core_calls": 16,
+      "core_output_16_dtype": "torch.float32",
+      "core_output_1_dtype": "torch.float32",
+      "example_id": 0,
+      "first_core_input_state_dtype": "torch.bfloat16",
+      "h16_bfloat16_roundtrip_max_abs": 0.015625,
+      "h16_exact_after_bfloat16_roundtrip": false,
+      "recurrent_input_x_dtype": "torch.float32",
+      "returned_hidden_post_coda_dtype": "torch.float32",
+      "returned_latent_h16_dtype": "torch.float32",
+      "returned_logits_dtype": "torch.float32",
+      "schedule_dtype": "torch.bfloat16",
+      "x_claim": "recurrent_input_x captured at first core call"
+    },
+    {
+      "core_calls": 16,
+      "core_output_16_dtype": "torch.float32",
+      "core_output_1_dtype": "torch.float32",
+      "example_id": 2,
+      "first_core_input_state_dtype": "torch.bfloat16",
+      "h16_bfloat16_roundtrip_max_abs": 0.01562356948852539,
+      "h16_exact_after_bfloat16_roundtrip": false,
+      "recurrent_input_x_dtype": "torch.float32",
+      "returned_hidden_post_coda_dtype": "torch.float32",
+      "returned_latent_h16_dtype": "torch.float32",
+      "returned_logits_dtype": "torch.float32",
+      "schedule_dtype": "torch.bfloat16",
+      "x_claim": "recurrent_input_x captured at first core call"
+    },
+    {
+      "core_calls": 16,
+      "core_output_16_dtype": "torch.float32",
+      "core_output_1_dtype": "torch.float32",
+      "example_id": 7,
+      "first_core_input_state_dtype": "torch.bfloat16",
+      "h16_bfloat16_roundtrip_max_abs": 0.021742820739746094,
+      "h16_exact_after_bfloat16_roundtrip": false,
+      "recurrent_input_x_dtype": "torch.float32",
+      "returned_hidden_post_coda_dtype": "torch.float32",
+      "returned_latent_h16_dtype": "torch.float32",
+      "returned_logits_dtype": "torch.float32",
+      "schedule_dtype": "torch.bfloat16",
+      "x_claim": "recurrent_input_x captured at first core call"
+    }
+  ],
+  "lm_head_dtype": "torch.float32",
+  "load_argument": "torch_dtype=torch.bfloat16",
+  "model_config_torch_dtype": "torch.bfloat16",
+  "parameter_dtype_counts": {
+    "torch.float32": 75
+  },
+  "wte_dtype": "torch.float32"
+}

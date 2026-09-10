@@ -1,0 +1,13 @@
+{"estimated_uncompressed_item_bytes": 61120365, "item_count": 8, "largest_transient_schedule_bytes": 21626880, "minimum_free_bytes_with_2x_margin": 122240730, "protocol": "functional-cache-v4-smoke-preflight-v2", "storage": {"directory_fsync": true, "free_bytes": 245077761196032, "renameat2_noreplace_existing_preserved": true, "same_filesystem": true, "write_flush_fsync": true}, "total_tokens": 1929}
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:01,  2.32it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  2.45it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:01<00:00,  2.45it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:01<00:00,  3.07it/s]
+preserved staging path on failure: /workspace/.functional_cache_v4_smoke.attempt-86c562b0557c4d79b4eb69fe3c09f065
+Traceback (most recent call last):
+  File "/workspace/attentionsquared/scripts/build_004_functional_cache_v4_smoke.py", line 132, in <module>
+    p=argparse.ArgumentParser();p.add_argument("--config",type=Path,default=CONFIG);p.add_argument("--preflight-only",action="store_true");a=p.parse_args();main(a.config,a.preflight_only)
+                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/attentionsquared/scripts/build_004_functional_cache_v4_smoke.py", line 124, in main
+    states=capture_scheduled_huginn_states(model,ids,mask,prefix)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/attentionsquared/src/data/functional_extraction_v4.py", line 91, in capture_scheduled_huginn_states
+    raise RuntimeError("all captured states must remain BF16")
+RuntimeError: all captured states must remain BF16
