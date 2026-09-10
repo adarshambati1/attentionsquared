@@ -21,8 +21,13 @@ def capture_huginn_functional_states(
     attention_mask: Any,
     *,
     depth: int = 16,
+    input_states: Any | None = None,
 ) -> dict[str, np.ndarray]:
-    """Capture h0, recurrent input x, and the exact coda input at fixed depth."""
+    """Capture h0, recurrent input x, and the exact coda input at fixed depth.
+
+    ``input_states`` optionally injects a caller-materialized h0. This supports
+    fixed-schedule replay without changing the legacy cache-v2 call path.
+    """
     import torch
 
     if depth != 16:
@@ -31,6 +36,8 @@ def capture_huginn_functional_states(
         raise ValueError("input_ids must have shape [1,T]")
     if attention_mask.shape != input_ids.shape:
         raise ValueError("attention_mask must match input_ids")
+    if input_states is not None and input_states.shape[:2] != input_ids.shape:
+        raise ValueError("explicit input_states must match input_ids [B,T]")
 
     captured: dict[str, Any] = {}
     recurrent_calls = 0
@@ -39,6 +46,8 @@ def capture_huginn_functional_states(
     def wrapped(this, x, input_embeds, *args, **kwargs):
         nonlocal recurrent_calls
         if recurrent_calls == 0:
+            if input_states is not None and not torch.equal(x, input_states):
+                raise RuntimeError("Huginn did not consume the explicit input_states")
             captured["h0_full"] = x.detach().to(torch.float32).cpu()[0]
             captured["x_full"] = input_embeds.detach().to(torch.float32).cpu()[0]
         recurrent_calls += 1
@@ -47,6 +56,9 @@ def capture_huginn_functional_states(
     model.core_block_forward = MethodType(wrapped, model)
     try:
         with torch.inference_mode():
+            model_kwargs = {}
+            if input_states is not None:
+                model_kwargs["input_states"] = input_states
             result = model(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
@@ -58,6 +70,7 @@ def capture_huginn_functional_states(
                     "return_head": False,
                     "return_stats": False,
                 },
+                **model_kwargs,
             )
     finally:
         model.core_block_forward = original
@@ -82,4 +95,8 @@ def capture_huginn_functional_states(
         if not np.isfinite(value).all():
             raise RuntimeError(f"{key} contains non-finite values")
         arrays[key] = value
+    if input_states is not None:
+        injected = input_states.detach().to(torch.float32).cpu()[0].numpy().astype(np.float16)
+        if not np.array_equal(arrays["h0_full"], injected):
+            raise RuntimeError("captured h0 does not equal explicit input_states")
     return arrays

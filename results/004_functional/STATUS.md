@@ -148,6 +148,41 @@ The compact cache is not yet built. All v2 work must follow
   The artifact, builder record, prior validation log, and attestation are all
   regular non-symlink files published read-only; each observed mode is `0444`.
 
+### Phase 9R prefix-stable cache-v3 smoke — PRE-RUN BLOCKED; remediation in progress
+
+- Phase-scoped code/config now targets only immutable raw teacher train IDs 0–7
+  and the new atomic no-replace output
+  `/workspace/functional_cache_v3_smoke`; cache v2 and raw continuations remain
+  untouched.
+- Each example derives its frozen seed under a forked CPU/CUDA RNG scope and
+  calls Huginn `initialize_state` exactly once on a BF16 CUDA
+  `[1,2048,5280]` template. Extraction and replay inject only views
+  `schedule[:, :t]`; prefix-shaped initialization is forbidden.
+- The builder locks split, reviewed-valid-end, cache-v2 manifest/freeze, and all
+  eight raw source hashes. It asserts rendered prompt plus the 1,024-token cap
+  and complete teacher sequences fit in 2,048 positions.
+- Items contain only the needed float16 `h0/x/h16` sequence slices, token/mask
+  and answer bounds, exact normalized-pre-coda semantics, schedule protocol and
+  length, derived seed, transient full-schedule SHA-256, and provenance. No
+  logits or complete 2,048-position schedule are persisted.
+- A static byte-estimate preflight and validator are implemented. Validation
+  requires every represented prefix to match the transient schedule
+  bit-for-bit, independent prompt/full request schedule hashes and overlap, RNG
+  restoration, exactly one initializer call per request, live D16 replay,
+  normal-live versus decomposed-coda equivalence, exact file/schema checks, no
+  K directories, and no logits.
+- Pinned H100 tests passed: 27 focused and 169 full-suite. Static production
+  preflight passed for exactly 8 items / 1,929 tokens, estimating 61,120,365
+  uncompressed item bytes, a 21,626,880-byte largest transient schedule, and a
+  122,240,730-byte two-times safety requirement.
+- Independent pre-run review `08c1b7ef` returned code FAIL / science FAIL.
+  Required remediation: real storage preflight; independent prompt/full
+  schedule rematerialization and D16 decomposition; pinned-dataset prompt and
+  boundary reconstruction; fixed-schedule use in active autoregressive routes;
+  and propagated prefix/full `x`, `h16`, logit, KL, and argmax diagnostics.
+- **No cache builder, Huginn extraction, or production validator execution has
+  occurred.** Phases 10–13 were not executed by this phase.
+
 ### Phase 10 correctness/unit-test gate — corrected coda-v3 PASS/PASS
 
 - The active gate now targets the new no-replace artifact

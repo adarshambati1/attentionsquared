@@ -47,6 +47,7 @@ class FakeHuginn:
         num_steps,
         use_cache,
         output_details,
+        input_states=None,
     ):
         assert use_cache is False
         assert output_details == {
@@ -56,7 +57,11 @@ class FakeHuginn:
             "return_stats": False,
         }
         batch, tokens = input_ids.shape
-        h0 = torch.zeros((batch, tokens, 3), device=input_ids.device)
+        h0 = (
+            torch.zeros((batch, tokens, 3), device=input_ids.device)
+            if input_states is None
+            else input_states
+        )
         recurrent_input = torch.ones_like(h0)
         state = h0
         block = torch.tensor(-1)
@@ -152,6 +157,24 @@ def test_capture_extracts_h0_x_and_exact_d16_coda_input_and_restores_hook():
     assert np.all(states["h0_full"] == 0)
     assert np.all(states["x_full"] == 1)
     assert np.all(states["h16_teacher"] == 16)
+
+
+def test_capture_optionally_injects_and_returns_exact_explicit_h0():
+    model = FakeHuginn()
+    input_ids = torch.arange(5).unsqueeze(0)
+    attention_mask = torch.ones_like(input_ids, dtype=torch.bool)
+    injected = torch.arange(15, dtype=torch.float32).reshape(1, 5, 3)
+
+    states = capture_huginn_functional_states(
+        model,
+        input_ids,
+        attention_mask,
+        depth=16,
+        input_states=injected,
+    )
+
+    assert np.array_equal(states["h0_full"], injected.numpy()[0].astype(np.float16))
+    assert np.array_equal(states["h16_teacher"], states["h0_full"] + np.float16(16))
 
 
 def test_capture_rejects_noncanonical_depth_before_model_execution():

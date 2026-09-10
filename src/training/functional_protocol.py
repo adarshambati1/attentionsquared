@@ -25,6 +25,10 @@ FINAL_H0_SEED_INDICES = (0, 1, 2)
 A2_INITIALIZATION_SEED = 0
 PAIRED_DATA_ORDER_SEED = 9100
 SUPPORTED_K = (1, 2, 4)
+FIXED_H0_SCHEDULE_LENGTH = 2048
+FIXED_H0_SCHEDULE_PROTOCOL = (
+    "huginn-initialize-state-once-bfloat16-cuda-[1,2048,H]-slice-prefix-v1"
+)
 
 
 @dataclass(frozen=True)
@@ -105,6 +109,62 @@ def paired_huginn_h0(
         torch.manual_seed(seed)
         state = model.initialize_state(input_embeds, scale=init_scale)
     return state, seed
+
+
+def fixed_huginn_h0_schedule(
+    model: Any,
+    template: torch.Tensor,
+    *,
+    base_seed: int,
+    example_id: int,
+    seed_index: int = 0,
+    step: int = 0,
+    init_scale: float = 1.0,
+) -> tuple[torch.Tensor, int]:
+    """Materialize the canonical fixed-length Huginn schedule exactly once.
+
+    ``template`` is deliberately shape- and dtype-constrained so callers cannot
+    accidentally initialize at a changing autoregressive prefix shape.  The
+    returned tensor remains BF16 CUDA; callers must use :func:`schedule_prefix`.
+    CPU and every CUDA generator are restored by the forked RNG scope.
+    """
+    if seed_index not in FINAL_H0_SEED_INDICES:
+        raise ValueError("seed_index must be one of the three frozen paired indices")
+    if (
+        template.ndim != 3
+        or tuple(template.shape[:2]) != (1, FIXED_H0_SCHEDULE_LENGTH)
+    ):
+        raise ValueError("schedule template must have shape [1,2048,H]")
+    if template.dtype != torch.bfloat16 or template.device.type != "cuda":
+        raise ValueError("schedule template must be BF16 CUDA")
+    seed = per_example_seed(
+        base_seed, example_id, step=step, seed_index=seed_index
+    )
+    with _fork_torch_rng(template.device):
+        torch.manual_seed(seed)
+        schedule = model.initialize_state(template, scale=init_scale)
+    if (
+        schedule.shape != template.shape
+        or schedule.dtype != torch.bfloat16
+        or schedule.device != template.device
+    ):
+        raise RuntimeError("Huginn initializer returned a noncanonical schedule")
+    return schedule, seed
+
+
+def schedule_prefix(schedule: torch.Tensor, length: int) -> torch.Tensor:
+    """Return a view of the fixed schedule; never rematerialize at prefix shape."""
+    if (
+        schedule.ndim != 3
+        or schedule.shape[0] != 1
+        or schedule.shape[1] != FIXED_H0_SCHEDULE_LENGTH
+        or schedule.dtype != torch.bfloat16
+        or schedule.device.type != "cuda"
+    ):
+        raise ValueError("schedule must be canonical BF16 CUDA [1,2048,H]")
+    if not 1 <= int(length) <= FIXED_H0_SCHEDULE_LENGTH:
+        raise ValueError("prefix length must be in [1,2048]")
+    return schedule[:, : int(length)]
 
 
 def paired_epoch_order(
