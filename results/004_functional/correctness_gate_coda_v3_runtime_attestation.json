@@ -1,0 +1,11 @@
+{
+  "artifact": "/workspace/functional_protocol/correctness_gate_coda_v3.json",
+  "artifact_bytes": 2006,
+  "artifact_sha256": "a83561b945f88607554087ce79f4b690e79f6094afd3b05d25c07c5c1c539788",
+  "git_commit": "f3fbceace25506e28f0229bed7cf6a7722a2607d",
+  "is_symlink": false,
+  "lstat_type": "regular-file",
+  "mode": "0444",
+  "protocol": "functional-correctness-gate-coda-v3-runtime-attestation-v1",
+  "status": "pass"
+}

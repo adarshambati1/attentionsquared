@@ -148,7 +148,7 @@ The compact cache is not yet built. All v2 work must follow
   The artifact, builder record, prior validation log, and attestation are all
   regular non-symlink files published read-only; each observed mode is `0444`.
 
-### Phase 10 correctness/unit-test gate — historical mechanics PASS; coda-v3 remediation implemented, pending independent review and rerun
+### Phase 10 correctness/unit-test gate — corrected coda-v3 PASS/PASS
 
 - The active gate now targets the new no-replace artifact
   `/workspace/functional_protocol/correctness_gate_coda_v3.json`; the historical
@@ -161,8 +161,18 @@ The compact cache is not yet built. All v2 work must follow
   once, and requires the model-returned latent and decomposed-coda logits to be
   exactly equal or tightly numerically equivalent to normal live D16 outputs.
 - Pinned H100 tests passed: 21 focused and 151 full-suite. Pre-run review passed
-  code/science with no Phase 10 scientific blockers. The coda-v3 production
-  gate has not yet been run.
+  code/science with no Phase 10 scientific blockers.
+- Corrected production gate passed at commit `f3fbceace25506e28f0229bed7cf6a7722a2607d`.
+  The live decomposition was exact: 16 recurrent calls, one initial `ln_f`,
+  exact latent equality, exact logit equality, and zero maximum absolute error.
+- Artifact SHA-256: `a83561b945f88607554087ce79f4b690e79f6094afd3b05d25c07c5c1c539788`;
+  authoritative runtime artifact is a regular non-symlink mode-`0444` file.
+  Runtime attestation SHA-256:
+  `3c80f8d27d96542f50ef221d7ff35e06d9a9ebb2b9d08ad611de9a42a2e424be`.
+- Corrected teacher self-KL/token was `-8.677907004095431e-11`; untrained K=4
+  KL/token was `11.100428581237793`. All 21 A² parameters had nonzero
+  gradients, `z16` had 812,684 nonzero gradient elements (L2
+  `0.17844003438949585`), and frozen Huginn had zero parameter gradients.
 
 - Literal `prompt | A B C` alignment verifies logits at positions immediately
   preceding A, B, and C predict those answer tokens.
