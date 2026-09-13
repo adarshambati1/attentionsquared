@@ -85,10 +85,14 @@ def main() -> None:
     config = json.loads(config_path.read_text())
     output = Path(config["output_root"])
     if output.exists():
-        raise FileExistsError(output)
-    output.mkdir(parents=True)
-    (output / "checkpoints").mkdir()
+        if output.is_symlink() or {path.name for path in output.iterdir()} != {"correctness_gate.json"}:
+            raise FileExistsError(f"output must contain only the immutable correctness gate: {output}")
+    else:
+        output.mkdir(parents=True)
+    (output / "checkpoints").mkdir(exist_ok=False)
     curve = output / "training_curve.jsonl"
+    if curve.exists() or (output / "best.pt").exists() or (output / "training_summary.json").exists():
+        raise FileExistsError("refusing to replace an existing training artifact")
     tokenizer = AutoTokenizer.from_pretrained(config["model_id"], revision=config["model_revision"], local_files_only=True)
     dataset = load_dataset(config["dataset_id"], config["dataset_config"], split="train", revision=config["dataset_revision"])
     huginn = AutoModelForCausalLM.from_pretrained(config["model_id"], revision=config["model_revision"], torch_dtype=torch.bfloat16, trust_remote_code=True, local_files_only=True).eval().cuda()
