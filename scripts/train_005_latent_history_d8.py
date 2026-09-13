@@ -85,8 +85,10 @@ def main() -> None:
     config = json.loads(config_path.read_text())
     output = Path(config["output_root"])
     if output.exists():
-        if output.is_symlink() or {path.name for path in output.iterdir()} != {"correctness_gate.json"}:
-            raise FileExistsError(f"output must contain only the immutable correctness gate: {output}")
+        allowed_bootstrap = {"correctness_gate.json", "training.log", "training.pid"}
+        observed = {path.name for path in output.iterdir()}
+        if output.is_symlink() or "correctness_gate.json" not in observed or not observed <= allowed_bootstrap:
+            raise FileExistsError(f"output contains artifacts outside the correctness gate and active launcher files: {output}")
     else:
         output.mkdir(parents=True)
     (output / "checkpoints").mkdir(exist_ok=False)
