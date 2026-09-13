@@ -53,9 +53,11 @@ def main():
     parser = argparse.ArgumentParser(); parser.add_argument("--config", type=Path, default=CONFIG); args = parser.parse_args()
     from datasets import load_dataset
     from transformers import AutoModelForCausalLM, AutoTokenizer
-    config_path = ROOT / args.config; config = json.loads(config_path.read_text()); output_root = Path(config["output_root"])
+    config_path = ROOT / args.config; config = json.loads(config_path.read_text())
+    output_root = Path("/workspace/history_memory_comparison_d8")
+    if output_root.exists(): raise FileExistsError(output_root)
+    output_root.mkdir()
     output_path = output_root / "comparison.json"
-    if output_path.exists(): raise FileExistsError(output_path)
     shared_checkpoint_path = Path("/workspace/latent_history_attention_d8/best.pt")
     mean_checkpoint_path = Path("/workspace/mean_history_d8/best.pt")
     layer_checkpoint_path = Path("/workspace/per_layer_history_d8/best.pt")

@@ -42,3 +42,6 @@ def test_control_training_keeps_answer_ce_and_validation_selection():
     assert 'config["validation_every_steps"]' in source
     assert 'split="train"' in source
     assert 'config["test_ids"]' not in source
+    evaluation = (ROOT / "scripts/evaluate_006_history_memory_d8.py").read_text()
+    assert 'Path("/workspace/history_memory_comparison_d8")' in evaluation
+    assert 'Path(config["output_root"])' not in evaluation
