@@ -1,0 +1,48 @@
+{
+  "protocol": "mean_history-d8-v1",
+  "model_id": "tomg-group-umd/huginn-0125",
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "dataset_id": "openai/gsm8k",
+  "dataset_config": "main",
+  "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "system_instruction": "You are a helpful assistant that can assist users with mathematical reasoning.",
+  "train_ids": [
+    0,
+    2249
+  ],
+  "validation_ids": [
+    2250,
+    2499
+  ],
+  "test_ids": [
+    0,
+    249
+  ],
+  "depth": 8,
+  "projection_size": 256,
+  "attention_heads": 4,
+  "history_mode": "uniform",
+  "h0_base_seed": 3000,
+  "h0_seed_index": 0,
+  "optimizer": "AdamW",
+  "learning_rate": 0.0001,
+  "weight_decay": 0.01,
+  "gradient_clip_norm": 1.0,
+  "gradient_accumulation_examples": 8,
+  "optimizer_steps": 1000,
+  "startup_gate_step": 10,
+  "startup_validation_examples": 16,
+  "validation_every_steps": 100,
+  "checkpoint_every_steps": 100,
+  "training_shuffle_seed": 5005,
+  "maximum_sequence_tokens": 2048,
+  "max_new_tokens": 1024,
+  "selection_criterion": "lowest full validation answer-token cross-entropy",
+  "generation_warmup_examples": 3,
+  "fixed_forward_tokens": 256,
+  "fixed_forward_warmup": 5,
+  "fixed_forward_repetitions": 20,
+  "output_root": "/workspace/mean_history_d8",
+  "variant": "mean_history",
+  "module_initialization_seed": 6006
+}
