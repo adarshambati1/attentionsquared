@@ -1,0 +1,13 @@
+{
+  "best_step": 500,
+  "best_validation_answer_token_cross_entropy": 0.43058749494209053,
+  "config_sha256": "52cf24204da60ac711cc7c8f018107a01be6372341d653f7ffab4954c10a227d",
+  "git_commit": "885a4f318aed8de6335b1e2b063da776eb6386bc",
+  "huginn_parameters_trained": false,
+  "optimizer_steps": 1000,
+  "protocol": "latent-history-attention-d8-training-v1",
+  "selection_criterion": "lowest full validation answer-token cross-entropy",
+  "status": "complete",
+  "test_set_used_for_selection": false,
+  "training_seconds": 1013.1442604064941
+}
