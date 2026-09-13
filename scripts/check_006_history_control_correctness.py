@@ -39,9 +39,9 @@ def main() -> None:
     from datasets import load_dataset
     from transformers import AutoModelForCausalLM, AutoTokenizer
     config = json.loads((ROOT / args.config).read_text())
-    output=Path(config["output_root"])/"correctness_gate.json"
-    output.parent.mkdir(parents=True, exist_ok=False)
-    if output.exists(): raise FileExistsError(output)
+    gate_path=Path(config["output_root"])/"correctness_gate.json"
+    gate_path.parent.mkdir(parents=True, exist_ok=False)
+    if gate_path.exists(): raise FileExistsError(gate_path)
     tokenizer = AutoTokenizer.from_pretrained(config["model_id"], revision=config["model_revision"], local_files_only=True)
     huginn = AutoModelForCausalLM.from_pretrained(config["model_id"], revision=config["model_revision"], torch_dtype=torch.bfloat16, trust_remote_code=True, local_files_only=True).eval().cuda()
     torch.manual_seed(config["module_initialization_seed"])
@@ -127,8 +127,8 @@ def main() -> None:
         "h0_schedule_sha256": tensor_sha256(schedule),
         "full_vocabulary_logits_persisted": False,
     }
-    output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
-    output.chmod(0o444)
+    gate_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    gate_path.chmod(0o444)
     print(json.dumps(result, indent=2, sort_keys=True))
 
 
