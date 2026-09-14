@@ -1,0 +1,82 @@
+{
+  "results": {
+    "anderson:2": {
+      "accuracy": 0.188,
+      "anderson_fallbacks": 523943,
+      "cap_hit_rate": 0.06,
+      "correct": 47,
+      "degeneration_rate": 0.0,
+      "mean_generated_tokens": 214.168,
+      "mean_generation_latency_seconds": 10.5610621785447,
+      "median_generation_latency_seconds": 7.649273168295622,
+      "peak_memory_bytes": 17231351296,
+      "total": 250
+    },
+    "anderson:3": {
+      "accuracy": 0.188,
+      "anderson_fallbacks": 523943,
+      "cap_hit_rate": 0.06,
+      "correct": 47,
+      "degeneration_rate": 0.0,
+      "mean_generated_tokens": 214.168,
+      "mean_generation_latency_seconds": 10.524114487081766,
+      "median_generation_latency_seconds": 7.665428539738059,
+      "peak_memory_bytes": 17230914048,
+      "total": 250
+    },
+    "anderson:4": {
+      "accuracy": 0.188,
+      "anderson_fallbacks": 523943,
+      "cap_hit_rate": 0.06,
+      "correct": 47,
+      "degeneration_rate": 0.0,
+      "mean_generated_tokens": 214.168,
+      "mean_generation_latency_seconds": 10.47932904996723,
+      "median_generation_latency_seconds": 7.557225659489632,
+      "peak_memory_bytes": 17230914048,
+      "total": 250
+    },
+    "heavy_ball:0.05": {
+      "accuracy": 0.236,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.068,
+      "correct": 59,
+      "degeneration_rate": 0.004,
+      "mean_generated_tokens": 219.784,
+      "mean_generation_latency_seconds": 10.527171651445329,
+      "median_generation_latency_seconds": 7.47156270686537,
+      "peak_memory_bytes": 17268517376,
+      "total": 250
+    },
+    "heavy_ball:0.1": {
+      "accuracy": 0.156,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.08,
+      "correct": 39,
+      "degeneration_rate": 0.008,
+      "mean_generated_tokens": 229.66,
+      "mean_generation_latency_seconds": 11.007235799320043,
+      "median_generation_latency_seconds": 6.812496812082827,
+      "peak_memory_bytes": 17268517376,
+      "total": 250
+    },
+    "heavy_ball:0.2": {
+      "accuracy": 0.02,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.308,
+      "correct": 5,
+      "degeneration_rate": 0.012,
+      "mean_generated_tokens": 386.504,
+      "mean_generation_latency_seconds": 18.915973180808127,
+      "median_generation_latency_seconds": 5.297842441126704,
+      "peak_memory_bytes": 17379776000,
+      "total": 250
+    }
+  },
+  "selected": {
+    "anderson": 2,
+    "heavy_ball": 0.05
+  },
+  "selection_rule": "highest corrected accuracy; tie lowest cap-hit count; tie shortest mean generation; tie smaller coefficient/window",
+  "test_used": false
+}

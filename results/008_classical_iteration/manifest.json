@@ -1,0 +1,16 @@
+{
+  "durable_source": "/workspace/classical_iteration_d8",
+  "files": {
+    "comparison.json": "1bc61bb68bf2fbcefc33e614aacb0ef9027f133a19148b981c65b23c500a5a3a",
+    "conclusion.md": "b2e06f0766a0176a87997bd78863944b6c48ee8474b0bea0544bec4175f89a1a",
+    "correctness_gate.json": "8281cd4331006ab9028107ae3d4de8b1a0ab012a1dddc271127ccb0e8251049b",
+    "run.log": "e08dc4b07dd4362ed98197680168bf0af35b2766056bdc640acff470c7407ccf",
+    "test_records.jsonl": "4950bae9e889b33b1516991f2358b6aab5eaabba39e641b6e82fd6e36d1adece",
+    "validation_selection.json": "8a7eb923bd0543800092ea1119dca1677d05b0a587773f6234e3e626dfc63d7e",
+    "validation_sweep.jsonl": "40fad892af3b28c4a3cb6c32e6df55346d1a9abc7373f7cccc1c86caf57f8fa8"
+  },
+  "protocol": "classical-iteration-huginn-d8-v1",
+  "run_log_source": "/workspace/classical_iteration_d8.log",
+  "source_commit": "8fbca369c84526098121673617133acf6e8845b5",
+  "status": "frozen"
+}

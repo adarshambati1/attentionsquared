@@ -1,0 +1,89 @@
+{
+  "architecture_parameters_added": 0,
+  "cache_path_uses_loop_indexed_HuginnDynamicCache": true,
+  "huginn_weights_unchanged": true,
+  "records": [
+    {
+      "all_modified_loop_states_finite": true,
+      "cache_checks": [
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "mode": "plain"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "mode": "halpern"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.125,
+          "mode": "heavy_ball"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "mode": "anderson"
+        }
+      ],
+      "example_id": 2250,
+      "plain_logits_exact": true
+    },
+    {
+      "all_modified_loop_states_finite": true,
+      "cache_checks": [
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "mode": "plain"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "mode": "halpern"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "mode": "heavy_ball"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "mode": "anderson"
+        }
+      ],
+      "example_id": 2251,
+      "plain_logits_exact": true
+    },
+    {
+      "all_modified_loop_states_finite": true,
+      "cache_checks": [
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.125,
+          "mode": "plain"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "mode": "halpern"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0703125,
+          "mode": "heavy_ball"
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.125,
+          "mode": "anderson"
+        }
+      ],
+      "example_id": 2252,
+      "plain_logits_exact": true
+    }
+  ],
+  "status": "pass"
+}

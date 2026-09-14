@@ -1,0 +1,328 @@
+{
+  "config_sha256": "d3a77f9098232e11dc878298abbc0e8ca71c43a5065545fa20ea9a436e89a22f",
+  "git_commit": "8fbca369c84526098121673617133acf6e8845b5",
+  "new_parameters": 0,
+  "protocol": "classical-iteration-huginn-d8-v1",
+  "selected": {
+    "anderson": 2,
+    "heavy_ball": 0.05
+  },
+  "status": "complete",
+  "test": {
+    "anderson": {
+      "accuracy": 0.164,
+      "anderson_fallbacks": 558866,
+      "cap_hit_rate": 0.068,
+      "correct": 41,
+      "degeneration_rate": 0.0,
+      "fixed_256_token_forward": {
+        "mean_seconds": 0.05714276600629091,
+        "median_seconds": 0.057126475498080254,
+        "peak_memory_bytes": 15221841920,
+        "tokens": 256
+      },
+      "mean_generated_tokens": 231.408,
+      "mean_generation_latency_seconds": 11.307826354049146,
+      "mean_loop_diagnostics": [
+        {
+          "cosine_to_final_state": 0.00010669546383724083,
+          "loop": 0,
+          "relative_update_norm": 1.8279412178993224
+        },
+        {
+          "cosine_to_final_state": 0.2990131279826164,
+          "loop": 1,
+          "relative_update_norm": 0.931187527179718
+        },
+        {
+          "cosine_to_final_state": 0.4334458605051041,
+          "loop": 2,
+          "relative_update_norm": 0.7589243669509887
+        },
+        {
+          "cosine_to_final_state": 0.5871061288118362,
+          "loop": 3,
+          "relative_update_norm": 0.6425673916339875
+        },
+        {
+          "cosine_to_final_state": 0.7053530786037445,
+          "loop": 4,
+          "relative_update_norm": 0.5308093347549439
+        },
+        {
+          "cosine_to_final_state": 0.8020430819988251,
+          "loop": 5,
+          "relative_update_norm": 0.43638793838024137
+        },
+        {
+          "cosine_to_final_state": 0.8818914122581482,
+          "loop": 6,
+          "relative_update_norm": 0.3623635326623917
+        },
+        {
+          "cosine_to_final_state": 0.9543399970531463,
+          "loop": 7,
+          "relative_update_norm": 0.30168394392728803
+        }
+      ],
+      "median_generation_latency_seconds": 7.9504438284784555,
+      "peak_memory_bytes": 17294407680,
+      "total": 250
+    },
+    "halpern": {
+      "accuracy": 0.16,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.048,
+      "correct": 40,
+      "degeneration_rate": 0.012,
+      "fixed_256_token_forward": {
+        "mean_seconds": 0.05576052889227867,
+        "median_seconds": 0.055761419236660004,
+        "peak_memory_bytes": 15146147840,
+        "tokens": 256
+      },
+      "mean_generated_tokens": 224.512,
+      "mean_generation_latency_seconds": 10.71475556050241,
+      "mean_loop_diagnostics": [
+        {
+          "cosine_to_final_state": 0.09406383243203163,
+          "loop": 0,
+          "relative_update_norm": 0.9140766649246216
+        },
+        {
+          "cosine_to_final_state": 0.33949952173233033,
+          "loop": 1,
+          "relative_update_norm": 0.7103318967819214
+        },
+        {
+          "cosine_to_final_state": 0.49792231500148776,
+          "loop": 2,
+          "relative_update_norm": 0.5489736160039902
+        },
+        {
+          "cosine_to_final_state": 0.6503267745971679,
+          "loop": 3,
+          "relative_update_norm": 0.459845494389534
+        },
+        {
+          "cosine_to_final_state": 0.777801745891571,
+          "loop": 4,
+          "relative_update_norm": 0.3706848691701889
+        },
+        {
+          "cosine_to_final_state": 0.8711765305995941,
+          "loop": 5,
+          "relative_update_norm": 0.297642836689949
+        },
+        {
+          "cosine_to_final_state": 0.9385851838588715,
+          "loop": 6,
+          "relative_update_norm": 0.2414925840497017
+        },
+        {
+          "cosine_to_final_state": 0.9807489242553711,
+          "loop": 7,
+          "relative_update_norm": 0.19760444635152816
+        }
+      ],
+      "median_generation_latency_seconds": 8.372172926552594,
+      "peak_memory_bytes": 17298277888,
+      "total": 250
+    },
+    "heavy_ball": {
+      "accuracy": 0.152,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.044,
+      "correct": 38,
+      "degeneration_rate": 0.0,
+      "fixed_256_token_forward": {
+        "mean_seconds": 0.05577682638540864,
+        "median_seconds": 0.055771143175661564,
+        "peak_memory_bytes": 15146147840,
+        "tokens": 256
+      },
+      "mean_generated_tokens": 210.096,
+      "mean_generation_latency_seconds": 10.004532873645426,
+      "mean_loop_diagnostics": [
+        {
+          "cosine_to_final_state": 0.0002714209276891779,
+          "loop": 0,
+          "relative_update_norm": 1.8277401432991027
+        },
+        {
+          "cosine_to_final_state": 0.3000325774550438,
+          "loop": 1,
+          "relative_update_norm": 0.9125404517650604
+        },
+        {
+          "cosine_to_final_state": 0.4378194533586502,
+          "loop": 2,
+          "relative_update_norm": 0.7245198986530303
+        },
+        {
+          "cosine_to_final_state": 0.5810322127342225,
+          "loop": 3,
+          "relative_update_norm": 0.6452382600307465
+        },
+        {
+          "cosine_to_final_state": 0.6862119770050049,
+          "loop": 4,
+          "relative_update_norm": 0.5468383756875992
+        },
+        {
+          "cosine_to_final_state": 0.7612886102199554,
+          "loop": 5,
+          "relative_update_norm": 0.4625038529634476
+        },
+        {
+          "cosine_to_final_state": 0.8389969899654388,
+          "loop": 6,
+          "relative_update_norm": 0.3952592895030975
+        },
+        {
+          "cosine_to_final_state": 0.9420626149177551,
+          "loop": 7,
+          "relative_update_norm": 0.33972730100154874
+        }
+      ],
+      "median_generation_latency_seconds": 7.677378373220563,
+      "peak_memory_bytes": 17297940480,
+      "total": 250
+    },
+    "plain": {
+      "accuracy": 0.16,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.08,
+      "correct": 40,
+      "degeneration_rate": 0.0,
+      "fixed_256_token_forward": {
+        "mean_seconds": 0.0556538556702435,
+        "median_seconds": 0.05565216392278671,
+        "peak_memory_bytes": 15140741120,
+        "tokens": 256
+      },
+      "mean_generated_tokens": 240.224,
+      "mean_generation_latency_seconds": 11.508298413574696,
+      "mean_loop_diagnostics": [
+        {
+          "cosine_to_final_state": 0.00011163874386693351,
+          "loop": 0,
+          "relative_update_norm": 1.8280180072784424
+        },
+        {
+          "cosine_to_final_state": 0.2989280533194542,
+          "loop": 1,
+          "relative_update_norm": 0.9314854044914246
+        },
+        {
+          "cosine_to_final_state": 0.4331272794008255,
+          "loop": 2,
+          "relative_update_norm": 0.7589759457111359
+        },
+        {
+          "cosine_to_final_state": 0.5865199264287949,
+          "loop": 3,
+          "relative_update_norm": 0.6426168596744537
+        },
+        {
+          "cosine_to_final_state": 0.7048058688640595,
+          "loop": 4,
+          "relative_update_norm": 0.53105025100708
+        },
+        {
+          "cosine_to_final_state": 0.8018040294647217,
+          "loop": 5,
+          "relative_update_norm": 0.43660662257671357
+        },
+        {
+          "cosine_to_final_state": 0.8818667683601379,
+          "loop": 6,
+          "relative_update_norm": 0.3623371498584747
+        },
+        {
+          "cosine_to_final_state": 0.9543725390434266,
+          "loop": 7,
+          "relative_update_norm": 0.30155801033973695
+        }
+      ],
+      "median_generation_latency_seconds": 7.794983168132603,
+      "peak_memory_bytes": 17294369280,
+      "total": 250
+    }
+  },
+  "training_performed": false,
+  "validation": {
+    "anderson:2": {
+      "accuracy": 0.188,
+      "anderson_fallbacks": 523943,
+      "cap_hit_rate": 0.06,
+      "correct": 47,
+      "degeneration_rate": 0.0,
+      "mean_generated_tokens": 214.168,
+      "mean_generation_latency_seconds": 10.5610621785447,
+      "median_generation_latency_seconds": 7.649273168295622,
+      "peak_memory_bytes": 17231351296,
+      "total": 250
+    },
+    "anderson:3": {
+      "accuracy": 0.188,
+      "anderson_fallbacks": 523943,
+      "cap_hit_rate": 0.06,
+      "correct": 47,
+      "degeneration_rate": 0.0,
+      "mean_generated_tokens": 214.168,
+      "mean_generation_latency_seconds": 10.524114487081766,
+      "median_generation_latency_seconds": 7.665428539738059,
+      "peak_memory_bytes": 17230914048,
+      "total": 250
+    },
+    "anderson:4": {
+      "accuracy": 0.188,
+      "anderson_fallbacks": 523943,
+      "cap_hit_rate": 0.06,
+      "correct": 47,
+      "degeneration_rate": 0.0,
+      "mean_generated_tokens": 214.168,
+      "mean_generation_latency_seconds": 10.47932904996723,
+      "median_generation_latency_seconds": 7.557225659489632,
+      "peak_memory_bytes": 17230914048,
+      "total": 250
+    },
+    "heavy_ball:0.05": {
+      "accuracy": 0.236,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.068,
+      "correct": 59,
+      "degeneration_rate": 0.004,
+      "mean_generated_tokens": 219.784,
+      "mean_generation_latency_seconds": 10.527171651445329,
+      "median_generation_latency_seconds": 7.47156270686537,
+      "peak_memory_bytes": 17268517376,
+      "total": 250
+    },
+    "heavy_ball:0.1": {
+      "accuracy": 0.156,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.08,
+      "correct": 39,
+      "degeneration_rate": 0.008,
+      "mean_generated_tokens": 229.66,
+      "mean_generation_latency_seconds": 11.007235799320043,
+      "median_generation_latency_seconds": 6.812496812082827,
+      "peak_memory_bytes": 17268517376,
+      "total": 250
+    },
+    "heavy_ball:0.2": {
+      "accuracy": 0.02,
+      "anderson_fallbacks": 0,
+      "cap_hit_rate": 0.308,
+      "correct": 5,
+      "degeneration_rate": 0.012,
+      "mean_generated_tokens": 386.504,
+      "mean_generation_latency_seconds": 18.915973180808127,
+      "median_generation_latency_seconds": 5.297842441126704,
+      "peak_memory_bytes": 17379776000,
+      "total": 250
+    }
+  }
+}
