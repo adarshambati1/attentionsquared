@@ -1,0 +1,55 @@
+{
+  "results": {
+    "2": {
+      "accuracy": 0.136,
+      "anderson_fallbacks": 0,
+      "anderson_nonfinite_solves": 0,
+      "anderson_singular_solves": 0,
+      "anderson_solve_attempts": 572474,
+      "anderson_successful_solves": 572474,
+      "cap_hit_rate": 0.092,
+      "correct": 34,
+      "degeneration_rate": 0.004,
+      "mean_generated_tokens": 241.9,
+      "mean_generation_latency_seconds": 12.15887332841754,
+      "median_generation_latency_seconds": 7.810206823982298,
+      "peak_memory_bytes": 17381280256,
+      "total": 250
+    },
+    "3": {
+      "accuracy": 0.124,
+      "anderson_fallbacks": 0,
+      "anderson_nonfinite_solves": 0,
+      "anderson_singular_solves": 0,
+      "anderson_solve_attempts": 594839,
+      "anderson_successful_solves": 594839,
+      "cap_hit_rate": 0.108,
+      "correct": 31,
+      "degeneration_rate": 0.016,
+      "mean_generated_tokens": 254.68,
+      "mean_generation_latency_seconds": 12.838301896966994,
+      "median_generation_latency_seconds": 7.612462901510298,
+      "peak_memory_bytes": 17230914048,
+      "total": 250
+    },
+    "4": {
+      "accuracy": 0.072,
+      "anderson_fallbacks": 0,
+      "anderson_nonfinite_solves": 0,
+      "anderson_singular_solves": 0,
+      "anderson_solve_attempts": 632527,
+      "anderson_successful_solves": 632527,
+      "cap_hit_rate": 0.14,
+      "correct": 18,
+      "degeneration_rate": 0.028,
+      "mean_generated_tokens": 276.216,
+      "mean_generation_latency_seconds": 14.016138353273272,
+      "median_generation_latency_seconds": 7.950557545758784,
+      "peak_memory_bytes": 17381911552,
+      "total": 250
+    }
+  },
+  "selected_window": 2,
+  "selection_rule": "highest corrected accuracy; tie lowest cap-hit count; tie shortest mean generation; tie smaller window",
+  "test_used": false
+}

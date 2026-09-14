@@ -1,0 +1,19 @@
+{
+  "durable_source": "/workspace/classical_iteration_anderson_fp32",
+  "files": {
+    "comparison_amended.json": "7d41c94731d1676e5e5c32dc5c314076a74afcadc19f52a2c4e96be0e3ea2c7c",
+    "conclusion.md": "bfd68a70bb2fe3c7365d415a83f1625e88c86b12fe4ca3acab929f684d09a4ff",
+    "correctness_gate.json": "4ae7c76b1e934c7e4aff184f33f948a0f2d891fc0ce1137c1ad655b979baa0fa",
+    "run.log": "fce5b66e81d5b0bda076cef9d39a949ffcf98ce2adfe3a2d99b9c3dd57209839",
+    "runtime_attestation.json": "333402ebd752a14ce81e4520dda16ce93fe5f0fa14146d1499f0f1e666240fcf",
+    "test_records.jsonl": "1373f0cc24f53e80002f88bcbec33c7cda61b04a9cbbd0ae6dc801956d2d2eda",
+    "validation_selection.json": "cb45164835b13f0c6b2c4288375ed7415f94a4494b3c1bfcf4681a98bad1cc87",
+    "validation_sweep.jsonl": "f58c62757786015c2b28cf14d771777fdbeaeba0e1ba3e4b9cce81736f266d27"
+  },
+  "preserves_original_artifacts": true,
+  "protocol": "classical-iteration-anderson-fp32-amendment-v1",
+  "run_log_source": "/workspace/classical_iteration_anderson_fp32.log",
+  "source_commit": "cfbf76b5720d009b06c217c54d1dd31b5dbfa78f",
+  "status": "frozen",
+  "supersedes_only": "invalid original Anderson arm"
+}

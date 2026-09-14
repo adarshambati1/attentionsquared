@@ -1,0 +1,410 @@
+{
+  "huginn_weights_unchanged": true,
+  "implementation_exceptions_are_fatal": true,
+  "linear_solve_dtype": "FP32 outside autocast",
+  "records": [
+    {
+      "checks": [
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 812,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 812,
+              "successful_solves": 812
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 812,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 812,
+              "successful_solves": 812
+            },
+            "uncached": {
+              "expected_solve_attempts": 819,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 819,
+              "successful_solves": 819
+            }
+          },
+          "window": 2
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.125,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 812,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 812,
+              "successful_solves": 812
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 812,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 812,
+              "successful_solves": 812
+            },
+            "uncached": {
+              "expected_solve_attempts": 819,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 819,
+              "successful_solves": 819
+            }
+          },
+          "window": 3
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 812,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 812,
+              "successful_solves": 812
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 812,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 812,
+              "successful_solves": 812
+            },
+            "uncached": {
+              "expected_solve_attempts": 819,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 819,
+              "successful_solves": 819
+            }
+          },
+          "window": 4
+        }
+      ],
+      "example_id": 2250
+    },
+    {
+      "checks": [
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 637,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 637,
+              "successful_solves": 637
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 637,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 637,
+              "successful_solves": 637
+            },
+            "uncached": {
+              "expected_solve_attempts": 644,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 644,
+              "successful_solves": 644
+            }
+          },
+          "window": 2
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 637,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 637,
+              "successful_solves": 637
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 637,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 637,
+              "successful_solves": 637
+            },
+            "uncached": {
+              "expected_solve_attempts": 644,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 644,
+              "successful_solves": 644
+            }
+          },
+          "window": 3
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 637,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 637,
+              "successful_solves": 637
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 637,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 637,
+              "successful_solves": 637
+            },
+            "uncached": {
+              "expected_solve_attempts": 644,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 644,
+              "successful_solves": 644
+            }
+          },
+          "window": 4
+        }
+      ],
+      "example_id": 2251
+    },
+    {
+      "checks": [
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.0625,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 497,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 497,
+              "successful_solves": 497
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 497,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 497,
+              "successful_solves": 497
+            },
+            "uncached": {
+              "expected_solve_attempts": 504,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 504,
+              "successful_solves": 504
+            }
+          },
+          "window": 2
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.125,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 497,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 497,
+              "successful_solves": 497
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 497,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 497,
+              "successful_solves": 497
+            },
+            "uncached": {
+              "expected_solve_attempts": 504,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 504,
+              "successful_solves": 504
+            }
+          },
+          "window": 3
+        },
+        {
+          "cached_full_argmax_exact": true,
+          "max_logit_abs_error": 0.125,
+          "paths": {
+            "full": {
+              "expected_solve_attempts": 497,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 497,
+              "successful_solves": 497
+            },
+            "incremental": {
+              "expected_solve_attempts": 7,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 7,
+              "successful_solves": 7
+            },
+            "prefill": {
+              "expected_solve_attempts": 497,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 497,
+              "successful_solves": 497
+            },
+            "uncached": {
+              "expected_solve_attempts": 504,
+              "fallbacks": 0,
+              "nonfinite_solves": 0,
+              "outputs_finite": true,
+              "singular_solves": 0,
+              "solve_attempts": 504,
+              "successful_solves": 504
+            }
+          },
+          "window": 4
+        }
+      ],
+      "example_id": 2252
+    }
+  ],
+  "status": "pass"
+}

@@ -1,0 +1,10 @@
+{
+  "pod_id": "ga0seqhby1ha8q",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "driver": "580.126.09",
+  "torch": "2.9.1+cu128",
+  "cuda": "12.8",
+  "python": "3.12.14",
+  "repository_commit": "cfbf76b5720d009b06c217c54d1dd31b5dbfa78f",
+  "comparison_note": "The preserved Experiment-008 arms and this amendment ran sequentially on the same pod, GPU, environment, tokenizer/model revisions, generation harness, and timing configuration."
+}
