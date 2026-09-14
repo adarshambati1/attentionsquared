@@ -55,8 +55,12 @@ class ClassicalIterationHuginn(nn.Module):
             system[..., count, :count] = 1
             rhs = torch.zeros((*gram.shape[:2], count + 1, 1), device=gram.device, dtype=torch.float32)
             rhs[..., count, 0] = 1
+            if system.dtype != torch.float32 or rhs.dtype != torch.float32:
+                raise RuntimeError("Anderson solve operands must be FP32")
             solution, info = torch.linalg.solve_ex(system, rhs, check_errors=False)
             coefficients = solution[..., :count, 0]
+            if coefficients.dtype != torch.float32:
+                raise RuntimeError("Anderson solve coefficients must be FP32")
             finite_solution = torch.isfinite(coefficients).all(dim=-1)
             singular = finite_input & (info != 0)
             nonfinite = (~finite_input) | ((info == 0) & (~finite_solution))

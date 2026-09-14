@@ -19,9 +19,13 @@ def gate(model,huginn,tokenizer,dataset,config):
    kwargs={'mode':'anderson','anderson_window':window,'anderson_ridge':config['anderson_ridge']}
    with torch.inference_mode(),torch.autocast('cuda',dtype=torch.bfloat16):
     full=model(prompt,h0,return_loop_states=True,**kwargs);prefill=model(prompt,h0,use_cache=True,**kwargs);token=prefill.logits[:,-1].argmax(-1,keepdim=True);incremental=model(token,schedule[:,prompt.shape[1]:prompt.shape[1]+1],use_cache=True,past_key_values=prefill.past_key_values,cache_position=torch.tensor([prompt.shape[1]],device='cuda'),**kwargs);prefix=torch.cat((prompt,token),dim=1);uncached=model(prefix,schedule[:,:prefix.shape[1]],**kwargs)
-   expected=7*prompt.shape[1];finite=all(bool(torch.isfinite(s).all()) for s in full.loop_states);argmax=torch.equal(incremental.logits[:,-1].argmax(-1),uncached.logits[:,-1].argmax(-1));delta=float((incremental.logits[:,-1]-uncached.logits[:,-1]).abs().max())
-   check={'window':window,'expected_solve_attempts':expected,'solve_attempts':full.anderson_solve_attempts,'successful_solves':full.anderson_successful_solves,'fallbacks':full.anderson_fallbacks,'singular_solves':full.anderson_singular_solves,'nonfinite_solves':full.anderson_nonfinite_solves,'all_loop_states_finite':finite,'cached_full_argmax_exact':argmax,'max_logit_abs_error':delta}
-   if full.anderson_solve_attempts!=expected or full.anderson_successful_solves!=expected or full.anderson_fallbacks or full.anderson_singular_solves or full.anderson_nonfinite_solves or not finite or not argmax or delta>0.25:raise RuntimeError(f'corrected Anderson gate failed: {check}')
+   expected_by_path={'full':7*prompt.shape[1],'prefill':7*prompt.shape[1],'incremental':7,'uncached':7*(prompt.shape[1]+1)};outputs={'full':full,'prefill':prefill,'incremental':incremental,'uncached':uncached};path_checks={}
+   for path_name,path_output in outputs.items():
+    expected=expected_by_path[path_name];finite=bool(torch.isfinite(path_output.logits).all()) and bool(torch.isfinite(path_output.latent_states).all()) and (not path_output.loop_states or all(bool(torch.isfinite(s).all()) for s in path_output.loop_states));path_check={'expected_solve_attempts':expected,'solve_attempts':path_output.anderson_solve_attempts,'successful_solves':path_output.anderson_successful_solves,'fallbacks':path_output.anderson_fallbacks,'singular_solves':path_output.anderson_singular_solves,'nonfinite_solves':path_output.anderson_nonfinite_solves,'outputs_finite':finite}
+    if path_output.anderson_solve_attempts!=expected or path_output.anderson_successful_solves!=expected or path_output.anderson_fallbacks or path_output.anderson_singular_solves or path_output.anderson_nonfinite_solves or not finite:raise RuntimeError(f'corrected Anderson gate failed: {path_name} {path_check}')
+    path_checks[path_name]=path_check
+   argmax=torch.equal(incremental.logits[:,-1].argmax(-1),uncached.logits[:,-1].argmax(-1));delta=float((incremental.logits[:,-1]-uncached.logits[:,-1]).abs().max());check={'window':window,'paths':path_checks,'cached_full_argmax_exact':argmax,'max_logit_abs_error':delta}
+   if not argmax or delta>0.25:raise RuntimeError(f'corrected Anderson cache gate failed: {check}')
    checks.append(check)
   records.append({'example_id':example_id,'checks':checks})
  after=param_sha(huginn)
