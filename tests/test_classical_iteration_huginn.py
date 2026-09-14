@@ -47,5 +47,5 @@ def test_fp32_amendment_requires_successful_solves():
  model_source=(ROOT/'src/models/classical_iteration_huginn.py').read_text()
  runner_source=(ROOT/'scripts/run_008_anderson_fp32_amendment.py').read_text()
  assert 'enabled=False' in model_source and 'torch.linalg.solve_ex' in model_source
- assert "full.anderson_successful_solves!=expected" in runner_source
+ assert "path_output.anderson_successful_solves!=expected" in runner_source
  assert "implementation_exceptions_are_fatal" in runner_source
