@@ -32,18 +32,18 @@ def method_kwargs(mode,parameter,config):
  return {}
 
 def generate(model,tokenizer,prompt,schedule,mode,parameter,config):
- cache=None;current=prompt;position=None;tokens=[];fallbacks=0;stops={int(x) for x in stop_token_ids(tokenizer) if x is not None and int(x)>=0};kwargs=method_kwargs(mode,parameter,config)
+ cache=None;current=prompt;position=None;tokens=[];fallbacks=0;solve_attempts=0;successful_solves=0;singular_solves=0;nonfinite_solves=0;stops={int(x) for x in stop_token_ids(tokenizer) if x is not None and int(x)>=0};kwargs=method_kwargs(mode,parameter,config)
  torch.cuda.reset_peak_memory_stats();torch.cuda.synchronize();start=time.perf_counter()
  with torch.inference_mode(),torch.autocast("cuda",dtype=torch.bfloat16):
   for _ in range(config["max_new_tokens"]):
    if position is None: h0=schedule[:,:current.shape[1]];cache_pos=None
    else: h0=schedule[:,position:position+1];cache_pos=torch.tensor([position],device="cuda")
-   out=model(current,h0,depth=8,mode=mode,past_key_values=cache,use_cache=True,cache_position=cache_pos,**kwargs);cache=out.past_key_values;fallbacks+=out.anderson_fallbacks
+   out=model(current,h0,depth=8,mode=mode,past_key_values=cache,use_cache=True,cache_position=cache_pos,**kwargs);cache=out.past_key_values;fallbacks+=out.anderson_fallbacks;solve_attempts+=out.anderson_solve_attempts;successful_solves+=out.anderson_successful_solves;singular_solves+=out.anderson_singular_solves;nonfinite_solves+=out.anderson_nonfinite_solves
    token=int(out.logits[0,-1].argmax());tokens.append(token)
    if token in stops:break
    position=prompt.shape[1]+len(tokens)-1;current=torch.tensor([[token]],device="cuda",dtype=prompt.dtype)
  torch.cuda.synchronize();latency=time.perf_counter()-start;status=generation_status(tokens,max_new_tokens=config["max_new_tokens"],stop_token_ids=stop_token_ids(tokenizer))
- return {"token_ids":tokens,"text":tokenizer.decode(tokens,skip_special_tokens=False),"latency_seconds":latency,"generated_tokens":len(tokens),"hit_cap":status.hit_max_new_tokens,"ended_naturally":status.ended_naturally,"peak_memory_bytes":int(torch.cuda.max_memory_allocated()),"anderson_fallbacks":fallbacks}
+ return {"token_ids":tokens,"text":tokenizer.decode(tokens,skip_special_tokens=False),"latency_seconds":latency,"generated_tokens":len(tokens),"hit_cap":status.hit_max_new_tokens,"ended_naturally":status.ended_naturally,"peak_memory_bytes":int(torch.cuda.max_memory_allocated()),"anderson_fallbacks":fallbacks,"anderson_solve_attempts":solve_attempts,"anderson_successful_solves":successful_solves,"anderson_singular_solves":singular_solves,"anderson_nonfinite_solves":nonfinite_solves}
 
 def diagnostics(model,full_ids,schedule,mode,parameter,config):
  kwargs=method_kwargs(mode,parameter,config)
@@ -60,7 +60,7 @@ def run_examples(model,tokenizer,dataset,ids,mode,parameter,config,output_jsonl=
  for example_id in ids:
   prompt_text=build_chat_prompt(tokenizer,dataset[example_id]["question"],config["system_instruction"]);prompt=tokenize_prompt(tokenizer,prompt_text)["input_ids"].cuda();schedule=materialize_h0_schedule(model.huginn,device=prompt.device,example_id=example_id,base_seed=config["h0_base_seed"])
   result=generate(model,tokenizer,prompt,schedule,mode,parameter,config);score=score_generation(result["text"],dataset[example_id]["answer"],hit_max_new_tokens=result["hit_cap"])
-  record={"example_id":example_id,"mode":mode,"parameter":parameter,"correct":score.correct,"predicted_answer":score.predicted_answer,"gold_answer":score.gold_answer,"generated_text":result["text"],"generated_token_ids":result["token_ids"],"generation_latency_seconds":result["latency_seconds"],"generated_tokens":result["generated_tokens"],"hit_max_new_tokens":result["hit_cap"],"ended_naturally":result["ended_naturally"],"peak_memory_bytes":result["peak_memory_bytes"],"anderson_fallbacks":result["anderson_fallbacks"],"repetition_onset":find_repetition_onset(result["token_ids"],chunk_size=config["degeneration_chunk_size"],repetitions=config["degeneration_repetitions"])}
+  record={"example_id":example_id,"mode":mode,"parameter":parameter,"correct":score.correct,"predicted_answer":score.predicted_answer,"gold_answer":score.gold_answer,"generated_text":result["text"],"generated_token_ids":result["token_ids"],"generation_latency_seconds":result["latency_seconds"],"generated_tokens":result["generated_tokens"],"hit_max_new_tokens":result["hit_cap"],"ended_naturally":result["ended_naturally"],"peak_memory_bytes":result["peak_memory_bytes"],"anderson_fallbacks":result["anderson_fallbacks"],"anderson_solve_attempts":result["anderson_solve_attempts"],"anderson_successful_solves":result["anderson_successful_solves"],"anderson_singular_solves":result["anderson_singular_solves"],"anderson_nonfinite_solves":result["anderson_nonfinite_solves"],"repetition_onset":find_repetition_onset(result["token_ids"],chunk_size=config["degeneration_chunk_size"],repetitions=config["degeneration_repetitions"])}
   if with_diagnostics:
    full=torch.cat((prompt,torch.tensor([result["token_ids"]],device="cuda",dtype=prompt.dtype)),dim=1);record["loop_diagnostics"]=diagnostics(model,full,schedule,mode,parameter,config)
   records.append(record)
@@ -69,7 +69,7 @@ def run_examples(model,tokenizer,dataset,ids,mode,parameter,config,output_jsonl=
  return records
 
 def summarize(records):
- return {"correct":sum(r["correct"] for r in records),"total":len(records),"accuracy":sum(r["correct"] for r in records)/len(records),"cap_hit_rate":sum(r["hit_max_new_tokens"] for r in records)/len(records),"degeneration_rate":sum(r["repetition_onset"] is not None for r in records)/len(records),"mean_generated_tokens":sum(r["generated_tokens"] for r in records)/len(records),"mean_generation_latency_seconds":sum(r["generation_latency_seconds"] for r in records)/len(records),"median_generation_latency_seconds":statistics.median(r["generation_latency_seconds"] for r in records),"peak_memory_bytes":max(r["peak_memory_bytes"] for r in records),"anderson_fallbacks":sum(r["anderson_fallbacks"] for r in records)}
+ return {"correct":sum(r["correct"] for r in records),"total":len(records),"accuracy":sum(r["correct"] for r in records)/len(records),"cap_hit_rate":sum(r["hit_max_new_tokens"] for r in records)/len(records),"degeneration_rate":sum(r["repetition_onset"] is not None for r in records)/len(records),"mean_generated_tokens":sum(r["generated_tokens"] for r in records)/len(records),"mean_generation_latency_seconds":sum(r["generation_latency_seconds"] for r in records)/len(records),"median_generation_latency_seconds":statistics.median(r["generation_latency_seconds"] for r in records),"peak_memory_bytes":max(r["peak_memory_bytes"] for r in records),"anderson_fallbacks":sum(r["anderson_fallbacks"] for r in records),"anderson_solve_attempts":sum(r["anderson_solve_attempts"] for r in records),"anderson_successful_solves":sum(r["anderson_successful_solves"] for r in records),"anderson_singular_solves":sum(r["anderson_singular_solves"] for r in records),"anderson_nonfinite_solves":sum(r["anderson_nonfinite_solves"] for r in records)}
 
 def fixed_benchmark(model,ids,schedule,mode,parameter,config):
  kwargs=method_kwargs(mode,parameter,config)
