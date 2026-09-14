@@ -48,6 +48,14 @@ def test_current_only_and_uniform_are_exact_declared_controls():
     assert torch.equal(uniform, expected)
 
 
+def test_raw_mean_is_exact_unprojected_completed_state_average():
+    module = PerTokenHistoryAttention(12, projection_size=8, num_heads=2)
+    current = torch.full((1, 3, 12), 3.0)
+    old = torch.full_like(current, 1.0)
+    output = module(current, [old, current], mode="raw_mean")
+    assert torch.equal(output, torch.full_like(current, 2.0))
+
+
 def test_answer_loss_includes_first_answer_token_and_excludes_prompt():
     logits = torch.full((1, 6, 10), -20.0)
     ids = torch.tensor([[1, 2, 3, 4, 5, 6]])

@@ -7,7 +7,7 @@ from typing import Any, Literal
 import torch
 from torch import nn
 
-HistoryMode = Literal["learned", "current_only", "uniform", "disabled"]
+HistoryMode = Literal["learned", "current_only", "uniform", "raw_mean", "disabled"]
 
 
 class PerTokenHistoryAttention(nn.Module):
@@ -41,6 +41,13 @@ class PerTokenHistoryAttention(nn.Module):
             raise ValueError("all completed states must match current [B,T,H]")
         if mode == "disabled":
             return torch.zeros_like(current)
+        if mode == "raw_mean":
+            output = torch.stack(
+                [state.to(current.dtype) for state in completed_states], dim=2
+            ).mean(dim=2)
+            if token_mask is not None:
+                output = output * token_mask.unsqueeze(-1).to(output.dtype)
+            return output
         memory = completed_states[-1:] if mode == "current_only" else completed_states
         history = torch.stack(memory, dim=2)  # [B,T,L,H], never mixes token positions
         batch, tokens, loops, _ = history.shape
