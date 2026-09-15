@@ -1,0 +1,17 @@
+{
+  "best_checkpoint_sha256": "d72e6797ab5a67735af294c46395fb420efe6a3ceed28189e0760f7d7d5c6e90",
+  "best_step": 1000,
+  "best_validation_answer_token_cross_entropy": 2.970119440728525,
+  "config_sha256": "8f54074cc7fd175016acb9d0bc94f7128cd576d1de9c87d1b009d1951a66cd0f",
+  "git_commit": "d1e0c1486a7f74ec4322c2675cba5c97cbfc138d",
+  "huginn_parameters_trained": false,
+  "inference_recurrent_steps": 0,
+  "optimizer_steps": 1000,
+  "predictor_initialization_sha256": "826c3c7366b53dc98e22d84876967345d7af7124a3c167d79397c2f6de9eed71",
+  "predictor_parameters": 4060576,
+  "protocol": "functional-fixed-point-jump-training-v1",
+  "selection_criterion": "lowest full validation answer-token CE; test never used",
+  "status": "complete",
+  "test_set_used_for_selection": false,
+  "training_seconds": 525.5004644393921
+}

@@ -1,0 +1,19 @@
+{
+  "best_checkpoint_sha256": "d72e6797ab5a67735af294c46395fb420efe6a3ceed28189e0760f7d7d5c6e90",
+  "checkpoints_preserved_on_durable_volume": true,
+  "durable_root": "/workspace/fixed_point_jump",
+  "files": {
+    "comparison.json": "117d6f60dcb216001b7a0f88642690f10c8224a5aa237e9e1a85f35426aad84b",
+    "conclusion.md": "8841c616704b439400a480278df84f25b622eac14e9011cc098ef79643b4eb57",
+    "correctness_gate.json": "85522a5ab76694a6340f419e40482c28df02cc83a443462141cf00028c024569",
+    "run.log": "3cd3ca3b8138b366993d18340cc59ffb40db81f30bfd392d2c500ab5ae25196c",
+    "test_records.jsonl": "ebb1dd98733b54a62a097014505dfc6a35964a96aa36e963bc7f75e74e209d13",
+    "training_curve.jsonl": "c7306363912abba27ea20d305c7b30868499782f2decb54e1cfd5baed6b69cf5",
+    "training_summary.json": "9d56d88d2ae1332d61a37a7240a956d4d88b04721ba5f89e6662ef6eb122c682",
+    "validation_selection.json": "33d8454d63a6e46f6b6c14e796b63ccaff4ef99683665101dd82f8807fd3bfc9"
+  },
+  "full_vocabulary_logits_persisted": false,
+  "protocol": "functional-fixed-point-jump-v1",
+  "source_commit": "d1e0c1486a7f74ec4322c2675cba5c97cbfc138d",
+  "status": "frozen"
+}
