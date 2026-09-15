@@ -1,0 +1,12 @@
+{
+  "protocol": "fixed-point-residual-audit-v1",
+  "source_experiment": "009_fixed_point_jump",
+  "source_config": "configs/009_fixed_point_jump.json",
+  "source_checkpoint": "/workspace/fixed_point_jump/best.pt",
+  "output_root": "/workspace/fixed_point_residual_audit",
+  "depths": [0, 8, 16, 32, 64],
+  "test_ids": [0, 249],
+  "fixed_point_epsilon": 1e-12,
+  "residual_estimand": "answer-token-weighted mean of per-example answer-position aggregate ||F(h,x)-h||^2/(||h||^2+epsilon)",
+  "teacher_forcing_metrics": ["answer_token_cross_entropy", "first_answer_token_cross_entropy", "answer_token_accuracy", "first_answer_token_accuracy"]
+}

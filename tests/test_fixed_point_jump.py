@@ -30,7 +30,7 @@ def test_training_uses_functional_task_and_fixed_point_losses():
  source=(ROOT/'scripts/train_009_fixed_point_jump.py').read_text()
  assert "task+c['fixed_point_weight']*fixed" in source
  assert 'answer_cross_entropy' in source
- assert "compute_fixed_point=True" in source
+ assert "compute_fixed_point=use_fixed" in source
  assert "best=val['answer_token_cross_entropy']" in source
 
 def test_evaluation_resumes_only_contiguous_bound_records():
