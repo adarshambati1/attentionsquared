@@ -1,0 +1,17 @@
+{
+  "durable_artifacts": {
+    "best_checkpoint_sha256": "70faf173b39aa052a349da0783ba683698a6bb1d1b7eabb4d7e0ff52a0c09c3b",
+    "comparison": "/workspace/raw_history_probe_d8",
+    "current_state_only": "/workspace/current_state_only_d8"
+  },
+  "files": {
+    "comparison.json": "77603398d294ebdd5825e7d5f9de32e2970ff1abb6621e468e3ca85ad2b79fe6",
+    "conclusion.md": "8b79889ec129a33897d6ed84ce94034f23fa965843fa69d5ddeca58270448af0",
+    "correctness_gate.json": "e40eec0184a18ab22ed7911fc8f3e87e239acef199e89037cd377c0b0350de6f",
+    "training_curve.jsonl": "84ff41caf627a15d08bfc8108a9401e53dbcac3d14daee5c828bfc35cf9e3c97",
+    "training_summary.json": "4378d2e4e6941bc0e62438fdf6263b3fcc5cf8589d90e5676434c00ff2d24ee8"
+  },
+  "protocol": "raw-history-probe-d8-v1",
+  "source_commit": "5f5a9a5fcdc395b6d1a94e6e9e004c21ae644999",
+  "status": "frozen"
+}

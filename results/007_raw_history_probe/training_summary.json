@@ -1,0 +1,14 @@
+{
+  "best_step": 500,
+  "best_validation_answer_token_cross_entropy": 0.4295351998763402,
+  "config_sha256": "88f2045b2cc2300577fb1e184a677840ff2c3f6a06d6df2408039b9d9fcc6e7c",
+  "git_commit": "5f5a9a5fcdc395b6d1a94e6e9e004c21ae644999",
+  "huginn_parameters_trained": false,
+  "optimizer_steps": 1000,
+  "protocol": "current_state_only-d8-training-v1",
+  "selection_criterion": "lowest full validation answer-token cross-entropy",
+  "status": "complete",
+  "test_set_used_for_selection": false,
+  "training_seconds": 1008.5993263721466,
+  "variant": "current_state_only"
+}
