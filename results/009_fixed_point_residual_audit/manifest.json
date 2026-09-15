@@ -1,0 +1,12 @@
+{
+  "durable_root": "/workspace/fixed_point_residual_audit",
+  "files": {
+    "conclusion.md": "7ce05f8aebe186481fbacfedfbad221b28cdc33d922c01e3c052dd951c6c8299",
+    "records.jsonl": "0926a4ab544001ff927e4b654e58bb5e924d83c86f2d7ec91f4a268391dff2ab",
+    "summary.json": "b24029f8b9ce66f7d7aedfa6fb1fa52aab0036ea9f0b471b17f1f58d2900407f"
+  },
+  "full_vocabulary_logits_persisted": false,
+  "protocol": "fixed-point-residual-audit-v1",
+  "source_commit": "00992f59120f62642f609970f954deb16b446cfc",
+  "status": "frozen"
+}

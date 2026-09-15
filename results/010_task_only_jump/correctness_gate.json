@@ -1,0 +1,104 @@
+{
+  "cache_vs_full_prefix": [
+    {
+      "example_id": 2250,
+      "generated_ids_exact": true,
+      "generated_token_ids": [
+        1702,
+        35880,
+        7228,
+        548,
+        364,
+        15373,
+        11771,
+        4070
+      ],
+      "max_checked_logit_abs_error_tolerance": 0.25,
+      "steps": 8
+    },
+    {
+      "example_id": 2251,
+      "generated_ids_exact": true,
+      "generated_token_ids": [
+        13348,
+        979,
+        291,
+        14540,
+        1238,
+        4713,
+        11247,
+        658
+      ],
+      "max_checked_logit_abs_error_tolerance": 0.25,
+      "steps": 8
+    },
+    {
+      "example_id": 2252,
+      "generated_ids_exact": true,
+      "generated_token_ids": [
+        3104,
+        258,
+        8265,
+        4955,
+        3044,
+        383,
+        37847,
+        4106
+      ],
+      "max_checked_logit_abs_error_tolerance": 0.25,
+      "steps": 8
+    }
+  ],
+  "config_sha256": "d57ce265649dc8180474af34f5db9c6056b2a44fab7c1bc7588464d51bcd7ef3",
+  "full_vocabulary_logits_persisted": false,
+  "git_commit": "00992f59120f62642f609970f954deb16b446cfc",
+  "gradient_and_freezing": {
+    "all_predictor_gradients_finite_when_present": true,
+    "fixed_point_loss": 3.354008197784424,
+    "frozen_huginn_gradient_tensors": 0,
+    "huginn_unchanged": true,
+    "output_gradient_nonzero": true,
+    "target_tokens": 57,
+    "task_loss": 10.949472427368164,
+    "total_loss": 10.949472427368164
+  },
+  "independent_ce_alignment": {
+    "answer_start": 2,
+    "exact_loss_match": true,
+    "target_count": 2,
+    "target_ids": [
+      33,
+      44
+    ]
+  },
+  "inference_recurrent_steps": 0,
+  "initialization": {
+    "consistency_core_steps": 1,
+    "fixed_point_image_finite": true,
+    "h_star_equals_h0_bitwise": true,
+    "inference_core_steps": 0,
+    "output_projection_zero": true,
+    "predictor_parameters": 4060576
+  },
+  "no_h16_or_h64_target": true,
+  "predictor_initialization_sha256": "826c3c7366b53dc98e22d84876967345d7af7124a3c167d79397c2f6de9eed71",
+  "protocol": "functional-fixed-point-jump-correctness-gate-v1",
+  "status": "pass",
+  "supervised_tokenization_checks": [
+    {
+      "combined_exact": true,
+      "example_id": 0,
+      "tokens": 124
+    },
+    {
+      "combined_exact": true,
+      "example_id": 2250,
+      "tokens": 225
+    },
+    {
+      "combined_exact": true,
+      "example_id": 2499,
+      "tokens": 179
+    }
+  ]
+}

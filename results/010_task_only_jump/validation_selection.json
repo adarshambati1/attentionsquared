@@ -1,0 +1,9 @@
+{
+  "best_checkpoint_sha256": "e4da53017e8a982d13528718404738cd569bc746a92c20ec8b897b069713b868",
+  "best_step": 1000,
+  "best_validation_answer_token_cross_entropy": 2.959433631373417,
+  "config_sha256": "d57ce265649dc8180474af34f5db9c6056b2a44fab7c1bc7588464d51bcd7ef3",
+  "criterion": "lowest full validation answer-token CE; test never used",
+  "git_commit": "00992f59120f62642f609970f954deb16b446cfc",
+  "test_used": false
+}

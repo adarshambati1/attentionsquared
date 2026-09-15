@@ -1,0 +1,58 @@
+{
+  "answer_tokens": 29399,
+  "config_sha256": "ee994d5a6e052dfb6e6aa85eb39a0165278f6de5d9211608fbd363cd80e90923",
+  "examples": 250,
+  "full_vocabulary_logits_persisted": false,
+  "git_commit": "00992f59120f62642f609970f954deb16b446cfc",
+  "huginn_relative_fixed_point_residuals": {
+    "0": 3.3421811313263237,
+    "16": 0.006022021366126678,
+    "32": 0.00023391417116786186,
+    "64": 0.00016985782402662727,
+    "8": 0.08069525318449422
+  },
+  "native_state_capture_gate": {
+    "0": {
+      "initial_state_exact": true
+    },
+    "16": {
+      "normalized_latent_bitwise_exact": true
+    },
+    "32": {
+      "normalized_latent_bitwise_exact": true
+    },
+    "64": {
+      "normalized_latent_bitwise_exact": true
+    },
+    "8": {
+      "normalized_latent_bitwise_exact": true
+    }
+  },
+  "one_shot_checkpoint": {
+    "answer_token_accuracy": 0.3610667029490799,
+    "answer_token_cross_entropy": 3.014530738801663,
+    "first_answer_token_accuracy": 0.16,
+    "first_answer_token_cross_entropy": 4.437790585041046,
+    "relative_fixed_point_residual": 0.6629736986329448
+  },
+  "protocol": "fixed-point-residual-audit-v1",
+  "protocol_binding": {
+    "audit_config_sha256": "ee994d5a6e052dfb6e6aa85eb39a0165278f6de5d9211608fbd363cd80e90923",
+    "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+    "depths": [
+      0,
+      8,
+      16,
+      32,
+      64
+    ],
+    "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+    "residual_estimand": "answer-token-weighted mean of per-example answer-position aggregate ||F(h,x)-h||^2/(||h||^2+epsilon)",
+    "source_config_sha256": "8f54074cc7fd175016acb9d0bc94f7128cd576d1de9c87d1b009d1951a66cd0f",
+    "source_manifest_sha256": "1a6bea7dd984473a4e87005bae564f70420fe88ab01e97d62781fe1e7e724962"
+  },
+  "protocol_binding_sha256": "4ae8544c88e33f2ee54db4d1104a36d79be6c844a58d510f0a738b6424297f4a",
+  "source_checkpoint_sha256": "d72e6797ab5a67735af294c46395fb420efe6a3ceed28189e0760f7d7d5c6e90",
+  "source_checkpoint_step": 1000,
+  "status": "complete"
+}

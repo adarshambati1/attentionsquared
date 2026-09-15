@@ -1,0 +1,61 @@
+{
+  "checkpoint_sha256": "e4da53017e8a982d13528718404738cd569bc746a92c20ec8b897b069713b868",
+  "checkpoint_step": 1000,
+  "checkpoint_validation": {
+    "answer_token_cross_entropy": 2.959433631373417,
+    "answer_tokens": 27915,
+    "fixed_point_relative_residual": null,
+    "fixed_point_term_computed": false,
+    "total_objective": 2.959433631373417
+  },
+  "config_sha256": "d57ce265649dc8180474af34f5db9c6056b2a44fab7c1bc7588464d51bcd7ef3",
+  "frozen_references": {
+    "current_state_only_d8": {
+      "accuracy": 0.216,
+      "artifact": "results/007_raw_history_probe/comparison.json",
+      "sha256": "77603398d294ebdd5825e7d5f9de32e2970ff1abb6621e468e3ca85ad2b79fe6"
+    },
+    "plain_huginn_d16": {
+      "accuracy": 0.388,
+      "artifact": "results/005_latent_history_attention/comparison.json",
+      "sha256": "92b4ff3f3ba6bfc4e8b13b8a65e536391dd245f05b88a00d2ef8e6a3e1d0bbc3"
+    },
+    "plain_huginn_d8": {
+      "accuracy": 0.16,
+      "artifact": "results/005_latent_history_attention/comparison.json",
+      "sha256": "92b4ff3f3ba6bfc4e8b13b8a65e536391dd245f05b88a00d2ef8e6a3e1d0bbc3"
+    },
+    "shared_history_d8": {
+      "accuracy": 0.232,
+      "artifact": "results/005_latent_history_attention/comparison.json",
+      "sha256": "92b4ff3f3ba6bfc4e8b13b8a65e536391dd245f05b88a00d2ef8e6a3e1d0bbc3"
+    }
+  },
+  "full_vocabulary_logits_persisted": false,
+  "git_commit": "00992f59120f62642f609970f954deb16b446cfc",
+  "h16_or_h64_imitation": false,
+  "one_shot_jump": {
+    "accuracy": 0.012,
+    "cap_hit_rate": 0.124,
+    "correct": 3,
+    "degeneration_rate": 0.124,
+    "fixed_256_token_forward": {
+      "mean_seconds": 0.007150835916399955,
+      "median_seconds": 0.007132408209145069,
+      "peak_memory_bytes": 15265518592,
+      "repetitions": 20,
+      "tokens": 256
+    },
+    "inference_recurrent_steps": 0,
+    "mean_generated_tokens": 181.108,
+    "mean_generation_latency_seconds": 1.1510293030515313,
+    "median_generation_latency_seconds": 0.4117074180394411,
+    "peak_memory_bytes": 15290877440,
+    "teacher_forced_answer_token_ce": 3.001595166314317,
+    "teacher_forced_fixed_point_relative_residual": 1.2968334991464225,
+    "total": 250
+  },
+  "protocol": "functional-task-only-jump-v1-evaluation",
+  "status": "complete",
+  "test_used_for_selection": false
+}
