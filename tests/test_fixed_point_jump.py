@@ -32,3 +32,10 @@ def test_training_uses_functional_task_and_fixed_point_losses():
  assert 'answer_cross_entropy' in source
  assert "compute_fixed_point=True" in source
  assert "best=val['answer_token_cross_entropy']" in source
+
+def test_evaluation_resumes_only_contiguous_bound_records():
+ source=(ROOT/'scripts/evaluate_009_fixed_point_jump.py').read_text()
+ assert "r.get('example_id')!=expected_id" in source
+ assert "r.get('config_sha256')!=config_sha" in source
+ assert "r.get('checkpoint_sha256')!=best_sha" in source
+ assert "range(c['test_ids'][0]+len(records)" in source
