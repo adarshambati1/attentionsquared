@@ -49,7 +49,9 @@ def main():
    cache_checks.append(condition)
  result={'protocol':c['protocol']+'-correctness-gate','status':'pass','sigma_zero_native_exact':zero_exact,'manual_trajectory_native_exact':native,'perturbations':perturbations,'same_direction_across_sigma_min_cosines':direction_cosines,'distinct_seed_direction_cosines':seed_direction_cosines,'seed_derivation':'sha256(base_seed,example_id,perturb_depth,seed_index,absolute_token_position)->63-bit seed','cache_vs_full_prefix':cache_checks,'huginn_weights_unchanged':before==sha(huginn),'new_parameters':0,'git_commit':subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,text=True,capture_output=True,check=True).stdout.strip(),'config_sha256':hashlib.sha256(config_path.read_bytes()).hexdigest(),'full_vocabulary_logits_persisted':False}
  if not all(zero_exact.values()) or not all(native.values()) or not result['huginn_weights_unchanged'] or not all(v['deterministic_bitwise'] and v['max_relative_norm_error']<1e-5 for v in perturbations.values()) or not all(v>.99999 for v in direction_cosines.values()) or not all(abs(v)<.05 for values in seed_direction_cosines.values() for v in values):raise RuntimeError(result)
- data=(json.dumps(result,indent=2,sort_keys=True)+'\n').encode();fd=os.open(output,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o444)
- with os.fdopen(fd,'wb') as stream:stream.write(data);stream.flush();os.fsync(stream.fileno())
+ data=(json.dumps(result,indent=2,sort_keys=True)+'\n').encode();temporary=output.with_name(f'.{output.name}.{os.getpid()}.{os.urandom(8).hex()}.tmp')
+ with temporary.open('xb') as stream:stream.write(data);stream.flush();os.fsync(stream.fileno())
+ try:os.link(temporary,output)
+ finally:temporary.unlink(missing_ok=True)
  print(json.dumps(result,indent=2,sort_keys=True))
 if __name__=='__main__':main()

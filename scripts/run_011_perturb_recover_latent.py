@@ -23,8 +23,10 @@ def coda_logits(huginn,state,frequencies):
  for block in huginn.transformer.coda:index-=1;value=block(value,frequencies,index,None,None)
  return huginn.lm_head(huginn.transformer.ln_f(value)).float()
 def write_exclusive_json(path,value):
- data=(json.dumps(value,sort_keys=True)+'\n').encode();fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o444)
- with os.fdopen(fd,'wb') as f:f.write(data);f.flush();os.fsync(f.fileno())
+ data=(json.dumps(value,sort_keys=True)+'\n').encode();temporary=path.with_name(f'.{path.name}.{os.getpid()}.{os.urandom(8).hex()}.tmp')
+ with temporary.open('xb') as f:f.write(data);f.flush();os.fsync(f.fileno())
+ try:os.link(temporary,path)
+ finally:temporary.unlink(missing_ok=True)
 def atomic_torch_save_exclusive(path,value):
  temporary=path.with_name(f'.{path.name}.{os.getpid()}.tmp')
  with temporary.open('xb') as f:torch.save(value,f);f.flush();os.fsync(f.fileno())
@@ -52,8 +54,14 @@ def main():
    grouped.clear();prompt=tokenize_prompt(tok,build_chat_prompt(tok,test[example_id]['question'],c['system_instruction']))['input_ids'].cuda();schedule=materialize_h0_schedule(huginn,device=prompt.device,example_id=example_id,base_seed=c['h0_base_seed'])
    with torch.inference_mode(),torch.autocast('cuda',dtype=torch.bfloat16):grouped[example_id]=(prompt,*trajectory(huginn,prompt,schedule[:,:prompt.shape[1]],c['clean_depth']+1))
    clean_path=clean_dir/f'{example_id:03d}.pt'
-   if not clean_path.exists():
-    clean_states=grouped[example_id][1];atomic_torch_save_exclusive(clean_path,{'protocol':c['protocol']+'-clean-trajectory','example_id':example_id,'prompt_token_ids':prompt.cpu(),'states':{depth:value.cpu() for depth,value in clean_states.items() if depth<=c['clean_depth']},'native_dtypes':{depth:str(value.dtype) for depth,value in clean_states.items() if depth<=c['clean_depth']},'config_sha256':config_sha})
+   clean_states=grouped[example_id][1]
+   if not clean_path.exists():atomic_torch_save_exclusive(clean_path,{'protocol':c['protocol']+'-clean-trajectory','example_id':example_id,'prompt_token_ids':prompt.cpu(),'states':{depth:value.cpu() for depth,value in clean_states.items() if depth<=c['clean_depth']},'native_dtypes':{depth:str(value.dtype) for depth,value in clean_states.items() if depth<=c['clean_depth']},'config_sha256':config_sha})
+   else:
+    saved=torch.load(clean_path,map_location='cpu',weights_only=True);expected_depths=set(range(c['clean_depth']+1));saved_states=saved.get('states',{})
+    valid=saved.get('protocol')==c['protocol']+'-clean-trajectory' and saved.get('example_id')==example_id and saved.get('config_sha256')==config_sha and torch.equal(saved.get('prompt_token_ids'),prompt.cpu()) and set(saved_states)==expected_depths
+    if valid:
+     for depth,value in saved_states.items():valid=valid and value.shape==clean_states[depth].shape and value.dtype==(torch.bfloat16 if depth==0 else torch.float32) and bool(torch.isfinite(value).all()) and saved.get('native_dtypes',{}).get(depth)==str(value.dtype)
+    if not valid:raise RuntimeError(f'stale/corrupt clean trajectory: {clean_path}')
   prompt,clean,indices,x,frequencies=grouped[example_id];positions=torch.arange(prompt.shape[1],device='cuda').unsqueeze(0)
   with torch.inference_mode(),torch.autocast('cuda',dtype=torch.bfloat16):
    perturbed,relative=token_relative_noise(clean[k],sigma=sigma,example_id=example_id,perturb_depth=k,seed_index=seed,base_seed=c['perturbation_base_seed'],token_positions=positions);initial_error=norm(perturbed-clean[k]);state=perturbed;index=torch.tensor(indices[k],device='cpu',dtype=torch.long);curve=[]
