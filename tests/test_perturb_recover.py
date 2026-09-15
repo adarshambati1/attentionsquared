@@ -28,6 +28,12 @@ def test_protocol_is_fixed_and_parameter_free():
  source=(ROOT/'src/models/perturbed_huginn.py').read_text()
  assert 'nn.Parameter' not in source and 'requires_grad_(False)' in source
 
+def test_optional_h4_generation_followup_fills_complete_table():
+ c=json.loads((ROOT/'configs/011_h4_generation_followup.json').read_text())
+ assert c['perturb_depth']==4 and c['noise_strengths']==[.01,.05,.1] and c['perturbation_seed_indices']==[0,1,2]
+ source=(ROOT/'scripts/run_011_h4_generation_followup.py').read_text()
+ assert "base_root/'complete_table.json'" in source and "perturb_depth=follow['perturb_depth']" in source
+
 def test_primary_metric_and_native_resume_are_explicit():
  source=(ROOT/'scripts/run_011_perturb_recover_latent.py').read_text()
  assert 'error_normalized_to_initial' in source and 'per_step_contraction' in source

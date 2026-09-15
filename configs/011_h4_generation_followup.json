@@ -1,0 +1,12 @@
+{
+  "protocol": "huginn-perturb-recover-h4-generation-followup-v1",
+  "base_config": "configs/011_perturb_recover.json",
+  "base_output_root": "/workspace/perturb_recover_attractor",
+  "output_root": "/workspace/perturb_recover_attractor/h4_generation",
+  "base_config_sha256": "1998d7995d925edc6646835ca4a1e6c6735a4e75483a624e34cff8d7529bfd6b",
+  "base_latent_commit": "97c99e9661fbbde5b5866a0085af3a2583f29e21",
+  "perturb_depth": 4,
+  "noise_strengths": [0.01, 0.05, 0.10],
+  "perturbation_seed_indices": [0, 1, 2],
+  "test_ids": [0, 249]
+}
