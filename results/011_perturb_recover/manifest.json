@@ -1,0 +1,24 @@
+{
+  "base_source_commit": "97c99e9661fbbde5b5866a0085af3a2583f29e21",
+  "clean_trajectory_archive_bytes_approx": 15000000000,
+  "clean_trajectory_files": 250,
+  "durable_root": "/workspace/perturb_recover_attractor",
+  "files": {
+    "complete_table.json": "9b835492743efc9feda2c8c485bd578b48051c37c9955a09c9fd02e08e20d9dd",
+    "conclusion.md": "67a0135421d5f4802b18efb35da8b51256433a165afdedc98502c2f87754f119",
+    "correctness_gate.json": "33535b662c6903a9daa236b28aeb8739c0c2c6dd6bc0e1510bfbbe4ec82cbe77",
+    "generation_records.jsonl": "f24ead04b65a8c6eacad83b7d5091ddff189b46688f38a208974d574a7bbb915",
+    "generation_summary.json": "8f818b599c495ef3ba2293995c329e3c59194a29d2af2d94a41ed095b34e65ed",
+    "h4_generation/generation_records.jsonl": "47b6bc21f9cd29e9b78b756fe6e93a5a5ce78e353b664f3332a107b54395fb17",
+    "h4_generation/generation_summary.json": "84cd8f0fe8b02dd5918dce81a9e826a3a0c69672d0e7a4e758c016b8bb8c2e19",
+    "h4_run.log": "3508c69963dede917ac884cb88e8415cc16fbbd2c8297c04d32b8b3cb0d71338",
+    "h8_run.log": "def17ccc5b4832ceb4812460260fbac3546c916696fc4462026f90d941670ae5",
+    "latent_records.jsonl": "49754ffa9ff26cc132f310b87dc9d360e042c096036267d1374845d85e426ba8",
+    "latent_summary.json": "bd727f64d217606e2fa64ddd219041e75fed0b4a1273bbf4fdcdb10163b4496e"
+  },
+  "full_vocabulary_logits_persisted": false,
+  "h4_followup_source_commit": "78f7b7e48daa0a3e83b4d1b681e7b56592641c0d",
+  "individual_condition_record_directories_preserved_on_durable_volume": true,
+  "protocol": "huginn-perturb-recover-attractor-v1",
+  "status": "frozen"
+}
