@@ -65,6 +65,8 @@ class CachedGeneration:
     hit_max_new_tokens: bool
     ended_naturally: bool
     peak_memory_bytes: int
+    used_full_prefix_fallback: bool = False
+    full_prefix_fallback_onset: int | None = None
 
 
 def generate_cached(
@@ -76,25 +78,33 @@ def generate_cached(
     depth: int,
     mode: str,
     max_new_tokens: int,
+    max_cache_allocated_bytes: int | None = None,
 ) -> CachedGeneration:
     device = prompt_ids.device
     stops = {int(value) for value in stop_token_ids(tokenizer) if value is not None and int(value) >= 0}
     generated: list[int] = []
     cache = None
     current_input = prompt_ids
+    prefix_ids = prompt_ids
     position = None
+    use_full_prefix = False
+    fallback_onset = None
     torch.cuda.reset_peak_memory_stats(device)
     torch.cuda.synchronize(device)
     start = time.perf_counter()
     with torch.inference_mode(), torch.autocast(device_type="cuda", dtype=torch.bfloat16):
         for _ in range(max_new_tokens):
-            if position is None:
+            if use_full_prefix:
+                current_input = prefix_ids
+                states = h0_schedule[:, : prefix_ids.shape[1]]
+                cache_position = None
+            elif position is None:
                 states = h0_schedule[:, : current_input.shape[1]]
                 cache_position = None
             else:
                 states = h0_schedule[:, position : position + 1]
                 cache_position = torch.tensor([position], device=device, dtype=torch.long)
-            output = model(current_input, states, depth=depth, mode=mode, past_key_values=cache, use_cache=True, cache_position=cache_position)
+            output = model(current_input, states, depth=depth, mode=mode, past_key_values=None if use_full_prefix else cache, use_cache=not use_full_prefix, cache_position=cache_position)
             if not bool(torch.isfinite(output.logits).all()):
                 raise FloatingPointError("non-finite logits during cached generation")
             if hasattr(output, "latent_states") and not bool(torch.isfinite(output.latent_states).all()):
@@ -102,10 +112,17 @@ def generate_cached(
             cache = output.past_key_values
             token = int(output.logits[0, -1].argmax().item())
             generated.append(token)
+            token_tensor = torch.tensor([[token]], device=device, dtype=prompt_ids.dtype)
+            prefix_ids = torch.cat((prefix_ids, token_tensor), dim=1)
             if token in stops:
                 break
+            if not use_full_prefix and max_cache_allocated_bytes is not None and torch.cuda.memory_allocated(device) >= max_cache_allocated_bytes:
+                use_full_prefix = True
+                fallback_onset = len(generated)
+                cache = None
+                torch.cuda.empty_cache()
             position = prompt_ids.shape[1] + len(generated) - 1
-            current_input = torch.tensor([[token]], device=device, dtype=prompt_ids.dtype)
+            current_input = token_tensor
     torch.cuda.synchronize(device)
     latency = time.perf_counter() - start
     status = generation_status(generated, max_new_tokens=max_new_tokens, stop_token_ids=stop_token_ids(tokenizer))
@@ -117,6 +134,8 @@ def generate_cached(
         hit_max_new_tokens=status.hit_max_new_tokens,
         ended_naturally=status.ended_naturally,
         peak_memory_bytes=int(torch.cuda.max_memory_allocated(device)),
+        used_full_prefix_fallback=use_full_prefix,
+        full_prefix_fallback_onset=fallback_onset,
     )
 
 

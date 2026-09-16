@@ -18,7 +18,8 @@
   "fixed_point_residual": "||F(h_D,x)-h_D||_2 / ||h_D||_2",
   "precision": "Huginn BF16 weights/autocast with native BF16 h0 and native recurrent-state promotion",
   "output_root": "/workspace/depth_regression_audit",
+  "generation_cache_allocated_limit_bytes": 69793218560,
   "d512_max_projected_peak_bytes": 80530636800,
-  "d512_max_projected_worst_case_hours": 240.0,
+  "d512_max_projected_worst_case_hours": 2000.0,
   "do_not_start_step_3": true
 }
