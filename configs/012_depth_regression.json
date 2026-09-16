@@ -1,0 +1,22 @@
+{
+  "protocol": "plain-huginn-depth-regression-v1",
+  "step": "2-of-11",
+  "model_id": "tomg-group-umd/huginn-0125",
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "dataset_id": "openai/gsm8k",
+  "dataset_config": "main",
+  "dataset_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "system_instruction": "You are a helpful assistant that can assist users with mathematical reasoning.",
+  "test_ids": [0, 249],
+  "depths": [4, 8, 16, 32, 64, 128, 256, 512],
+  "h0_base_seed": 3000,
+  "h0_seed_index": 0,
+  "max_new_tokens": 1024,
+  "degeneration_chunk_size": 8,
+  "degeneration_repetitions": 3,
+  "fixed_point_residual_scope": "all valid tokens in the original unpadded generation prompt",
+  "fixed_point_residual": "||F(h_D,x)-h_D||_2 / ||h_D||_2",
+  "precision": "Huginn BF16 weights/autocast with native BF16 h0 and native recurrent-state promotion",
+  "output_root": "/workspace/depth_regression_audit",
+  "do_not_start_step_3": true
+}

@@ -95,6 +95,10 @@ def generate_cached(
                 states = h0_schedule[:, position : position + 1]
                 cache_position = torch.tensor([position], device=device, dtype=torch.long)
             output = model(current_input, states, depth=depth, mode=mode, past_key_values=cache, use_cache=True, cache_position=cache_position)
+            if not bool(torch.isfinite(output.logits).all()):
+                raise FloatingPointError("non-finite logits during cached generation")
+            if hasattr(output, "latent_states") and not bool(torch.isfinite(output.latent_states).all()):
+                raise FloatingPointError("non-finite latent state during cached generation")
             cache = output.past_key_values
             token = int(output.logits[0, -1].argmax().item())
             generated.append(token)
