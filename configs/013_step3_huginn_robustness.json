@@ -1,5 +1,5 @@
 {
-  "protocol": "step3-huginn-robustness-batched-v2",
+  "protocol": "step3-huginn-robustness-concurrent-serial-v3",
   "step": "3-of-11",
   "model_id": "tomg-group-umd/huginn-0125",
   "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
@@ -15,8 +15,6 @@
   "degeneration_chunk_size": 16,
   "degeneration_repetitions": 4,
   "generation_cache_allocated_limit_bytes": 69793218560,
-  "generation_batch_size_by_depth": {"4": 12, "8": 12, "16": 9, "32": 6, "64": 3},
-  "batch_parity_max_new_tokens": 16,
   "projection_size": 256,
   "attention_heads": 4,
   "checkpoints": {
@@ -38,11 +36,15 @@
   ],
   "cross_dataset_conditions": [["plain", 8], ["current", 8], ["shared", 8], ["plain", 16], ["plain", 64]],
   "depth_transfer_conditions": [["plain", 4], ["current", 4], ["shared", 4], ["plain", 8], ["current", 8], ["shared", 8], ["plain", 16], ["current", 16], ["shared", 16], ["plain", 32], ["current", 32], ["shared", 32], ["plain", 64], ["current", 64], ["shared", 64]],
+  "concurrent_workers_by_depth": {"4": 3, "8": 3, "16": 3, "32": 3, "64": 2},
+  "concurrency_gate_examples": [0],
+  "concurrency_gate_short_tokens": 64,
+  "concurrency_gate_policy": "user-approved-proportional-v1",
   "fixed_forward_tokens": 256,
   "fixed_forward_warmup": 5,
   "fixed_forward_repetitions": 20,
   "bootstrap_samples": 10000,
   "bootstrap_seed": 13003,
-  "output_root": "/workspace/step3_huginn_robustness_batched_v2",
+  "output_root": "/workspace/step3_huginn_robustness_concurrent_v3",
   "do_not_start_step_4": true
 }
