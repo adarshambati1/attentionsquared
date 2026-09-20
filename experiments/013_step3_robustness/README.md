@@ -8,6 +8,8 @@ Frozen checkpoints only. GSM8K uses six conditions and paired h0 seed indices 0/
 
 ## Qwen3-1.7B (3D)
 
+Step 3D uses its separate environment declared in `requirements-step3-qwen.txt` because Qwen3 requires Transformers 4.57.1; the canonical Huginn environment remains pinned to Transformers 4.44.2.
+
 The frozen Qwen3-1.7B-Base backbone repeats zero-indexed layers 12–14 exactly twice. Plain, current-state, shared whole-loop history, and RecurTrace-style per-layer loop memory use the same backbone. The three modified variants train only added modules on identical MathQA examples/order, optimizer, update budget, validation split, precision, and initialization policy where parameters correspond. No halting head is implemented.
 
 At a fixed two-loop budget, shared whole-block history has exactly one completed whole-loop state at its sole injection point. It therefore algebraically reduces to the current-state V/O adapter; this requested control is retained, trained on the identical order, and required to remain exactly equivalent rather than being treated as independent evidence.

@@ -1,0 +1,3 @@
+# Dedicated Step-3D environment layered on the pinned Runpod PyTorch image.
+transformers==4.57.1
+datasets==3.6.0
