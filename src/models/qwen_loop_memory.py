@@ -1,62 +1,69 @@
-"""Fixed-two-loop Qwen3 backbone controls for Step 3D."""
+"""Paper-faithful fixed-budget Qwen3 loop controls for Step 3D."""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 import torch
 from torch import nn
 import torch.nn.functional as F
-Variant=Literal['plain','current','shared','recurtrace']
+Variant=Literal['plain','shared_current','shared_history','per_layer_current','recurtrace']
 @dataclass
 class QwenLoopOutput:
  logits:torch.Tensor
  hidden_states:torch.Tensor
-class CurrentStateAdapter(nn.Module):
- def __init__(self,hidden:int,width:int):
-  super().__init__();self.v_proj=nn.Linear(hidden,width,bias=False);self.out_proj=nn.Linear(width,hidden,bias=False);self.injection=nn.Parameter(torch.zeros(()))
- def forward(self,state):return self.injection*self.out_proj(self.v_proj(state))
-class SharedLoopHistory(nn.Module):
- def __init__(self,hidden:int,width:int,heads:int):
-  super().__init__();assert width%heads==0;self.heads=heads;self.dim=width//heads;self.q_proj=nn.Linear(hidden,width,bias=False);self.k_proj=nn.Linear(hidden,width,bias=False);self.v_proj=nn.Linear(hidden,width,bias=False);self.out_proj=nn.Linear(width,hidden,bias=False);self.injection=nn.Parameter(torch.zeros(()))
- def forward(self,current,history):
-  h=torch.stack(history,2);b,t,l,_=h.shape;q=self.q_proj(current).view(b,t,self.heads,self.dim);k=self.k_proj(h).view(b,t,l,self.heads,self.dim);v=self.v_proj(h).view(b,t,l,self.heads,self.dim);w=torch.einsum('bthd,btlhd->bthl',q,k)*(self.dim**-.5);mixed=torch.einsum('bthl,btlhd->bthd',w.softmax(-1),v);return self.injection*self.out_proj(mixed.reshape(b,t,-1))
-class RecurTraceLayerMemory(nn.Module):
- """Same-position loop-time memory with QK norm, W=3, signed distance bias and gates."""
- def __init__(self,hidden:int,width:int,heads:int,window:int=3):
-  super().__init__();assert width%heads==0;self.heads=heads;self.dim=width//heads;self.window=window;self.q_proj=nn.Linear(hidden,width,bias=False);self.k_proj=nn.Linear(hidden,width,bias=False);self.v_proj=nn.Linear(hidden,width,bias=False);self.out_proj=nn.Linear(width,hidden,bias=False);self.scalar_gate=nn.Parameter(torch.ones(()));self.injection=nn.Parameter(torch.zeros(()));self.distance_slope=nn.Parameter(torch.tensor([2**(-8*i/heads) for i in range(heads)]));self.token_gate_in=nn.Linear(2*hidden,hidden);self.token_gate_out=nn.Linear(hidden,1);nn.init.zeros_(self.token_gate_out.weight);nn.init.constant_(self.token_gate_out.bias,-3.0)
- def forward(self,query_state,history):
-  memory=history[-self.window:];h=torch.stack(memory,2);b,t,l,_=h.shape;q=self.q_proj(query_state).view(b,t,self.heads,self.dim);k=self.k_proj(h).view(b,t,l,self.heads,self.dim);v=self.v_proj(h).view(b,t,l,self.heads,self.dim);q=F.normalize(q.float(),dim=-1).to(q.dtype);k=F.normalize(k.float(),dim=-1).to(k.dtype);distance=torch.arange(l-1,-1,-1,device=h.device,dtype=q.dtype);score=torch.einsum('bthd,btlhd->bthl',q,k)*(self.dim**-.5)-self.distance_slope.to(q.dtype)[None,None,:,None]*distance[None,None,None,:];mixed=torch.einsum('bthl,btlhd->bthd',score.softmax(-1),v);attention=self.out_proj(mixed.reshape(b,t,-1));mean=h.mean(2);token_gate=torch.sigmoid(self.token_gate_out(F.silu(self.token_gate_in(torch.cat((query_state,mean),-1)))));return self.injection*self.scalar_gate*token_gate*attention
-def match_corresponding_initialization(wrapper,seed:int)->None:
- """Bind V/O/ReZero initialization wherever the three mechanisms correspond."""
- hidden=wrapper.qwen.config.hidden_size;width=wrapper.module.v_proj.out_features if wrapper.variant in ('current','shared') else wrapper.module[0].v_proj.out_features
- with torch.random.fork_rng(devices=[]):
-  torch.manual_seed(seed);canonical=CurrentStateAdapter(hidden,width)
- targets=[wrapper.module] if wrapper.variant in ('current','shared') else list(wrapper.module)
- for target in targets:
-  target.v_proj.load_state_dict(canonical.v_proj.state_dict());target.out_proj.load_state_dict(canonical.out_proj.state_dict());target.injection.data.copy_(canonical.injection.data)
+
+def rms_norm_no_weight(x:torch.Tensor,eps:float)->torch.Tensor:
+ dtype=x.dtype;return (x.float()*torch.rsqrt(x.float().pow(2).mean(-1,keepdim=True)+eps)).to(dtype)
+
+def alibi_slopes(heads:int)->torch.Tensor:
+ if heads<=0 or heads&(heads-1):raise ValueError('LMA heads must be a positive power of two')
+ return torch.tensor([2**(-8*(i+1)/heads) for i in range(heads)])
+
+class LoopMemoryAttention(nn.Module):
+ """Same-position attention over one layer's prior-loop states."""
+ def __init__(self,hidden:int,width:int,heads:int,window:int=3,eps:float=1e-6):
+  super().__init__();assert width%heads==0;self.heads=heads;self.dim=width//heads;self.window=window;self.eps=eps
+  self.q_proj=nn.Linear(hidden,width,bias=False);self.k_proj=nn.Linear(hidden,width,bias=False);self.v_proj=nn.Linear(hidden,width,bias=False);self.out_proj=nn.Linear(width,hidden,bias=False)
+  self.scalar_gate=nn.Parameter(torch.ones(()));self.distance_slope=nn.Parameter(alibi_slopes(heads));self.token_gate_in=nn.Linear(2*hidden,hidden);self.token_gate_out=nn.Linear(hidden,1);nn.init.zeros_(self.token_gate_out.weight);nn.init.constant_(self.token_gate_out.bias,-3.0)
+ def forward(self,query_state:torch.Tensor,history:list[torch.Tensor])->torch.Tensor:
+  if not history:return torch.zeros_like(query_state)
+  memory=history[-self.window:];stack=torch.stack(memory,2);b,t,m,_=stack.shape;q=self.q_proj(query_state).view(b,t,self.heads,self.dim);k=self.k_proj(stack).view(b,t,m,self.heads,self.dim);v=self.v_proj(stack).view(b,t,m,self.heads,self.dim);q=rms_norm_no_weight(q,self.eps);k=rms_norm_no_weight(k,self.eps);distance=torch.arange(m,0,-1,device=stack.device,dtype=q.dtype);score=torch.einsum('bthd,btmhd->bthm',q,k)*(self.dim**-.5)-self.distance_slope.to(q.dtype)[None,None,:,None]*distance[None,None,None,:];mixed=torch.einsum('bthm,btmhd->bthd',score.softmax(-1),v);attention=self.out_proj(mixed.reshape(b,t,-1));mean=stack.mean(2);token_gate=torch.sigmoid(self.token_gate_out(F.silu(self.token_gate_in(torch.cat((query_state,mean),-1)))));return self.scalar_gate*token_gate*attention
+
 class FixedLoopQwen3(nn.Module):
- def __init__(self,qwen:nn.Module,variant:Variant,width:int=512,heads:int=4,loop_start:int=12,loop_end:int=14):
-  super().__init__();self.qwen=qwen;self.variant=variant;self.loop_start=loop_start;self.loop_end=loop_end;hidden=qwen.config.hidden_size
+ def __init__(self,qwen:nn.Module,variant:Variant,width:int=512,heads:int=4,window:int=3,loop_start:int=12,loop_end:int=14,loop_count:int=2):
+  super().__init__();self.qwen=qwen;self.variant=variant;self.loop_start=loop_start;self.loop_end=loop_end;self.loop_count=loop_count;self.eps=float(qwen.config.rms_norm_eps);hidden=qwen.config.hidden_size
   for p in qwen.parameters():p.requires_grad_(False)
   qwen.eval()
-  if variant=='current':self.module=CurrentStateAdapter(hidden,width)
-  elif variant=='shared':self.module=SharedLoopHistory(hidden,width,heads)
-  elif variant=='recurtrace':self.module=nn.ModuleList(RecurTraceLayerMemory(hidden,width,heads) for _ in range(loop_end-loop_start+1))
+  if variant in ('shared_current','shared_history'):self.module=LoopMemoryAttention(hidden,width,heads,window,self.eps)
+  elif variant in ('per_layer_current','recurtrace'):self.module=nn.ModuleList(LoopMemoryAttention(hidden,width,heads,window,self.eps) for _ in range(loop_end-loop_start+1))
   elif variant!='plain':raise ValueError(variant)
+  if variant!='plain':self.input_injection=nn.Parameter(torch.zeros(()))
  def train(self,mode=True):super().train(mode);self.qwen.eval();return self
- def trainable_parameters(self):return () if self.variant=='plain' else self.module.parameters()
- def forward(self,input_ids,attention_mask=None):
+ def trainable_parameters(self):return () if self.variant=='plain' else (p for name,p in self.named_parameters() if not name.startswith('qwen.'))
+ def forward(self,input_ids,attention_mask=None,*,loop_count:int|None=None):
+  loops=self.loop_count if loop_count is None else loop_count
+  if loops<1:raise ValueError('loop_count must be positive')
   from transformers.masking_utils import create_causal_mask
   base=self.qwen.model;hidden=base.embed_tokens(input_ids);seq=input_ids.shape[1];cache_position=torch.arange(seq,device=input_ids.device);position_ids=cache_position.unsqueeze(0);mask=create_causal_mask(config=base.config,input_embeds=hidden,attention_mask=attention_mask,cache_position=cache_position,past_key_values=None,position_ids=position_ids);pos=base.rotary_emb(hidden,position_ids)
   def layer(i,x):return base.layers[i](x,attention_mask=mask,position_ids=position_ids,past_key_values=None,use_cache=False,cache_position=cache_position,position_embeddings=pos)
   for i in range(self.loop_start):hidden=layer(i,hidden)
-  layer_history=[[] for _ in range(self.loop_end-self.loop_start+1)]
-  for loop in range(2):
-   if loop==1:
-    if self.variant=='current':hidden=hidden+self.module(hidden)
-    elif self.variant=='shared':hidden=hidden+self.module(hidden,[hidden])
+  block_input=hidden;block_history=[];layer_history=[[] for _ in range(self.loop_end-self.loop_start+1)]
+  for loop in range(loops):
+   if loop>0 and self.variant!='plain':hidden=hidden+self.input_injection*rms_norm_no_weight(block_input,self.eps)
+   if loop>0 and self.variant in ('shared_current','shared_history'):
+    query=block_history[-1];memory=[query] if self.variant=='shared_current' else block_history;hidden=hidden+self.module(query,memory)
    for j,i in enumerate(range(self.loop_start,self.loop_end+1)):
-    if loop==1 and self.variant=='recurtrace':hidden=hidden+self.module[j](hidden,[layer_history[j][-1]])
-    hidden=layer(i,hidden)
-    if loop==0:layer_history[j].append(hidden.detach())
+    if loop>0 and self.variant in ('per_layer_current','recurtrace'):
+     query=layer_history[j][-1];memory=[query] if self.variant=='per_layer_current' else layer_history[j];hidden=hidden+self.module[j](query,memory)
+    hidden=layer(i,hidden);layer_history[j].append(hidden)
+   block_history.append(hidden)
   for i in range(self.loop_end+1,len(base.layers)):hidden=layer(i,hidden)
-  hidden=base.norm(hidden);logits=self.qwen.lm_head(hidden).float();return QwenLoopOutput(logits,hidden)
+  hidden=base.norm(hidden);return QwenLoopOutput(self.qwen.lm_head(hidden).float(),hidden)
+
+def match_pair_initialization(left:FixedLoopQwen3,right:FixedLoopQwen3,seed:int)->None:
+ """Initialize corresponding B/C or D/E modules exactly alike."""
+ if (left.variant,right.variant) not in (('shared_current','shared_history'),('per_layer_current','recurtrace')):raise ValueError('not an approved causal pair')
+ with torch.random.fork_rng(devices=[]):
+  torch.manual_seed(seed);left.input_injection.data.zero_();right.input_injection.data.copy_(left.input_injection.data)
+  left_modules=[left.module] if left.variant=='shared_current' else list(left.module);right_modules=[right.module] if right.variant=='shared_history' else list(right.module)
+  for index,(a,b) in enumerate(zip(left_modules,right_modules)):
+   torch.manual_seed(seed+index);template=LoopMemoryAttention(left.qwen.config.hidden_size,a.q_proj.out_features,a.heads,a.window,a.eps);a.load_state_dict(template.state_dict());b.load_state_dict(template.state_dict())

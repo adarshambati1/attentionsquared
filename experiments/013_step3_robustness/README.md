@@ -1,19 +1,22 @@
 # Experiment 013 — Step 3 robustness
 
-Step 3 of 11 tests whether most loop-history gain is explained by current-state processing.
+Step 3 of 11 tests whether most Huginn loop-history gain is explained by current-state processing and then applies capacity-matched controls to RecurTrace. Step 4 is blocked.
 
-## Huginn (3A–3C)
+## Huginn (3A–3C) — approved for execution
 
-Frozen checkpoints only. GSM8K uses six conditions and paired h0 seed indices 0/1/2 on the same 250 examples. SVAMP and MATH-500 use the minimum four requested conditions and the same paired seeds. Depth transfer uses unchanged plain/current/shared modules at D4, D8, D16, D32, and D64. Records preserve continuations, seed mappings, scoring, caps, repetition, synchronized generation latency, and peak memory. Summary statistics use example-clustered paired bootstrap intervals.
+Frozen checkpoints only. GSM8K uses three paired deterministic `h0` seeds on all 250 examples and evaluates plain D8, current D8, projected-uniform D8, shared-history D8, per-layer memory D8, plain D16, and plain D64. SVAMP and MATH-500 are zero-shot evaluations of plain D8, current D8, shared D8, plain D16, and plain D64. Depth transfer uses unchanged D8-trained plain/current/shared modules at D4, D8, D16, D32, and D64. Question-clustered intervals retain all three seeds together rather than treating 750 executions as independent questions.
 
-## Qwen3-1.7B (3D)
+## Qwen3-1.7B (3D) — implementation/gates only
 
-Step 3D uses its separate environment declared in `requirements-step3-qwen.txt` because Qwen3 requires Transformers 4.57.1; the canonical Huginn environment remains pinned to Transformers 4.44.2.
+The approved five arms are plain, shared current-only, shared history, per-layer current-only, and per-layer RecurTrace history. The frozen Qwen3-1.7B-Base backbone repeats zero-indexed layers 12–14. The implementation follows the paper's input reinjection and Loop Memory Attention equations, including four 128-dimensional heads, width 512, per-head QK RMS normalization, signed ALiBi-initialized loop-distance bias, memory window three, scalar and token gates, and no halting head.
 
-The frozen Qwen3-1.7B-Base backbone repeats zero-indexed layers 12–14 exactly twice. Plain, current-state, shared whole-loop history, and RecurTrace-style per-layer loop memory use the same backbone. The three modified variants train only added modules on identical MathQA examples/order, optimizer, update budget, validation split, precision, and initialization policy where parameters correspond. No halting head is implemented.
+Matched initialization and capacity are required within the causal pairs:
 
-At a fixed two-loop budget, shared whole-block history has exactly one completed whole-loop state at its sole injection point. It therefore algebraically reduces to the current-state V/O adapter; this requested control is retained, trained on the identical order, and required to remain exactly equivalent rather than being treated as independent evidence.
+- shared history versus shared current-only;
+- per-layer RecurTrace history versus per-layer current-only.
 
-The mechanisms intentionally have different parameter/FLOP counts because the requested current, shared, and three-placement per-layer RecurTrace modules are structurally different; fairness here means the frozen backbone, examples/order, token/update budget, optimizer, validation selection, and corresponding V/O/ReZero initialization are matched, not parameter-count matching. Trainable parameter counts are reported. Step 3D uses the one preregistered module/training seed; paired bootstrap intervals quantify held-out-example uncertainty conditional on that seed and do not generalize over training seeds.
+T=2 is primary. T=4 is the approved secondary diagnostic because multiple historical slots—and therefore temporal selection—do not exist at T=2.
 
-Step 4 is blocked.
+The reference audit is in `RECURTRACE_REFERENCE_AUDIT.md`. The anonymous paper does not expose the official repository, final 1.15M-example manifest, prompt/packing implementation, or seed mappings. Training is therefore fail-closed. It may proceed only after a new immutable authorization manifest establishes either exact provenance or explicit user approval for a paper-guided controlled replication, and sufficient compute is provisioned.
+
+Step 3D uses the separate environment in `requirements-step3-qwen.txt` (Transformers 4.57.1); canonical Huginn remains on Transformers 4.44.2.
