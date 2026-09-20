@@ -1,13 +1,16 @@
 # Attention Squared
 
-Research project investigating whether recurrent latent depth in transformers can be replaced by substantially less sequential computation using parallel attention over computational depth.
+Research project investigating how language models should use iterative latent computation: ordinary recurrence, loop-level skips, explicitly supervised refinement, monotonic refinement, and looped-flow training.
 
 ## Research question
 
-Can a learned parallel depth operator match the capability gains of recurrent-depth transformers while reducing the sequential critical path?
+Should iterative latent reasoning repeat a shared operator, explicitly supervise progressive refinement, enforce monotonic progress, or learn a local flow/transport process?
+
+The frozen 11-step execution plan is in [`ROADMAP.md`](ROADMAP.md). Step 3 is current; Step 4 and all later steps remain blocked until Step 3 is frozen.
 
 ## Experimental status
 
+- [Frozen 11-step roadmap](ROADMAP.md)
 - [Trust ledger](results/TRUST_STATUS.md)
 - [Authoritative Experiment 004 recovery plan](experiments/004a_attention2/RECOVERY_PLAN.md)
 
