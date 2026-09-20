@@ -1,0 +1,45 @@
+{
+  "protocol": "step3-huginn-robustness-v1",
+  "step": "3-of-11",
+  "model_id": "tomg-group-umd/huginn-0125",
+  "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
+  "hardware": "NVIDIA A100 80GB PCIe",
+  "gsm8k": {"dataset_id": "openai/gsm8k", "config": "main", "revision": "740312add88f781978c0658806c59bc2815b9866", "split": "test", "ids": [0, 249]},
+  "svamp": {"dataset_id": "ChilleD/SVAMP", "config": null, "revision": "5e0bf1e5e7c0e9c4bc39180d224f41f3f801b7ef", "split": "test", "ids": [0, 299]},
+  "math500": {"dataset_id": "HuggingFaceH4/MATH-500", "config": null, "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be", "split": "test", "ids": [0, 499]},
+  "system_instruction": "You are a helpful assistant that can assist users with mathematical reasoning.",
+  "h0_base_seed": 3000,
+  "h0_seed_indices": [0, 1, 2],
+  "maximum_schedule_tokens": 2048,
+  "max_new_tokens": 1024,
+  "degeneration_chunk_size": 16,
+  "degeneration_repetitions": 4,
+  "generation_cache_allocated_limit_bytes": 69793218560,
+  "projection_size": 256,
+  "attention_heads": 4,
+  "checkpoints": {
+    "current": "/workspace/step3_frozen_checkpoints/current_state_only_d8/best.pt",
+    "projected_uniform": "/workspace/step3_frozen_checkpoints/mean_history_d8/best.pt",
+    "shared": "/workspace/step3_frozen_checkpoints/latent_history_attention_d8/best.pt",
+    "per_layer": "/workspace/step3_frozen_checkpoints/per_layer_history_d8/best.pt"
+  },
+  "checkpoint_sha256": {
+    "current": "70faf173b39aa052a349da0783ba683698a6bb1d1b7eabb4d7e0ff52a0c09c3b",
+    "projected_uniform": "9df8ce78ad83f02f70d33e629c4a6280ba4bcde3bc7145c8a59bd9f45a65c94a",
+    "shared": "afff645730c278411bd18ce5cb231c2768e4a038ab87308be01d4764ed250b6d",
+    "per_layer": "f4212542fca39f7321b38393b553ed24da4244fc5391739a0599e7ceb0fbbf1d"
+  },
+  "gsm8k_conditions": [
+    ["plain", 8], ["current", 8], ["projected_uniform", 8], ["shared", 8], ["per_layer", 8], ["plain", 16],
+    ["plain", 4], ["current", 4], ["shared", 4], ["current", 16], ["shared", 16],
+    ["plain", 32], ["current", 32], ["shared", 32], ["plain", 64], ["current", 64], ["shared", 64]
+  ],
+  "cross_dataset_conditions": [["plain", 8], ["current", 8], ["shared", 8], ["plain", 16]],
+  "fixed_forward_tokens": 256,
+  "fixed_forward_warmup": 5,
+  "fixed_forward_repetitions": 20,
+  "bootstrap_samples": 10000,
+  "bootstrap_seed": 13003,
+  "output_root": "/workspace/step3_huginn_robustness",
+  "do_not_start_step_4": true
+}

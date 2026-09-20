@@ -35,10 +35,10 @@ def encode_supervised_example(tokenizer: Any, question: str, answer: str, system
     return SupervisedExample(full, len(prompt_ids))
 
 
-def materialize_h0_schedule(huginn: Any, *, device: torch.device, example_id: int, base_seed: int = 3000) -> torch.Tensor:
+def materialize_h0_schedule(huginn: Any, *, device: torch.device, example_id: int, base_seed: int = 3000, seed_index: int = 0) -> torch.Tensor:
     hidden = int(huginn.config.n_embd)
     template = torch.empty((1, 2048, hidden), device=device, dtype=torch.bfloat16)
-    schedule, _ = fixed_huginn_h0_schedule(huginn, template, base_seed=base_seed, example_id=example_id, seed_index=0)
+    schedule, _ = fixed_huginn_h0_schedule(huginn, template, base_seed=base_seed, example_id=example_id, seed_index=seed_index)
     return schedule
 
 
