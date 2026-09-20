@@ -83,7 +83,7 @@ def main():
   correct=sum(r['correct'] for r in rs);summaries[name]={'model':model,'depth':depth,'by_seed':by_seed,'correct':correct,'total':len(rs),'pooled_accuracy':correct/len(rs),'wilson_95ci_naive':wilson_interval(correct,len(rs)),'mean_seed_accuracy':sum(v['accuracy'] for v in by_seed.values())/len(by_seed),'cap_hit_rate':sum(r['hit_max_new_tokens'] for r in rs)/len(rs),'degeneration_rate':sum(r['degeneration'] for r in rs)/len(rs),'mean_output_length':sum(r['generated_tokens'] for r in rs)/len(rs),'mean_generation_latency_seconds':sum(r['generation_latency_seconds'] for r in rs)/len(rs),'median_generation_latency_seconds':statistics.median(r['generation_latency_seconds'] for r in rs),'full_prefix_fallbacks':sum(r['used_full_prefix_fallback'] for r in rs)}
  if a.dataset=='gsm8k':
   latency_dir=root/'fixed_forward_latency';latency_dir.mkdir(exist_ok=True);latency={};provenance={'protocol':c['protocol']+'-fixed-forward-latency','git_commit':commit,'config_sha256':sha(cp),'checkpoint_sha256':checkpoint_hashes_before,'gate_sha256':gate_sha,'hardware':c['hardware'],'tokens':c['fixed_forward_tokens'],'repetitions':c['fixed_forward_repetitions'],'warmup':c['fixed_forward_warmup']}
-  for model,depth in c['gsm8k_conditions'][:6]:
+  for model,depth in (('plain',8),('current',8),('projected_uniform',8),('shared',8),('per_layer',8),('plain',16),('plain',64)):
    name=condition_name(model,depth);path=latency_dir/f'{name}.json'
    if path.exists():entry=json.loads(path.read_text())
    else:entry={**provenance,'condition':name,'measurement':fixed_benchmark(wrappers[model],tok,dataset,c,model,depth,huginn)};publish(path,entry,True)

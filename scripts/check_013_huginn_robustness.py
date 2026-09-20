@@ -22,7 +22,8 @@ def main():
  from datasets import load_dataset;from transformers import AutoModelForCausalLM,AutoTokenizer
  c=json.loads(CONFIG.read_text());
  expected_transfer={(m,d) for m in ('plain','current','shared') for d in (4,8,16,32,64)}
- if set(map(tuple,c['depth_transfer_conditions']))!=expected_transfer or c['h0_seed_indices']!=[0,1,2] or c['do_not_start_step_4'] is not True:raise RuntimeError('frozen Step-3A-C scope mismatch')
+ expected_cross={('plain',8),('current',8),('shared',8),('plain',16),('plain',64)}
+ if set(map(tuple,c['depth_transfer_conditions']))!=expected_transfer or set(map(tuple,c['cross_dataset_conditions']))!=expected_cross or c['h0_seed_indices']!=[0,1,2] or c['do_not_start_step_4'] is not True:raise RuntimeError('frozen Step-3A-C scope mismatch')
  if torch.cuda.get_device_name()!=c['hardware']:raise RuntimeError(f"expected {c['hardware']}, got {torch.cuda.get_device_name()}")
  commit=subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,text=True,capture_output=True,check=True).stdout.strip();dirty=subprocess.run(['git','status','--porcelain','--untracked-files=all'],cwd=ROOT,text=True,capture_output=True,check=True).stdout
  if dirty:raise RuntimeError(f'tracked worktree dirty: {dirty}')

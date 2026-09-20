@@ -34,7 +34,7 @@
     ["plain", 4], ["current", 4], ["shared", 4], ["current", 16], ["shared", 16],
     ["plain", 32], ["current", 32], ["shared", 32], ["plain", 64], ["current", 64], ["shared", 64]
   ],
-  "cross_dataset_conditions": [["plain", 8], ["current", 8], ["shared", 8], ["plain", 16]],
+  "cross_dataset_conditions": [["plain", 8], ["current", 8], ["shared", 8], ["plain", 16], ["plain", 64]],
   "depth_transfer_conditions": [["plain", 4], ["current", 4], ["shared", 4], ["plain", 8], ["current", 8], ["shared", 8], ["plain", 16], ["current", 16], ["shared", 16], ["plain", 32], ["current", 32], ["shared", 32], ["plain", 64], ["current", 64], ["shared", 64]],
   "fixed_forward_tokens": 256,
   "fixed_forward_warmup": 5,
