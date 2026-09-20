@@ -3,7 +3,7 @@
   "step": "3-of-11",
   "model_id": "tomg-group-umd/huginn-0125",
   "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
-  "hardware": "NVIDIA A100 80GB PCIe",
+  "hardware": "NVIDIA H200",
   "gsm8k": {"dataset_id": "openai/gsm8k", "config": "main", "revision": "740312add88f781978c0658806c59bc2815b9866", "split": "test", "ids": [0, 249]},
   "svamp": {"dataset_id": "ChilleD/SVAMP", "config": null, "revision": "5e0bf1e5e7c0e9c4bc39180d224f41f3f801b7ef", "split": "test", "ids": [0, 299]},
   "math500": {"dataset_id": "HuggingFaceH4/MATH-500", "config": null, "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be", "split": "test", "ids": [0, 499]},
