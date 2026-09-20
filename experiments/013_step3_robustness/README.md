@@ -4,7 +4,7 @@ Step 3 of 11 tests whether most Huginn loop-history gain is explained by current
 
 ## Huginn (3A–3C) — approved for execution
 
-Frozen checkpoints only. GSM8K uses three paired deterministic `h0` seeds on all 250 examples and evaluates plain D8, current D8, projected-uniform D8, shared-history D8, per-layer memory D8, plain D16, and plain D64. SVAMP and MATH-500 are zero-shot evaluations of plain D8, current D8, shared D8, plain D16, and plain D64. Depth transfer uses unchanged D8-trained plain/current/shared modules at D4, D8, D16, D32, and D64. Question-clustered intervals retain all three seeds together rather than treating 750 executions as independent questions.
+Frozen checkpoints only. GSM8K uses three paired deterministic `h0` seeds on all 250 examples and evaluates plain D8, current D8, projected-uniform D8, shared-history D8, per-layer memory D8, plain D16, and plain D64. SVAMP and MATH-500 are zero-shot evaluations of plain D8, current D8, shared D8, plain D16, and plain D64. Depth transfer uses unchanged D8-trained plain/current/shared modules at D4, D8, D16, D32, and D64. Question-clustered intervals retain all three seeds together rather than treating 750 executions as independent questions. Generation uses exact-length prompt buckets so no padding can affect attention, batches paired seeds/examples only within identical tokenized prompt lengths, preserves independent stopping, and must pass complete greedy token/stopping parity against the serial reference through D64 before execution.
 
 ## Qwen3-1.7B (3D) — implementation/gates only
 

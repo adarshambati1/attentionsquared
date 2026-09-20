@@ -1,5 +1,5 @@
 {
-  "protocol": "step3-huginn-robustness-v1",
+  "protocol": "step3-huginn-robustness-batched-v2",
   "step": "3-of-11",
   "model_id": "tomg-group-umd/huginn-0125",
   "model_revision": "bb6621b65e90b6a4b9b29ef88dc83866d450470c",
@@ -15,6 +15,8 @@
   "degeneration_chunk_size": 16,
   "degeneration_repetitions": 4,
   "generation_cache_allocated_limit_bytes": 69793218560,
+  "generation_batch_size_by_depth": {"4": 12, "8": 12, "16": 9, "32": 6, "64": 3},
+  "batch_parity_max_new_tokens": 16,
   "projection_size": 256,
   "attention_heads": 4,
   "checkpoints": {
@@ -41,6 +43,6 @@
   "fixed_forward_repetitions": 20,
   "bootstrap_samples": 10000,
   "bootstrap_seed": 13003,
-  "output_root": "/workspace/step3_huginn_robustness",
+  "output_root": "/workspace/step3_huginn_robustness_batched_v2",
   "do_not_start_step_4": true
 }

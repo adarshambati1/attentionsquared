@@ -5,7 +5,9 @@ from src.training.recurtrace_protocol import sample_loop_depths
 ROOT=Path(__file__).resolve().parents[1]
 def test_frozen_step3_huginn_scope():
  c=json.loads((ROOT/'configs/013_step3_huginn_robustness.json').read_text())
+ assert c['protocol']=='step3-huginn-robustness-batched-v2'
  assert c['h0_seed_indices']==[0,1,2]
+ assert c['generation_batch_size_by_depth']=={'4':12,'8':12,'16':9,'32':6,'64':3}
  assert c['gsm8k']['ids']==[0,249]
  assert c['cross_dataset_conditions']==[['plain',8],['current',8],['shared',8],['plain',16],['plain',64]]
  required_3a={('plain',8),('current',8),('projected_uniform',8),('shared',8),('per_layer',8),('plain',16),('plain',64)}
