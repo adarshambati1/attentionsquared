@@ -1,0 +1,191 @@
+{
+  "config_sha256": "3208d6a8a4804674a3dab3ed363359fcd12f037106e5b995d068d1f250fe95c6",
+  "correctness_gate_sha256": "4dba6af6a3b3d36b895481b5dc3c90c5823631d547ce07b87da81b7223913238",
+  "do_not_start_step_3": true,
+  "full_vocabulary_logits_persisted": false,
+  "git_commit": "2786836c01bbffe033834c11de1cc698a0d0f97b",
+  "protocol": "plain-huginn-depth-regression-v1",
+  "raw_records": 2000,
+  "status": "complete",
+  "step": "2-of-11",
+  "table": [
+    {
+      "accuracy": 0.012,
+      "cap_hit_rate": 0.4,
+      "correct": 3,
+      "degeneration_rate": 0.072,
+      "depth": 4,
+      "fixed_point_residual_mean": 0.44649309587478636,
+      "fixed_point_residual_median": 0.4457402527332306,
+      "full_prefix_fallbacks": 0,
+      "mean_generated_tokens": 494.864,
+      "mean_generation_latency_seconds": 13.637729315735399,
+      "median_generation_latency_seconds": 6.310692172497511,
+      "peak_memory_bytes": 16279883776,
+      "total": 250
+    },
+    {
+      "accuracy": 0.16,
+      "cap_hit_rate": 0.08,
+      "correct": 40,
+      "degeneration_rate": 0.0,
+      "depth": 8,
+      "fixed_point_residual_mean": 0.20156679344177247,
+      "fixed_point_residual_median": 0.19942279160022736,
+      "full_prefix_fallbacks": 0,
+      "mean_generated_tokens": 240.224,
+      "mean_generation_latency_seconds": 11.477528255432844,
+      "median_generation_latency_seconds": 7.750820669345558,
+      "peak_memory_bytes": 17251194880,
+      "total": 250
+    },
+    {
+      "accuracy": 0.388,
+      "cap_hit_rate": 0.008,
+      "correct": 97,
+      "degeneration_rate": 0.0,
+      "depth": 16,
+      "fixed_point_residual_mean": 0.05741681070625782,
+      "fixed_point_residual_median": 0.05649138614535332,
+      "full_prefix_fallbacks": 0,
+      "mean_generated_tokens": 197.04,
+      "mean_generation_latency_seconds": 17.399609594769775,
+      "median_generation_latency_seconds": 15.959523214958608,
+      "peak_memory_bytes": 19204246016,
+      "total": 250
+    },
+    {
+      "accuracy": 0.432,
+      "cap_hit_rate": 0.02,
+      "correct": 108,
+      "degeneration_rate": 0.0,
+      "depth": 32,
+      "fixed_point_residual_mean": 0.010962251842021943,
+      "fixed_point_residual_median": 0.010198269505053759,
+      "full_prefix_fallbacks": 0,
+      "mean_generated_tokens": 217.112,
+      "mean_generation_latency_seconds": 37.224130936332045,
+      "median_generation_latency_seconds": 32.771852037869394,
+      "peak_memory_bytes": 23206892544,
+      "total": 250
+    },
+    {
+      "accuracy": 0.444,
+      "cap_hit_rate": 0.024,
+      "correct": 111,
+      "degeneration_rate": 0.0,
+      "depth": 64,
+      "fixed_point_residual_mean": 0.008630038309842348,
+      "fixed_point_residual_median": 0.008118792902678251,
+      "full_prefix_fallbacks": 0,
+      "mean_generated_tokens": 225.548,
+      "mean_generation_latency_seconds": 75.6087757775262,
+      "median_generation_latency_seconds": 65.7492725579068,
+      "peak_memory_bytes": 31145923584,
+      "total": 250
+    },
+    {
+      "accuracy": 0.432,
+      "cap_hit_rate": 0.036,
+      "correct": 108,
+      "degeneration_rate": 0.0,
+      "depth": 128,
+      "fixed_point_residual_mean": 0.00858544479869306,
+      "fixed_point_residual_median": 0.00809745630249381,
+      "full_prefix_fallbacks": 0,
+      "mean_generated_tokens": 232.548,
+      "mean_generation_latency_seconds": 153.66092867605389,
+      "median_generation_latency_seconds": 129.32526894379407,
+      "peak_memory_bytes": 47023985664,
+      "total": 250
+    },
+    {
+      "accuracy": 0.44,
+      "cap_hit_rate": 0.024,
+      "correct": 110,
+      "degeneration_rate": 0.0,
+      "depth": 256,
+      "fixed_point_residual_mean": 0.008563839256763458,
+      "fixed_point_residual_median": 0.008065282367169857,
+      "full_prefix_fallbacks": 6,
+      "mean_generated_tokens": 223.124,
+      "mean_generation_latency_seconds": 297.4613591757491,
+      "median_generation_latency_seconds": 257.5374120231718,
+      "peak_memory_bytes": 70787214848,
+      "total": 250
+    },
+    {
+      "accuracy": 0.436,
+      "cap_hit_rate": 0.02,
+      "correct": 109,
+      "degeneration_rate": 0.0,
+      "depth": 512,
+      "fixed_point_residual_mean": 0.008560442455112935,
+      "fixed_point_residual_median": 0.008059944957494736,
+      "full_prefix_fallbacks": 15,
+      "mean_generated_tokens": 220.824,
+      "mean_generation_latency_seconds": 615.3442686905936,
+      "median_generation_latency_seconds": 511.46234459988773,
+      "peak_memory_bytes": 70719845376,
+      "total": 250
+    }
+  ],
+  "transitions": [
+    {
+      "correct_to_correct": 0,
+      "correct_to_wrong": 3,
+      "from_depth": 4,
+      "to_depth": 8,
+      "wrong_to_correct": 40,
+      "wrong_to_wrong": 207
+    },
+    {
+      "correct_to_correct": 27,
+      "correct_to_wrong": 13,
+      "from_depth": 8,
+      "to_depth": 16,
+      "wrong_to_correct": 70,
+      "wrong_to_wrong": 140
+    },
+    {
+      "correct_to_correct": 74,
+      "correct_to_wrong": 23,
+      "from_depth": 16,
+      "to_depth": 32,
+      "wrong_to_correct": 34,
+      "wrong_to_wrong": 119
+    },
+    {
+      "correct_to_correct": 101,
+      "correct_to_wrong": 7,
+      "from_depth": 32,
+      "to_depth": 64,
+      "wrong_to_correct": 10,
+      "wrong_to_wrong": 132
+    },
+    {
+      "correct_to_correct": 100,
+      "correct_to_wrong": 11,
+      "from_depth": 64,
+      "to_depth": 128,
+      "wrong_to_correct": 8,
+      "wrong_to_wrong": 131
+    },
+    {
+      "correct_to_correct": 98,
+      "correct_to_wrong": 10,
+      "from_depth": 128,
+      "to_depth": 256,
+      "wrong_to_correct": 12,
+      "wrong_to_wrong": 130
+    },
+    {
+      "correct_to_correct": 102,
+      "correct_to_wrong": 8,
+      "from_depth": 256,
+      "to_depth": 512,
+      "wrong_to_correct": 7,
+      "wrong_to_wrong": 133
+    }
+  ]
+}

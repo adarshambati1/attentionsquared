@@ -1,0 +1,663 @@
+{
+  "cache_vs_full_prefix": [
+    {
+      "depth": 4,
+      "steps": [
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 0,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 1,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 2,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 3,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 4,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 5,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 6,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 7,
+          "wrapped_stop": false
+        }
+      ]
+    },
+    {
+      "depth": 8,
+      "steps": [
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 0,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 1,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 2,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 3,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 4,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 5,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 6,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 7,
+          "wrapped_stop": false
+        }
+      ]
+    },
+    {
+      "depth": 16,
+      "steps": [
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 0,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 1,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 2,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 3,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 4,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 5,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 6,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 7,
+          "wrapped_stop": false
+        }
+      ]
+    },
+    {
+      "depth": 32,
+      "steps": [
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 0,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 1,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 2,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 3,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 4,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 5,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 6,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 7,
+          "wrapped_stop": false
+        }
+      ]
+    },
+    {
+      "depth": 64,
+      "steps": [
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 0,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 1,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 2,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 3,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 4,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 5,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 6,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 7,
+          "wrapped_stop": false
+        }
+      ]
+    },
+    {
+      "depth": 128,
+      "steps": [
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 0,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 1,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 2,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 3,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 4,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 5,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 6,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 7,
+          "wrapped_stop": false
+        }
+      ]
+    },
+    {
+      "depth": 256,
+      "steps": [
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 0,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 1,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 2,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 3,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 4,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 5,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 6,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 7,
+          "wrapped_stop": false
+        }
+      ]
+    },
+    {
+      "depth": 512,
+      "steps": [
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 0,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 1,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 2,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 3,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 4,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 5,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 6,
+          "wrapped_stop": false
+        },
+        {
+          "all_outputs_finite": true,
+          "generated_token_exact": true,
+          "max_logit_abs_error": 0.0,
+          "native_stop": false,
+          "step": 7,
+          "wrapped_stop": false
+        }
+      ]
+    }
+  ],
+  "config_sha256": "3208d6a8a4804674a3dab3ed363359fcd12f037106e5b995d068d1f250fe95c6",
+  "d512_preflight": {
+    "elapsed_seconds_32_steps": 84.4357578125,
+    "finite": true,
+    "full_prefix_fallback_token_exact": true,
+    "full_prefix_seconds_at_observed_length": 3.005378662109375,
+    "generated_tokens": [
+      1401,
+      2861,
+      264,
+      8959,
+      727,
+      5233,
+      44,
+      358,
+      1079,
+      302,
+      626,
+      907,
+      2756,
+      58,
+      10,
+      49,
+      46,
+      6917,
+      264,
+      1543,
+      16872,
+      330,
+      611,
+      11606,
+      46,
+      10,
+      50,
+      46,
+      23778,
+      264,
+      1543,
+      16872
+    ],
+    "longest_prompt_example_id": 144,
+    "longest_prompt_tokens": 162,
+    "memory_headroom_threshold_bytes": 80530636800,
+    "observed_cache_bytes": 8364280320,
+    "peak_memory_bytes": 59044696064,
+    "projected_peak_bytes_at_prompt_plus_cap": 69836556800.0,
+    "projected_worst_case_all_depths_hours": 1519.9481981557476,
+    "raw_projected_cache_peak_bytes_at_prompt_plus_cap": 102079568384.0,
+    "runtime_viability_threshold_hours": 2000.0,
+    "seconds_per_step": 2.638617431640625
+  },
+  "full_vocabulary_logits_persisted": false,
+  "git_commit": "2786836c01bbffe033834c11de1cc698a0d0f97b",
+  "huginn_weights_unchanged": true,
+  "native_parity": [
+    {
+      "depth": 4,
+      "fixed_point_residual_finite": true,
+      "latents_bitwise_exact": true,
+      "logits_bitwise_exact": true
+    },
+    {
+      "depth": 8,
+      "fixed_point_residual_finite": true,
+      "latents_bitwise_exact": true,
+      "logits_bitwise_exact": true
+    },
+    {
+      "depth": 16,
+      "fixed_point_residual_finite": true,
+      "latents_bitwise_exact": true,
+      "logits_bitwise_exact": true
+    },
+    {
+      "depth": 32,
+      "fixed_point_residual_finite": true,
+      "latents_bitwise_exact": true,
+      "logits_bitwise_exact": true
+    },
+    {
+      "depth": 64,
+      "fixed_point_residual_finite": true,
+      "latents_bitwise_exact": true,
+      "logits_bitwise_exact": true
+    },
+    {
+      "depth": 128,
+      "fixed_point_residual_finite": true,
+      "latents_bitwise_exact": true,
+      "logits_bitwise_exact": true
+    },
+    {
+      "depth": 256,
+      "fixed_point_residual_finite": true,
+      "latents_bitwise_exact": true,
+      "logits_bitwise_exact": true
+    },
+    {
+      "depth": 512,
+      "fixed_point_residual_finite": true,
+      "latents_bitwise_exact": true,
+      "logits_bitwise_exact": true
+    }
+  ],
+  "new_parameters": 0,
+  "protocol": "plain-huginn-depth-regression-v1-correctness-gate",
+  "status": "pass"
+}

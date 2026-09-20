@@ -1,0 +1,18 @@
+{
+  "accuracy": 0.388,
+  "cap_hit_rate": 0.008,
+  "config_sha256": "3208d6a8a4804674a3dab3ed363359fcd12f037106e5b995d068d1f250fe95c6",
+  "correct": 97,
+  "degeneration_rate": 0.0,
+  "depth": 16,
+  "fixed_point_residual_mean": 0.05741681070625782,
+  "fixed_point_residual_median": 0.05649138614535332,
+  "full_prefix_fallbacks": 0,
+  "git_commit": "2786836c01bbffe033834c11de1cc698a0d0f97b",
+  "mean_generated_tokens": 197.04,
+  "mean_generation_latency_seconds": 17.399609594769775,
+  "median_generation_latency_seconds": 15.959523214958608,
+  "peak_memory_bytes": 19204246016,
+  "status": "complete",
+  "total": 250
+}

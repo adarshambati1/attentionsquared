@@ -1,0 +1,58 @@
+[
+  {
+    "correct_to_correct": 0,
+    "correct_to_wrong": 3,
+    "from_depth": 4,
+    "to_depth": 8,
+    "wrong_to_correct": 40,
+    "wrong_to_wrong": 207
+  },
+  {
+    "correct_to_correct": 27,
+    "correct_to_wrong": 13,
+    "from_depth": 8,
+    "to_depth": 16,
+    "wrong_to_correct": 70,
+    "wrong_to_wrong": 140
+  },
+  {
+    "correct_to_correct": 74,
+    "correct_to_wrong": 23,
+    "from_depth": 16,
+    "to_depth": 32,
+    "wrong_to_correct": 34,
+    "wrong_to_wrong": 119
+  },
+  {
+    "correct_to_correct": 101,
+    "correct_to_wrong": 7,
+    "from_depth": 32,
+    "to_depth": 64,
+    "wrong_to_correct": 10,
+    "wrong_to_wrong": 132
+  },
+  {
+    "correct_to_correct": 100,
+    "correct_to_wrong": 11,
+    "from_depth": 64,
+    "to_depth": 128,
+    "wrong_to_correct": 8,
+    "wrong_to_wrong": 131
+  },
+  {
+    "correct_to_correct": 98,
+    "correct_to_wrong": 10,
+    "from_depth": 128,
+    "to_depth": 256,
+    "wrong_to_correct": 12,
+    "wrong_to_wrong": 130
+  },
+  {
+    "correct_to_correct": 102,
+    "correct_to_wrong": 8,
+    "from_depth": 256,
+    "to_depth": 512,
+    "wrong_to_correct": 7,
+    "wrong_to_wrong": 133
+  }
+]
