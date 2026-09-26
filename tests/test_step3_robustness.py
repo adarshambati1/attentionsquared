@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from src.evaluation.step3_robustness import clustered_paired_bootstrap,question_and_gold,score_dataset_answer,wilson_interval
 from src.evaluation.step3_concurrency import production_waves,validate_gate_contract
+from src.evaluation.step3_context_amendment import effective_math500_cap
 from src.training.recurtrace_protocol import sample_loop_depths
 ROOT=Path(__file__).resolve().parents[1]
 def test_frozen_step3_huginn_scope():
@@ -19,7 +20,24 @@ def test_frozen_step3_huginn_scope():
  assert c['concurrency_gate_examples']==[0]
  assert c['concurrency_gate_short_tokens']==64
  assert c['concurrency_gate_policy']=='user-approved-proportional-v1'
+ amendment=json.loads((ROOT/'configs/013_step3_math500_context_amendment.json').read_text())
+ assert amendment['base_protocol']==c['protocol']
+ assert amendment['requested_max_new_tokens']==c['max_new_tokens']==1024
+ assert amendment['maximum_total_tokens']==c['maximum_schedule_tokens']==2048
+ assert amendment['effective_cap_rule']=='min(requested_max_new_tokens, maximum_total_tokens - prompt_tokens)'
+ assert amendment['prompt_truncation_allowed'] is False and amendment['schedule_extension_allowed'] is False
  assert c['do_not_start_step_4'] is True
+def test_math500_context_cap_amendment_is_centralized_and_scoped():
+ c=json.loads((ROOT/'configs/013_step3_huginn_robustness.json').read_text());a=json.loads((ROOT/'configs/013_step3_math500_context_amendment.json').read_text())
+ assert effective_math500_cap(dataset='math500',prompt_tokens=1000,config=c,amendment=a)==1024
+ assert effective_math500_cap(dataset='math500',prompt_tokens=1100,config=c,amendment=a)==948
+ try:effective_math500_cap(dataset='gsm8k',prompt_tokens=1100,config=c,amendment=a)
+ except ValueError:pass
+ else:raise AssertionError('non-MATH amendment was accepted')
+ try:effective_math500_cap(dataset='math500',prompt_tokens=2048,config=c,amendment=a)
+ except ValueError:pass
+ else:raise AssertionError('exhausted context was accepted')
+
 def test_concurrent_serial_waves_exactly_reconstruct_production():
  c=json.loads((ROOT/'configs/013_step3_huginn_robustness.json').read_text())
  waves=production_waves(c)

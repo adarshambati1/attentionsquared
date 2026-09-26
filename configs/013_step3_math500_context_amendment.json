@@ -1,0 +1,18 @@
+{
+  "protocol": "step3-math500-context-cap-amendment-v1",
+  "scope": "math500-only",
+  "base_protocol": "step3-huginn-robustness-concurrent-serial-v3",
+  "base_git_commit": "bf790cbeb6f357a080cb1a810fa45af85eaed507",
+  "base_config_sha256": "b94a2d2f1baf027302e3d4164aae7bf98d10472fd9788d527ac2e46edca1f412",
+  "requested_max_new_tokens": 1024,
+  "maximum_total_tokens": 2048,
+  "effective_cap_rule": "min(requested_max_new_tokens, maximum_total_tokens - prompt_tokens)",
+  "preserve_complete_prompt": true,
+  "prompt_truncation_allowed": false,
+  "schedule_extension_allowed": false,
+  "cap_hit_scoring_uses_effective_cap": true,
+  "legacy_record_rule": "Unmodified base records are admissible only when prompt_tokens + requested_max_new_tokens <= maximum_total_tokens and all original provenance and reconstruction checks pass.",
+  "amended_record_rule": "Context-limited records must persist prompt_tokens, requested_max_new_tokens, effective_max_new_tokens, context_limited, amendment_sha256, and amendment implementation commit.",
+  "other_datasets_unchanged": true,
+  "do_not_start_step_4": true
+}
